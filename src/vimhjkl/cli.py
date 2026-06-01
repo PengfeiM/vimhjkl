@@ -214,10 +214,17 @@ def run_drill(skills: list[Skill], progress: dict, count: int,
     # Auto-gate new skills by belt rank unless the caller forced one.
     if new_gate is None:
         new_gate = mastery_summary(skills, progress)["new_gate"]
+    # Blind mode recalls what you already know — it never introduces brand-new
+    # skills.  The pool grows on its own as Learn/Practice/Grind mark skills seen.
+    include_new = mode != "blind"
     selected = select_due_skills(skills, progress, count, new_gate=new_gate,
-                                 rng=random.Random())
+                                 include_new=include_new, rng=random.Random())
     if not selected:
-        print(tui.c("No skills available. Build the curriculum first.", tui.YELLOW))
+        if not include_new:
+            print(tui.c("Nothing to recall yet — play Learn mode first to "
+                        "unlock skills for Blind.", tui.YELLOW))
+        else:
+            print(tui.c("No skills available. Build the curriculum first.", tui.YELLOW))
         return
     present = partial(_show_task, mode=mode)
     review = partial(_show_result, show_moves=show_moves, mode=mode)

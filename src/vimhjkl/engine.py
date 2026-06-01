@@ -101,12 +101,19 @@ def _interleave(a: list, b: list) -> list:
 
 def select_due_skills(skills: list[Skill], progress: dict, count: int,
                       *, new_gate: Optional[int] = None,
+                      include_new: bool = True,
                       now: Optional[float] = None,
                       rng: Optional[random.Random] = None) -> list[Skill]:
     """Return up to ``count`` skills, weakest/most-due first.
 
     ``new_gate``: only introduce brand-new skills whose ``difficulty`` <=
     new_gate.  ``None`` means no gate (all new skills eligible).
+
+    ``include_new``: when False, brand-new (never-seen) skills are excluded
+    entirely — the session only draws from skills you've already encountered.
+    Blind mode uses this so it recalls what you know rather than quizzing
+    material you've never been taught; the eligible set grows on its own as
+    other modes record a ``last_seen`` for each skill.
 
     ``rng``: when given, the order within each priority tier is a *weighted
     shuffle* — still skewed toward weak/easy skills, but a different mix every
@@ -132,8 +139,9 @@ def select_due_skills(skills: list[Skill], progress: dict, count: int,
                  if is_due(e, now) and e.get("box", 1) < store.MAX_BOX]
     due_review = [(s, e) for (s, e) in seen
                   if is_due(e, now) and e.get("box", 1) >= store.MAX_BOX]
-    eligible_new = [(s, e) for (s, e) in new
-                    if new_gate is None or s.difficulty <= new_gate]
+    eligible_new = [] if not include_new else \
+        [(s, e) for (s, e) in new
+         if new_gate is None or s.difficulty <= new_gate]
     not_due = [(s, e) for (s, e) in seen if not is_due(e, now)]
 
     # Within the box-maxed review tier, the skills still grooming (passes < the
