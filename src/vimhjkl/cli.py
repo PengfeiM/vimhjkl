@@ -748,8 +748,9 @@ def main(argv: Optional[list[str]] = None) -> int:
             print("   " + prob, file=sys.stderr)
 
     if not skills:
-        print(tui.c("No skills loaded yet (content/skills.json is empty). "
-                    "Run the build to populate the curriculum.", tui.YELLOW))
+        print(tui.c("No skills loaded yet — the bundled curriculum is missing. "
+                    "Reinstall vimhjkl, or run the build from a source checkout.",
+                    tui.YELLOW))
         # Still allow the menu to show for --list etc.
 
     try:

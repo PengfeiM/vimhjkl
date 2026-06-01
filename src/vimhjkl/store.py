@@ -1,9 +1,11 @@
 """Load/save the curriculum (skills.json) and player progress (progress.json).
 
 Two stores, deliberately separate:
-  * content/skills.json   — the curriculum (data).
-  * progress.json         — PLAYER state (Leitner boxes, history).  Lives at the
-                            project root.
+  * skills.json    — the curriculum (data), bundled inside the package at
+                     src/vimhjkl/data/skills.json so installed wheels are
+                     self-contained.
+  * progress.json  — PLAYER state (Leitner boxes, history).  Repo root in a
+                     source checkout, XDG user data dir when installed.
 """
 
 from __future__ import annotations
@@ -16,11 +18,37 @@ from pathlib import Path
 from .challenge import Skill
 
 
-# Resolve paths relative to the project root (two levels up from this file:
-# src/vimhjkl/store.py -> project root).
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-SKILLS_PATH = PROJECT_ROOT / "content" / "skills.json"
-PROGRESS_PATH = PROJECT_ROOT / "progress.json"
+# The curriculum ships INSIDE the package (src/vimhjkl/data/skills.json) so an
+# installed wheel is self-contained.  A __file__-relative path resolves correctly
+# both in a source checkout and in site-packages (wheels install as plain files).
+_PKG_DIR = Path(__file__).resolve().parent
+SKILLS_PATH = _PKG_DIR / "data" / "skills.json"
+
+# PROJECT_ROOT and content/ exist only in a source checkout — the build writes its
+# cursor + LLM pools into content/.  Both are absent in an installed package.
+PROJECT_ROOT = _PKG_DIR.parents[1]
+CONTENT_DIR = PROJECT_ROOT / "content"
+
+
+def _is_source_checkout() -> bool:
+    """True when running from the repo (not an installed wheel)."""
+    return (PROJECT_ROOT / "pyproject.toml").exists()
+
+
+def _progress_path() -> Path:
+    """Player state must live somewhere writable.  In a source checkout keep the
+    historical repo-root location; installed, use the XDG user data dir so we
+    never try to write inside read-only site-packages."""
+    env = os.environ.get("VIMHJKL_PROGRESS")
+    if env:
+        return Path(env)
+    if _is_source_checkout():
+        return PROJECT_ROOT / "progress.json"
+    base = os.environ.get("XDG_DATA_HOME") or str(Path.home() / ".local" / "share")
+    return Path(base) / "vimhjkl" / "progress.json"
+
+
+PROGRESS_PATH = _progress_path()
 
 
 # ---------------------------------------------------------------------------
@@ -105,6 +133,7 @@ def record_result(progress: dict, skill_id: str, passed: bool,
 # ---------------------------------------------------------------------------
 
 def _atomic_write(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_text(text, encoding="utf-8")
     os.replace(tmp, path)
