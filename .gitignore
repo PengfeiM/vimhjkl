@@ -5,6 +5,10 @@ __pycache__/
 # Virtual environment
 .venv/
 
+# Secrets — never commit API keys
+.env
+.env.*
+
 # Player state — local, never committed
 progress.json
 
