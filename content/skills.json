@@ -618,109 +618,81 @@
         },
         {
           "start": [
-            "cobweb hollow",
-            "ribbon cheerful"
+            "wizard",
+            "goblin",
+            "dragon"
           ],
-          "par_keys": 5,
-          "hint": "append ';' once, then j. to ripple it down",
+          "par_keys": 14,
+          "hint": "append once, dot down the list",
           "goal": [
-            "cobweb hollow;",
-            "ribbon cheerful;"
+            "wizard // TODO",
+            "goblin // TODO",
+            "dragon // TODO"
           ],
-          "solution": "A;<Esc>j.",
-          "why": "A makes the change repeatable; j. replays it per line."
+          "solution": "A // TODO<Esc>j.j.",
+          "why": "the dot command replays the whole insert."
         },
         {
           "start": [
-            "frosty bridge",
-            "rusty swift juggle"
-          ],
-          "par_keys": 5,
-          "hint": "append ';' once, then j. to ripple it down",
-          "goal": [
-            "frosty bridge;",
-            "rusty swift juggle;"
-          ],
-          "solution": "A;<Esc>j.",
-          "why": "A makes the change repeatable; j. replays it per line."
-        },
-        {
-          "start": [
-            "brittle ponder signal",
-            "mingle rugged",
-            "gather button"
+            "chant rain",
+            "chant fire",
+            "chant ice"
           ],
           "par_keys": 7,
-          "hint": "append ';' once, then j. to ripple it down",
+          "hint": "one change, repeat with j.",
           "goal": [
-            "brittle ponder signal;",
-            "mingle rugged;",
-            "gather button;"
+            "chant rain!",
+            "chant fire!",
+            "chant ice!"
           ],
-          "solution": "A;<Esc>j.j.",
-          "why": "A makes the change repeatable; j. replays it per line."
+          "solution": "A!<Esc>j.j."
         },
         {
           "start": [
-            "meadow helmet crimson",
-            "hammer cellar window",
-            "carve harbor velvet",
-            "juggle bundle"
+            "loot: 10",
+            "loot: 20",
+            "loot: 30"
+          ],
+          "par_keys": 11,
+          "hint": "j. is the Dot Formula heartbeat",
+          "goal": [
+            "loot: 10 gold",
+            "loot: 20 gold",
+            "loot: 30 gold"
+          ],
+          "solution": "A gold<Esc>j.j."
+        },
+        {
+          "start": [
+            "red",
+            "orange",
+            "yellow",
+            "green"
           ],
           "par_keys": 9,
-          "hint": "append ';' once, then j. to ripple it down",
+          "hint": "four lines, three dots",
           "goal": [
-            "meadow helmet crimson;",
-            "hammer cellar window;",
-            "carve harbor velvet;",
-            "juggle bundle;"
+            "red!",
+            "orange!",
+            "yellow!",
+            "green!"
           ],
-          "solution": "A;<Esc>j.j.j.",
-          "why": "A makes the change repeatable; j. replays it per line."
+          "solution": "A!<Esc>j.j.j."
         },
         {
           "start": [
-            "pocket helmet orchard",
-            "rusty scatter basket"
+            "sir",
+            "lady",
+            "lord"
           ],
-          "par_keys": 7,
-          "hint": "insert the prefix at the line start, then j. repeats",
+          "par_keys": 14,
+          "hint": "knight them all",
           "goal": [
-            "// pocket helmet orchard",
-            "// rusty scatter basket"
+            "sir cheddar",
+            "lady cheddar",
+            "lord cheddar"
           ],
-          "solution": "I// <Esc>j.",
-          "why": "I inserts before the first character; j. comments the rest."
-        },
-        {
-          "start": [
-            "jagged cellar stack",
-            "pillow scatter swift"
-          ],
-          "par_keys": 7,
-          "hint": "insert the prefix at the line start, then j. repeats",
-          "goal": [
-            "// jagged cellar stack",
-            "// pillow scatter swift"
-          ],
-          "solution": "I// <Esc>j.",
-          "why": "I inserts before the first character; j. comments the rest."
-        },
-        {
-          "start": [
-            "polish helmet",
-            "kettle walnut orchard",
-            "gentle copper planet"
-          ],
-          "par_keys": 9,
-          "hint": "insert the prefix at the line start, then j. repeats",
-          "goal": [
-            "// polish helmet",
-            "// kettle walnut orchard",
-            "// gentle copper planet"
-          ],
-          "solution": "I// <Esc>j.j.",
-          "why": "I inserts before the first character; j. comments the rest."
+          "solution": "A cheddar<Esc>j.j."
         }
       ]
     },
@@ -789,63 +761,72 @@
         },
         {
           "start": [
-            "meadow compass",
-            "button blanket",
-            "hollow forest restless",
-            "mellow tidy"
+            "health = 100"
           ],
-          "par_keys": 9,
-          "hint": "append ';' once, then j. to ripple it down",
+          "par_keys": 3,
+          "hint": "A appends at end of line",
           "goal": [
-            "meadow compass;",
-            "button blanket;",
-            "hollow forest restless;",
-            "mellow tidy;"
+            "health = 100;"
           ],
-          "solution": "A;<Esc>j.j.j.",
-          "why": "A makes the change repeatable; j. replays it per line."
+          "solution": "A;<Esc>"
         },
         {
           "start": [
-            "hollow helmet",
-            "nimble window"
+            "urgent task"
           ],
-          "par_keys": 5,
-          "hint": "append ';' once, then j. to ripple it down",
+          "par_keys": 6,
+          "hint": "I inserts before the first non-blank",
           "goal": [
-            "hollow helmet;",
-            "nimble window;"
+            "!!! urgent task"
           ],
-          "solution": "A;<Esc>j.",
-          "why": "A makes the change repeatable; j. replays it per line."
+          "solution": "I!!! <Esc>"
         },
         {
           "start": [
-            "cellar velvet silent",
-            "feather cobweb"
+            "first floor"
           ],
-          "par_keys": 5,
-          "hint": "append ';' once, then j. to ripple it down",
+          "par_keys": 14,
+          "hint": "o opens a line below",
           "goal": [
-            "cellar velvet silent;",
-            "feather cobweb;"
+            "first floor",
+            "second floor"
           ],
-          "solution": "A;<Esc>j.",
-          "why": "A makes the change repeatable; j. replays it per line."
+          "solution": "osecond floor<Esc>"
         },
         {
           "start": [
-            "saddle vanish somber",
-            "stumble sketch juggle"
+            "the conclusion"
           ],
-          "par_keys": 5,
-          "hint": "append ';' once, then j. to ripple it down",
+          "par_keys": 11,
+          "hint": "O opens a line above",
           "goal": [
-            "saddle vanish somber;",
-            "stumble sketch juggle;"
+            "the intro",
+            "the conclusion"
           ],
-          "solution": "A;<Esc>j.",
-          "why": "A makes the change repeatable; j. replays it per line."
+          "solution": "Othe intro<Esc>"
+        },
+        {
+          "start": [
+            "print('hi')"
+          ],
+          "par_keys": 11,
+          "hint": "jump straight to the line end",
+          "goal": [
+            "print('hi')  # debug"
+          ],
+          "solution": "A  # debug<Esc>"
+        },
+        {
+          "start": [
+            "def spell():"
+          ],
+          "par_keys": 12,
+          "hint": "open a body line below",
+          "goal": [
+            "def spell():",
+            "    cast()"
+          ],
+          "solution": "o    cast()<Esc>"
         }
       ]
     },
@@ -1059,99 +1040,60 @@
         },
         {
           "start": [
-            "harbor brittle drift pillow snatch"
+            "delete the cursed word now"
           ],
-          "par_keys": 3,
-          "hint": "delete A word — it takes a neighbouring space too",
+          "par_keys": 5,
+          "hint": "daw deletes the word and its space",
           "goal": [
-            "harbor brittle drift snatch"
+            "delete the word now"
           ],
-          "start_cursor": [
-            1,
-            22
-          ],
-          "solution": "daw",
-          "why": "daw leaves no double space; diw would."
+          "solution": "2wdaw",
+          "why": "daw keeps spacing clean and stays repeatable."
         },
         {
           "start": [
-            "amber linger silent shimmer basket"
+            "banish evil spirits forever"
           ],
-          "par_keys": 3,
-          "hint": "delete A word — it takes a neighbouring space too",
+          "par_keys": 4,
+          "hint": "hop to the word, delete A word",
           "goal": [
-            "amber silent shimmer basket"
+            "banish spirits forever"
           ],
-          "start_cursor": [
-            1,
-            7
-          ],
-          "solution": "daw",
-          "why": "daw leaves no double space; diw would."
+          "solution": "wdaw"
         },
         {
           "start": [
-            "fasten crimson meadow kettle"
+            "the the duplicate word"
           ],
           "par_keys": 3,
-          "hint": "delete A word — it takes a neighbouring space too",
+          "hint": "kill the stutter",
           "goal": [
-            "fasten meadow kettle"
+            "the duplicate word"
           ],
-          "start_cursor": [
-            1,
-            8
-          ],
-          "solution": "daw",
-          "why": "daw leaves no double space; diw would."
+          "solution": "daw"
         },
         {
           "start": [
-            "gentle jagged fold whisper"
+            "chop chop chop wood"
           ],
-          "par_keys": 3,
-          "hint": "delete A word — it takes a neighbouring space too",
+          "par_keys": 4,
+          "hint": "daw then dot to remove the next",
           "goal": [
-            "gentle jagged whisper"
+            "chop wood"
           ],
-          "start_cursor": [
-            1,
-            15
-          ],
-          "solution": "daw",
-          "why": "daw leaves no double space; diw would."
+          "solution": "daw.",
+          "why": "daw is dot-repeatable; db x is not."
         },
         {
           "start": [
-            "saddle blanket blanket scribble"
+            "remove ADJECTIVE please"
           ],
-          "par_keys": 3,
-          "hint": "delete A word — it takes a neighbouring space too",
+          "par_keys": 4,
+          "hint": "drop the loud word",
           "goal": [
-            "saddle blanket scribble"
+            "remove please"
           ],
-          "start_cursor": [
-            1,
-            8
-          ],
-          "solution": "daw",
-          "why": "daw leaves no double space; diw would."
-        },
-        {
-          "start": [
-            "rugged stack stack meadow juggle"
-          ],
-          "par_keys": 3,
-          "hint": "delete A word — it takes a neighbouring space too",
-          "goal": [
-            "rugged stack meadow juggle"
-          ],
-          "start_cursor": [
-            1,
-            14
-          ],
-          "solution": "daw",
-          "why": "daw leaves no double space; diw would."
+          "solution": "wdaw"
         }
       ]
     },
@@ -3260,105 +3202,100 @@
         },
         {
           "start": [
-            "borrow borrow forest Q cellar"
+            "jump to the @ symbol"
           ],
           "par_keys": 2,
-          "hint": "fly straight to the rare marker character",
+          "hint": "fly to the @ on the line",
           "start_cursor": [
             1,
             1
           ],
           "target": [
             1,
-            22
+            13
           ],
-          "solution": "fQ",
-          "why": "'Q' is unique here, so f hits it in one hop."
+          "solution": "f@",
+          "why": "f{char} lands the cursor on the next match."
         },
         {
           "start": [
-            "stack J quiet feather sketch polish"
+            "x.y.z.w"
           ],
-          "par_keys": 2,
-          "hint": "fly straight to the rare marker character",
+          "par_keys": 3,
+          "hint": "find a dot, then repeat with ;",
           "start_cursor": [
             1,
             1
           ],
           "target": [
             1,
-            7
+            4
           ],
-          "solution": "fJ",
-          "why": "'J' is unique here, so f hits it in one hop."
+          "solution": "f.;"
         },
         {
           "start": [
-            "anchor gentle beacon harbor Z bridge"
+            "stop before END"
           ],
           "par_keys": 2,
-          "hint": "fly straight to the rare marker character",
+          "hint": "t stops just before the target",
           "start_cursor": [
             1,
             1
           ],
           "target": [
             1,
-            29
+            12
           ],
-          "solution": "fZ",
-          "why": "'Z' is unique here, so f hits it in one hop."
+          "solution": "tE"
         },
         {
           "start": [
-            "cellar K bridge cactus"
+            "a,b,c,d"
           ],
-          "par_keys": 2,
-          "hint": "fly straight to the rare marker character",
+          "par_keys": 4,
+          "hint": "repeat the find twice",
           "start_cursor": [
             1,
             1
           ],
           "target": [
             1,
-            8
+            6
           ],
-          "solution": "fK",
-          "why": "'K' is unique here, so f hits it in one hop."
+          "solution": "f,;;"
         },
         {
           "start": [
-            "forest Z pencil cactus button"
+            "1=2=3=4"
           ],
-          "par_keys": 2,
-          "hint": "fly straight to the rare marker character",
+          "par_keys": 4,
+          "hint": "; forward, , back",
           "start_cursor": [
             1,
             1
           ],
           "target": [
             1,
-            8
+            2
           ],
-          "solution": "fZ",
-          "why": "'Z' is unique here, so f hits it in one hop."
+          "solution": "f=;,"
         },
         {
           "start": [
-            "golden cheerful Z shimmer"
+            "catch the ! mark"
           ],
           "par_keys": 2,
-          "hint": "fly straight to the rare marker character",
+          "hint": "aim at the rare character",
           "start_cursor": [
             1,
             1
           ],
           "target": [
             1,
-            17
+            11
           ],
-          "solution": "fZ",
-          "why": "'Z' is unique here, so f hits it in one hop."
+          "solution": "f!"
         }
       ]
     },
@@ -4139,147 +4076,71 @@
         },
         {
           "start": [
-            "planet fold ponder restless"
-          ],
-          "par_keys": 10,
-          "hint": "the cursor sits on the word — change just it",
-          "goal": [
-            "planet fold copper restless"
-          ],
-          "start_cursor": [
-            1,
-            13
-          ],
-          "solution": "ciwcopper<Esc>",
-          "why": "ciw replaces the whole word from anywhere inside it."
-        },
-        {
-          "start": [
-            "planet brittle ribbon"
-          ],
-          "par_keys": 10,
-          "hint": "the cursor sits on the word — change just it",
-          "goal": [
-            "planet brittle anchor"
-          ],
-          "start_cursor": [
-            1,
-            16
-          ],
-          "solution": "ciwanchor<Esc>",
-          "why": "ciw replaces the whole word from anywhere inside it."
-        },
-        {
-          "start": [
-            "quiet rescue forest vanish amber"
+            "the grumpy dragon naps"
           ],
           "par_keys": 11,
-          "hint": "the cursor sits on the word — change just it",
+          "hint": "change the word under the cursor",
           "goal": [
-            "quiet rescue forest compass amber"
+            "the sleepy dragon naps"
           ],
-          "start_cursor": [
-            1,
-            21
-          ],
-          "solution": "ciwcompass<Esc>",
-          "why": "ciw replaces the whole word from anywhere inside it."
+          "solution": "wciwsleepy<Esc>",
+          "why": "ciw works from anywhere inside the word."
         },
         {
           "start": [
-            "narrow carve kettle"
+            "summon the kraken now"
           ],
-          "par_keys": 10,
-          "hint": "the cursor sits on the word — change just it",
+          "par_keys": 14,
+          "hint": "downgrade the monster",
           "goal": [
-            "cellar carve kettle"
+            "summon the goldfish now"
           ],
-          "start_cursor": [
-            1,
-            1
-          ],
-          "solution": "ciwcellar<Esc>",
-          "why": "ciw replaces the whole word from anywhere inside it."
+          "solution": "2wciwgoldfish<Esc>"
         },
         {
           "start": [
-            "bundle rugged tumble gather swift"
+            "brave knight runs"
           ],
-          "par_keys": 10,
-          "hint": "the cursor sits on the word — change just it",
+          "par_keys": 11,
+          "hint": "reclass the hero",
           "goal": [
-            "bundle rugged tumble gather walnut"
+            "brave wizard runs"
           ],
-          "start_cursor": [
-            1,
-            29
-          ],
-          "solution": "ciwwalnut<Esc>",
-          "why": "ciw replaces the whole word from anywhere inside it."
+          "solution": "wciwwizard<Esc>"
         },
         {
           "start": [
-            "carve glossy ribbon walnut"
+            "error code 500"
           ],
-          "par_keys": 10,
-          "hint": "the cursor sits on the word — change just it",
+          "par_keys": 8,
+          "hint": "ciw from the last char too",
           "goal": [
-            "carve basket ribbon walnut"
+            "error code 404"
           ],
-          "start_cursor": [
-            1,
-            7
-          ],
-          "solution": "ciwbasket<Esc>",
-          "why": "ciw replaces the whole word from anywhere inside it."
+          "solution": "$ciw404<Esc>"
         },
         {
           "start": [
-            "basket ribbon polish quiet bundle"
+            "wizard casts fireball"
           ],
-          "par_keys": 9,
-          "hint": "the cursor sits on the word — change just it",
+          "par_keys": 13,
+          "hint": "upgrade the spell",
           "goal": [
-            "basket ribbon polish quiet river"
+            "wizard casts pancakes"
           ],
-          "start_cursor": [
-            1,
-            28
-          ],
-          "solution": "ciwriver<Esc>",
-          "why": "ciw replaces the whole word from anywhere inside it."
+          "solution": "$ciwpancakes<Esc>"
         },
         {
           "start": [
-            "hollow hammer ponder restless shimmer"
+            "keep DELETEME keep"
           ],
-          "par_keys": 10,
-          "hint": "the cursor sits on the word — change just it",
+          "par_keys": 4,
+          "hint": "diw deletes, leaving the spaces",
           "goal": [
-            "hollow window ponder restless shimmer"
+            "keep  keep"
           ],
-          "start_cursor": [
-            1,
-            8
-          ],
-          "solution": "ciwwindow<Esc>",
-          "why": "ciw replaces the whole word from anywhere inside it."
-        },
-        {
-          "start": [
-            "frosty golden vivid forest"
-          ],
-          "par_keys": 10,
-          "hint": "the cursor sits on the word — change just it",
-          "goal": [
-            "frosty cactus vivid forest"
-          ],
-          "start_cursor": [
-            1,
-            8
-          ],
-          "solution": "ciwcactus<Esc>",
-          "why": "ciw replaces the whole word from anywhere inside it."
+          "solution": "wdiw",
+          "why": "that double space is why you change with ciw, not diw."
         }
       ]
     },
@@ -4346,99 +4207,69 @@
         },
         {
           "start": [
-            "fold[blanket]"
+            "cast(oldSpell)"
           ],
-          "par_keys": 10,
-          "hint": "change what's inside the pair, brackets untouched",
+          "par_keys": 12,
+          "hint": "change inside the parens",
           "goal": [
-            "fold[ladder]"
+            "cast(fireball)"
           ],
-          "solution": "ci[ladder<Esc>",
-          "why": "ci[ targets the contents wherever the cursor sits."
+          "solution": "ci(fireball<Esc>"
         },
         {
           "start": [
-            "wander[bridge]"
+            "loot = {copper}"
           ],
-          "par_keys": 10,
-          "hint": "change what's inside the pair, brackets untouched",
+          "par_keys": 8,
+          "hint": "swap what's in the braces",
           "goal": [
-            "wander[magnet]"
+            "loot = {gold}"
           ],
-          "solution": "ci[magnet<Esc>",
-          "why": "ci[ targets the contents wherever the cursor sits."
+          "solution": "ci{gold<Esc>"
         },
         {
           "start": [
-            "scatter{compass}"
+            "inventory[old]"
           ],
-          "par_keys": 10,
-          "hint": "change what's inside the pair, brackets untouched",
+          "par_keys": 9,
+          "hint": "change inside the brackets",
           "goal": [
-            "scatter{cobweb}"
+            "inventory[sword]"
           ],
-          "solution": "ci{cobweb<Esc>",
-          "why": "ci{ targets the contents wherever the cursor sits."
+          "solution": "ci[sword<Esc>"
         },
         {
           "start": [
-            "stumble{anchor}"
+            "<title>Old Quest</title>"
           ],
-          "par_keys": 10,
-          "hint": "change what's inside the pair, brackets untouched",
+          "par_keys": 15,
+          "hint": "cit changes inside the tag",
           "goal": [
-            "stumble{cobweb}"
+            "<title>Dragon Hunt</title>"
           ],
-          "solution": "ci{cobweb<Esc>",
-          "why": "ci{ targets the contents wherever the cursor sits."
+          "solution": "citDragon Hunt<Esc>"
         },
         {
           "start": [
-            "fold{planet}"
+            "say \"boring\""
           ],
           "par_keys": 10,
-          "hint": "change what's inside the pair, brackets untouched",
+          "hint": "change inside the quotes",
           "goal": [
-            "fold{pocket}"
+            "say \"kaboom\""
           ],
-          "solution": "ci{pocket<Esc>",
-          "why": "ci{ targets the contents wherever the cursor sits."
+          "solution": "ci\"kaboom<Esc>"
         },
         {
           "start": [
-            "tumble(orchard)"
+            "wave(stranger)"
           ],
-          "par_keys": 10,
-          "hint": "change what's inside the pair, brackets untouched",
+          "par_keys": 12,
+          "hint": "the cursor need not be inside yet",
           "goal": [
-            "tumble(pebble)"
+            "wave(farewell)"
           ],
-          "solution": "ci(pebble<Esc>",
-          "why": "ci( targets the contents wherever the cursor sits."
-        },
-        {
-          "start": [
-            "<b>window</b>"
-          ],
-          "par_keys": 10,
-          "hint": "change inside the tag",
-          "goal": [
-            "<b>bridge</b>"
-          ],
-          "solution": "citbridge<Esc>",
-          "why": "cit reads the tag structure — no counting characters."
-        },
-        {
-          "start": [
-            "<em>saddle</em>"
-          ],
-          "par_keys": 10,
-          "hint": "change inside the tag",
-          "goal": [
-            "<em>candle</em>"
-          ],
-          "solution": "citcandle<Esc>",
-          "why": "cit reads the tag structure — no counting characters."
+          "solution": "ci(farewell<Esc>"
         }
       ]
     },
@@ -7167,93 +6998,67 @@
         },
         {
           "start": [
-            "ladder snatch",
-            "shimmer rescue ladder"
+            "ho ho ho merry"
           ],
-          "par_keys": 21,
-          "hint": "whole file (%), every match per line (g)",
+          "par_keys": 12,
+          "hint": "g changes every match on the line",
           "goal": [
-            "lantern snatch",
-            "shimmer rescue lantern"
+            "ha ha ha merry"
           ],
-          "solution": ":%s/ladder/lantern/g<CR>",
-          "why": "g replaces every occurrence, not just the first per line."
+          "solution": ":%s/ho/ha/g<CR>",
+          "why": "without g only the first match per line changes."
         },
         {
           "start": [
-            "hover thunder rescue",
-            "shimmer borrow thunder"
+            "na na na batman"
           ],
-          "par_keys": 21,
-          "hint": "whole file (%), every match per line (g)",
+          "par_keys": 11,
+          "hint": "no g: only the first match",
           "goal": [
-            "hover signal rescue",
-            "shimmer borrow signal"
+            "yo na na batman"
           ],
-          "solution": ":%s/thunder/signal/g<CR>",
-          "why": "g replaces every occurrence, not just the first per line."
+          "solution": ":%s/na/yo/<CR>"
         },
         {
           "start": [
-            "compass harvest",
-            "ponder compass",
-            "ponder compass"
-          ],
-          "par_keys": 21,
-          "hint": "whole file (%), every match per line (g)",
-          "goal": [
-            "ladder harvest",
-            "ponder ladder",
-            "ponder ladder"
-          ],
-          "solution": ":%s/compass/ladder/g<CR>",
-          "why": "g replaces every occurrence, not just the first per line."
-        },
-        {
-          "start": [
-            "button harvest button",
-            "stumble button gather"
+            "keep",
+            "fix me",
+            "fix me",
+            "keep"
           ],
           "par_keys": 20,
-          "hint": "whole file (%), every match per line (g)",
+          "hint": "limit the change to a line range",
           "goal": [
-            "signal harvest signal",
-            "stumble signal gather"
+            "keep",
+            "FIXED",
+            "FIXED",
+            "keep"
           ],
-          "solution": ":%s/button/signal/g<CR>",
-          "why": "g replaces every occurrence, not just the first per line."
+          "solution": ":2,3s/fix me/FIXED/<CR>"
         },
         {
           "start": [
-            "feather tumble snatch feather",
-            "feather feather linger",
-            "snatch feather feather"
+            "spam spam",
+            "spam eggs"
           ],
-          "par_keys": 21,
-          "hint": "whole file (%), every match per line (g)",
+          "par_keys": 15,
+          "hint": "% spans the whole file",
           "goal": [
-            "forest tumble snatch forest",
-            "forest forest linger",
-            "snatch forest forest"
+            "ham ham",
+            "ham eggs"
           ],
-          "solution": ":%s/feather/forest/g<CR>",
-          "why": "g replaces every occurrence, not just the first per line."
+          "solution": ":%s/spam/ham/g<CR>"
         },
         {
           "start": [
-            "lantern vanish fasten lantern",
-            "lantern lantern whisper snatch",
-            "shimmer juggle lantern lantern"
+            "error error error"
           ],
-          "par_keys": 21,
-          "hint": "whole file (%), every match per line (g)",
+          "par_keys": 15,
+          "hint": "calm the whole line down",
           "goal": [
-            "tunnel vanish fasten tunnel",
-            "tunnel tunnel whisper snatch",
-            "shimmer juggle tunnel tunnel"
+            "ok ok ok"
           ],
-          "solution": ":%s/lantern/tunnel/g<CR>",
-          "why": "g replaces every occurrence, not just the first per line."
+          "solution": ":%s/error/ok/g<CR>"
         }
       ]
     },

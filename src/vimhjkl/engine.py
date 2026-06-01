@@ -183,9 +183,29 @@ def select_due_skills(skills: list[Skill], progress: dict, count: int,
     return out
 
 
+# Per-skill "shuffle bag": deal every instance once in a random order before any
+# repeats, so you cycle through ALL of a skill's variety (not the same one twice
+# in a row by chance).  State lives for the process — a fresh shuffle each run.
+_bags: dict[str, list[int]] = {}
+_last_dealt: dict[str, int] = {}
+
+
 def pick_challenge(skill: Skill, rng: Optional[random.Random] = None) -> Challenge:
     rng = rng or random
-    return rng.choice(skill.challenges)
+    n = len(skill.challenges)
+    if n <= 1:
+        return skill.challenges[0]
+    bag = _bags.get(skill.id)
+    if not bag:
+        bag = list(range(n))
+        rng.shuffle(bag)
+        # don't let a refill immediately repeat the instance we just showed
+        if bag[0] == _last_dealt.get(skill.id) and n > 1:
+            bag[0], bag[1] = bag[1], bag[0]
+    idx = bag.pop(0)
+    _bags[skill.id] = bag
+    _last_dealt[skill.id] = idx
+    return skill.challenges[idx]
 
 
 # ---------------------------------------------------------------------------
