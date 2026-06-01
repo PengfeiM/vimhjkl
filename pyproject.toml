@@ -1,0 +1,21 @@
+[build-system]
+requires = ["uv_build>=0.11,<0.12"]
+build-backend = "uv_build"
+
+[project]
+name = "vimhjkl"
+version = "0.1.0"
+description = "A terminal trainer that drills advanced Vim techniques in real vim/nvim and grades your keystrokes."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "vimhjkl" }]
+# No third-party runtime dependencies: the package is pure standard library.
+# The only external requirement is a `vim` or `nvim` binary on PATH.
+dependencies = []
+
+[project.scripts]
+vimhjkl = "vimhjkl.cli:main"
+
+[tool.uv.build-backend]
+module-root = "src"
+module-name = "vimhjkl"

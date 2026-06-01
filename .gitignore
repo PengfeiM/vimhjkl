@@ -1,0 +1,14 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+.venv/
+
+# Player state — local, never committed
+progress.json
+
+# Local tooling / reference material — not distributed
+.claude/
+source-material.md
+CLAUDE.md

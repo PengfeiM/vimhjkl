@@ -1,0 +1,3526 @@
+{
+  "version": 1,
+  "skills": [
+    {
+      "id": "motion-word-forward",
+      "title": "Jump forward by word",
+      "category": "motion",
+      "teach": "w moves the cursor to the start of the next word; a count multiplies it, so 2w jumps two words ahead. It is the bread-and-butter horizontal motion, far faster than hammering l.",
+      "key_commands": [
+        "w",
+        "3w",
+        "b",
+        "e"
+      ],
+      "difficulty": 1,
+      "challenges": [
+        {
+          "start": [
+            "alpha beta gamma delta"
+          ],
+          "par_keys": 2,
+          "hint": "a count in front of w repeats it",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            1,
+            12
+          ],
+          "solution": "2w",
+          "why": "Two word-jumps land on 'gamma' in two keystrokes."
+        },
+        {
+          "start": [
+            "one two three four"
+          ],
+          "par_keys": 2,
+          "hint": "count then w",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            1,
+            9
+          ],
+          "solution": "2w",
+          "why": "w counts words, not characters — distance is irrelevant."
+        }
+      ]
+    },
+    {
+      "id": "operator-delete-line",
+      "title": "Delete a whole line (dd)",
+      "category": "operator",
+      "teach": "dd deletes the current line, linewise. Reach the target line with a motion first (j/k or a count), then dd. The deleted line goes to the unnamed register, ready to put back with p.",
+      "key_commands": [
+        "dd",
+        "jdd",
+        "2dd",
+        "p"
+      ],
+      "difficulty": 1,
+      "challenges": [
+        {
+          "start": [
+            "valid line one",
+            "DELETE THIS LINE",
+            "valid line two"
+          ],
+          "par_keys": 3,
+          "hint": "move down to the bad line, then delete it",
+          "goal": [
+            "valid line one",
+            "valid line two"
+          ],
+          "solution": "jdd",
+          "why": "j reaches the line, dd removes it linewise."
+        },
+        {
+          "start": [
+            "alpha",
+            "beta",
+            "GONE",
+            "gamma"
+          ],
+          "par_keys": 4,
+          "hint": "two lines down, then dd",
+          "goal": [
+            "alpha",
+            "beta",
+            "gamma"
+          ],
+          "solution": "jjdd",
+          "why": "Stack motions before the operator to reach the target line."
+        }
+      ]
+    },
+    {
+      "id": "textobj-change-in-quotes",
+      "title": "Change inside quotes (ci\")",
+      "category": "text_object",
+      "teach": "ci\" changes the text between the nearest pair of double quotes, wherever the cursor sits on the line — Vim searches forward to find them. The quotes stay; only their contents are replaced, and you land in insert mode.",
+      "key_commands": [
+        "ci\"",
+        "ci'",
+        "ci(",
+        "cit"
+      ],
+      "difficulty": 2,
+      "challenges": [
+        {
+          "start": [
+            "greeting = \"hello\""
+          ],
+          "par_keys": 9,
+          "hint": "change inside the quotes",
+          "goal": [
+            "greeting = \"howdy\""
+          ],
+          "solution": "ci\"howdy<Esc>",
+          "why": "ci\" finds the quoted text for you, then drops you in insert mode."
+        },
+        {
+          "start": [
+            "path = \"/tmp/old\""
+          ],
+          "par_keys": 12,
+          "hint": "ci\" wipes the whole quoted string",
+          "goal": [
+            "path = \"/var/new\""
+          ],
+          "solution": "ci\"/var/new<Esc>",
+          "why": "One text-object swap replaces the entire path in a single motion."
+        }
+      ]
+    },
+    {
+      "id": "dot-command-repeat",
+      "title": "Repeat a change with the dot command",
+      "category": "operator",
+      "teach": "The dot command (.) replays your last change — anything from entering Insert mode and typing, to a delete. The Dot Formula is the ideal: make the first change so it is repeatable, then it takes one keystroke to MOVE (j) and one to EXECUTE (.). Append with A so the cursor's column never matters.",
+      "key_commands": [
+        "A",
+        ".",
+        "j.",
+        "u"
+      ],
+      "difficulty": 2,
+      "challenges": [
+        {
+          "start": [
+            "let a = 1",
+            "let b = 2",
+            "let c = 3"
+          ],
+          "par_keys": 7,
+          "hint": "A; once, then j. to ripple it down",
+          "goal": [
+            "let a = 1;",
+            "let b = 2;",
+            "let c = 3;"
+          ],
+          "solution": "A;<Esc>j.j.",
+          "why": "A appends at the line end from anywhere, so . repeats cleanly."
+        },
+        {
+          "start": [
+            "alpha",
+            "bravo",
+            "charlie",
+            "delta"
+          ],
+          "par_keys": 9,
+          "hint": "one change, then walk down with j.",
+          "goal": [
+            "alpha.",
+            "bravo.",
+            "charlie.",
+            "delta."
+          ],
+          "solution": "A.<Esc>j.j.j.",
+          "why": "One keystroke to move, one to execute — the Dot Formula."
+        },
+        {
+          "start": [
+            "run()",
+            "stop()",
+            "reset()"
+          ],
+          "par_keys": 9,
+          "hint": "I inserts at the line start; then j. repeats",
+          "goal": [
+            "// run()",
+            "// stop()",
+            "// reset()"
+          ],
+          "solution": "I// <Esc>j.j.",
+          "why": "I// is a repeatable change; j. comments the rest for free."
+        },
+        {
+          "start": [
+            "cobweb hollow",
+            "ribbon cheerful"
+          ],
+          "par_keys": 5,
+          "hint": "append ';' once, then j. to ripple it down",
+          "goal": [
+            "cobweb hollow;",
+            "ribbon cheerful;"
+          ],
+          "solution": "A;<Esc>j.",
+          "why": "A makes the change repeatable; j. replays it per line."
+        },
+        {
+          "start": [
+            "frosty bridge",
+            "rusty swift juggle"
+          ],
+          "par_keys": 5,
+          "hint": "append ';' once, then j. to ripple it down",
+          "goal": [
+            "frosty bridge;",
+            "rusty swift juggle;"
+          ],
+          "solution": "A;<Esc>j.",
+          "why": "A makes the change repeatable; j. replays it per line."
+        },
+        {
+          "start": [
+            "brittle ponder signal",
+            "mingle rugged",
+            "gather button"
+          ],
+          "par_keys": 7,
+          "hint": "append ';' once, then j. to ripple it down",
+          "goal": [
+            "brittle ponder signal;",
+            "mingle rugged;",
+            "gather button;"
+          ],
+          "solution": "A;<Esc>j.j.",
+          "why": "A makes the change repeatable; j. replays it per line."
+        },
+        {
+          "start": [
+            "meadow helmet crimson",
+            "hammer cellar window",
+            "carve harbor velvet",
+            "juggle bundle"
+          ],
+          "par_keys": 9,
+          "hint": "append ';' once, then j. to ripple it down",
+          "goal": [
+            "meadow helmet crimson;",
+            "hammer cellar window;",
+            "carve harbor velvet;",
+            "juggle bundle;"
+          ],
+          "solution": "A;<Esc>j.j.j.",
+          "why": "A makes the change repeatable; j. replays it per line."
+        },
+        {
+          "start": [
+            "pocket helmet orchard",
+            "rusty scatter basket"
+          ],
+          "par_keys": 7,
+          "hint": "insert the prefix at the line start, then j. repeats",
+          "goal": [
+            "// pocket helmet orchard",
+            "// rusty scatter basket"
+          ],
+          "solution": "I// <Esc>j.",
+          "why": "I inserts before the first character; j. comments the rest."
+        },
+        {
+          "start": [
+            "jagged cellar stack",
+            "pillow scatter swift"
+          ],
+          "par_keys": 7,
+          "hint": "insert the prefix at the line start, then j. repeats",
+          "goal": [
+            "// jagged cellar stack",
+            "// pillow scatter swift"
+          ],
+          "solution": "I// <Esc>j.",
+          "why": "I inserts before the first character; j. comments the rest."
+        },
+        {
+          "start": [
+            "polish helmet",
+            "kettle walnut orchard",
+            "gentle copper planet"
+          ],
+          "par_keys": 9,
+          "hint": "insert the prefix at the line start, then j. repeats",
+          "goal": [
+            "// polish helmet",
+            "// kettle walnut orchard",
+            "// gentle copper planet"
+          ],
+          "solution": "I// <Esc>j.j.",
+          "why": "I inserts before the first character; j. comments the rest."
+        }
+      ]
+    },
+    {
+      "id": "insert-entry-points",
+      "title": "Enter Insert mode in the right place",
+      "category": "operator",
+      "teach": "Don't waste motions getting to where you want to type. A appends at end of line, I inserts before the first non-blank, o opens a line below, O opens above. Each compounds a motion and a mode-switch into one key, and each is dot-repeatable.",
+      "key_commands": [
+        "A",
+        "I",
+        "o",
+        "O"
+      ],
+      "difficulty": 1,
+      "challenges": [
+        {
+          "start": [
+            "total = 5"
+          ],
+          "par_keys": 3,
+          "hint": "append at end of line, wherever the cursor is",
+          "goal": [
+            "total = 5;"
+          ],
+          "solution": "A;<Esc>",
+          "why": "A = $a: jump to the end and append in one key."
+        },
+        {
+          "start": [
+            "the headline"
+          ],
+          "par_keys": 4,
+          "hint": "insert before the first character",
+          "goal": [
+            "# the headline"
+          ],
+          "solution": "I# <Esc>",
+          "why": "I = ^i: insert at the start without pressing 0 first."
+        },
+        {
+          "start": [
+            "first"
+          ],
+          "par_keys": 8,
+          "hint": "open a new line below and type",
+          "goal": [
+            "first",
+            "second"
+          ],
+          "solution": "osecond<Esc>",
+          "why": "o opens below and enters Insert mode in one stroke."
+        },
+        {
+          "start": [
+            "second"
+          ],
+          "par_keys": 7,
+          "hint": "open a new line above",
+          "goal": [
+            "first",
+            "second"
+          ],
+          "solution": "Ofirst<Esc>",
+          "why": "O opens above — no need to go up then o."
+        },
+        {
+          "start": [
+            "meadow compass",
+            "button blanket",
+            "hollow forest restless",
+            "mellow tidy"
+          ],
+          "par_keys": 9,
+          "hint": "append ';' once, then j. to ripple it down",
+          "goal": [
+            "meadow compass;",
+            "button blanket;",
+            "hollow forest restless;",
+            "mellow tidy;"
+          ],
+          "solution": "A;<Esc>j.j.j.",
+          "why": "A makes the change repeatable; j. replays it per line."
+        },
+        {
+          "start": [
+            "hollow helmet",
+            "nimble window"
+          ],
+          "par_keys": 5,
+          "hint": "append ';' once, then j. to ripple it down",
+          "goal": [
+            "hollow helmet;",
+            "nimble window;"
+          ],
+          "solution": "A;<Esc>j.",
+          "why": "A makes the change repeatable; j. replays it per line."
+        },
+        {
+          "start": [
+            "cellar velvet silent",
+            "feather cobweb"
+          ],
+          "par_keys": 5,
+          "hint": "append ';' once, then j. to ripple it down",
+          "goal": [
+            "cellar velvet silent;",
+            "feather cobweb;"
+          ],
+          "solution": "A;<Esc>j.",
+          "why": "A makes the change repeatable; j. replays it per line."
+        },
+        {
+          "start": [
+            "saddle vanish somber",
+            "stumble sketch juggle"
+          ],
+          "par_keys": 5,
+          "hint": "append ';' once, then j. to ripple it down",
+          "goal": [
+            "saddle vanish somber;",
+            "stumble sketch juggle;"
+          ],
+          "solution": "A;<Esc>j.",
+          "why": "A makes the change repeatable; j. replays it per line."
+        }
+      ]
+    },
+    {
+      "id": "change-to-eol-C",
+      "title": "Change to end of line (C)",
+      "category": "operator",
+      "teach": "C deletes from the cursor to the end of the line and drops you into Insert mode — it is shorthand for c$. Land on the first character you want to replace, hit C, and retype the tail.",
+      "key_commands": [
+        "C",
+        "c$",
+        "D",
+        "d$"
+      ],
+      "difficulty": 2,
+      "challenges": [
+        {
+          "start": [
+            "color = OLD"
+          ],
+          "par_keys": 5,
+          "hint": "from the cursor, blow away the rest of the line",
+          "goal": [
+            "color = NEW"
+          ],
+          "start_cursor": [
+            1,
+            9
+          ],
+          "solution": "CNEW<Esc>",
+          "why": "C clears to end-of-line and starts Insert in one move."
+        },
+        {
+          "start": [
+            "url = http://stale"
+          ],
+          "par_keys": 10,
+          "hint": "C eats to EOL; type the replacement",
+          "goal": [
+            "url = http://fresh.io"
+          ],
+          "start_cursor": [
+            1,
+            14
+          ],
+          "solution": "Cfresh.io<Esc>",
+          "why": "One key replaces everything from the cursor onward."
+        }
+      ]
+    },
+    {
+      "id": "substitute-char-dot",
+      "title": "One back, three forward (s + dot)",
+      "category": "operator",
+      "teach": "s deletes the character under the cursor and enters Insert mode (it is cl). Combined with f{char} to find the target and ; to repeat that find, you get a fully repeatable edit: f to land, s to swap, then ;. to march through the rest.",
+      "key_commands": [
+        "s",
+        "f",
+        ";",
+        "."
+      ],
+      "difficulty": 3,
+      "challenges": [
+        {
+          "start": [
+            "a+b+c+d"
+          ],
+          "par_keys": 11,
+          "hint": "find a +, substitute it with ' + ', then ;. repeats",
+          "goal": [
+            "a + b + c + d"
+          ],
+          "solution": "f+s + <Esc>;.;.",
+          "why": "Making BOTH the find (;) and the change (.) repeatable wins."
+        },
+        {
+          "start": [
+            "x|y|z"
+          ],
+          "par_keys": 9,
+          "hint": "f| to the bar, s to ' / ', ;. for the rest",
+          "goal": [
+            "x / y / z"
+          ],
+          "solution": "f|s / <Esc>;.",
+          "why": "The Dot Formula again: one find-repeat, one change-repeat."
+        }
+      ]
+    },
+    {
+      "id": "compose-delete-word",
+      "title": "Compose a repeatable word delete (daw)",
+      "category": "operator",
+      "teach": "There is more than one way to delete a word; pick the repeatable one. db then x leaves you unable to repeat. daw ('delete a word') removes the word AND an adjacent space as a single, dot-repeatable change.",
+      "key_commands": [
+        "daw",
+        "diw",
+        "db",
+        "."
+      ],
+      "difficulty": 2,
+      "challenges": [
+        {
+          "start": [
+            "clear the morning fog"
+          ],
+          "par_keys": 3,
+          "hint": "delete A word — it takes the trailing/leading space too",
+          "goal": [
+            "clear the morning"
+          ],
+          "start_cursor": [
+            1,
+            19
+          ],
+          "solution": "daw",
+          "why": "daw is one tidy change you can repeat; db then x is not."
+        },
+        {
+          "start": [
+            "remove this word here"
+          ],
+          "par_keys": 5,
+          "hint": "hop to the word, then daw",
+          "goal": [
+            "remove this here"
+          ],
+          "solution": "2wdaw",
+          "why": "aw grabs the word plus a space so no double space is left."
+        },
+        {
+          "start": [
+            "harbor brittle drift pillow snatch"
+          ],
+          "par_keys": 3,
+          "hint": "delete A word — it takes a neighbouring space too",
+          "goal": [
+            "harbor brittle drift snatch"
+          ],
+          "start_cursor": [
+            1,
+            22
+          ],
+          "solution": "daw",
+          "why": "daw leaves no double space; diw would."
+        },
+        {
+          "start": [
+            "amber linger silent shimmer basket"
+          ],
+          "par_keys": 3,
+          "hint": "delete A word — it takes a neighbouring space too",
+          "goal": [
+            "amber silent shimmer basket"
+          ],
+          "start_cursor": [
+            1,
+            7
+          ],
+          "solution": "daw",
+          "why": "daw leaves no double space; diw would."
+        },
+        {
+          "start": [
+            "fasten crimson meadow kettle"
+          ],
+          "par_keys": 3,
+          "hint": "delete A word — it takes a neighbouring space too",
+          "goal": [
+            "fasten meadow kettle"
+          ],
+          "start_cursor": [
+            1,
+            8
+          ],
+          "solution": "daw",
+          "why": "daw leaves no double space; diw would."
+        },
+        {
+          "start": [
+            "gentle jagged fold whisper"
+          ],
+          "par_keys": 3,
+          "hint": "delete A word — it takes a neighbouring space too",
+          "goal": [
+            "gentle jagged whisper"
+          ],
+          "start_cursor": [
+            1,
+            15
+          ],
+          "solution": "daw",
+          "why": "daw leaves no double space; diw would."
+        },
+        {
+          "start": [
+            "saddle blanket blanket scribble"
+          ],
+          "par_keys": 3,
+          "hint": "delete A word — it takes a neighbouring space too",
+          "goal": [
+            "saddle blanket scribble"
+          ],
+          "start_cursor": [
+            1,
+            8
+          ],
+          "solution": "daw",
+          "why": "daw leaves no double space; diw would."
+        },
+        {
+          "start": [
+            "rugged stack stack meadow juggle"
+          ],
+          "par_keys": 3,
+          "hint": "delete A word — it takes a neighbouring space too",
+          "goal": [
+            "rugged stack meadow juggle"
+          ],
+          "start_cursor": [
+            1,
+            14
+          ],
+          "solution": "daw",
+          "why": "daw leaves no double space; diw would."
+        }
+      ]
+    },
+    {
+      "id": "search-word-under-cursor",
+      "title": "Search the word under the cursor (*)",
+      "category": "motion",
+      "teach": "* searches for the whole word under the cursor and jumps to its next occurrence — no typing the word out. n then repeats the search forward, N backward. It pairs beautifully with a repeatable change.",
+      "key_commands": [
+        "*",
+        "#",
+        "n",
+        "N"
+      ],
+      "difficulty": 2,
+      "challenges": [
+        {
+          "start": [
+            "foo bar",
+            "baz foo qux"
+          ],
+          "par_keys": 1,
+          "hint": "one key searches for the word you're sitting on",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            2,
+            5
+          ],
+          "solution": "*",
+          "why": "* spares you from typing /foo — just point and jump."
+        },
+        {
+          "start": [
+            "total here",
+            "skip",
+            "use total now"
+          ],
+          "par_keys": 1,
+          "hint": "* finds the next 'total' for you",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            3,
+            5
+          ],
+          "solution": "*",
+          "why": "Point-and-search beats spelling the word into /."
+        }
+      ]
+    },
+    {
+      "id": "count-vs-repeat",
+      "title": "Count, or repeat?",
+      "category": "operator",
+      "teach": "d2w and 2dw both delete two words; dw. deletes one then repeats. Prefer dw. when you want fine-grained undo and the freedom to stop early; reach for a count when you'll continue into Insert mode (c3w) so undo stays one clean chunk.",
+      "key_commands": [
+        "d2w",
+        "2dw",
+        "dw.",
+        "d3w"
+      ],
+      "difficulty": 2,
+      "challenges": [
+        {
+          "start": [
+            "alpha beta gamma delta"
+          ],
+          "par_keys": 3,
+          "hint": "delete three words in one coherent change",
+          "goal": [
+            "delta"
+          ],
+          "solution": "d3w",
+          "why": "A count keeps undo a single chunk — handy before more edits."
+        },
+        {
+          "start": [
+            "one two three"
+          ],
+          "par_keys": 3,
+          "hint": "delete a word, then repeat it",
+          "goal": [
+            "three"
+          ],
+          "solution": "dw.",
+          "why": "dw. gives word-at-a-time undo; back out with one u if you overshoot."
+        }
+      ]
+    },
+    {
+      "id": "case-operators",
+      "title": "Operate on case (gU, gu, g~)",
+      "category": "operator",
+      "teach": "Case change is an operator, so it follows the operator+motion grammar. gU makes UPPERCASE, gu makes lowercase, g~ swaps case. Combine with any motion or text object (gUaw, guap), or double it to act on the line (gUU, guu, g~~).",
+      "key_commands": [
+        "gU",
+        "gu",
+        "g~",
+        "gUaw"
+      ],
+      "difficulty": 2,
+      "challenges": [
+        {
+          "start": [
+            "make this loud"
+          ],
+          "par_keys": 5,
+          "hint": "jump to the word, then UPPER-case inside it",
+          "goal": [
+            "make THIS loud"
+          ],
+          "solution": "wgUiw",
+          "why": "gU is an operator; iw is its motion — pure grammar."
+        },
+        {
+          "start": [
+            "shout the whole line"
+          ],
+          "par_keys": 3,
+          "hint": "double the operator to hit the whole line",
+          "goal": [
+            "SHOUT THE WHOLE LINE"
+          ],
+          "solution": "gUU",
+          "why": "A doubled operator (gUU) acts linewise, like dd or >>."
+        },
+        {
+          "start": [
+            "QUIET please"
+          ],
+          "par_keys": 4,
+          "hint": "lowercase inside the first word",
+          "goal": [
+            "quiet please"
+          ],
+          "solution": "guiw",
+          "why": "guiw lowercases just the word under the cursor."
+        },
+        {
+          "start": [
+            "MixedCase Word"
+          ],
+          "par_keys": 3,
+          "hint": "swap case from the cursor to end of line",
+          "goal": [
+            "mIXEDcASE wORD"
+          ],
+          "solution": "g~$",
+          "why": "g~ takes a motion too; $ carries it to the line end."
+        }
+      ]
+    },
+    {
+      "id": "increment-number",
+      "title": "Increment numbers (<C-a>, <C-x>)",
+      "category": "operator",
+      "teach": "<C-a> adds to the number at or after the cursor; <C-x> subtracts. With no count they step by one, but a count adds that amount: 180<C-x> subtracts 180. If the cursor isn't on a digit, Vim jumps forward to the next one on the line — so you rarely need to aim first.",
+      "key_commands": [
+        "<C-a>",
+        "<C-x>",
+        "10<C-a>",
+        "180<C-x>"
+      ],
+      "difficulty": 2,
+      "challenges": [
+        {
+          "start": [
+            "count = 41"
+          ],
+          "par_keys": 1,
+          "hint": "bump the number — Vim finds it for you",
+          "goal": [
+            "count = 42"
+          ],
+          "solution": "<C-a>",
+          "why": "<C-a> adds 1 to the next number without any cursor aiming."
+        },
+        {
+          "start": [
+            "version 7"
+          ],
+          "par_keys": 2,
+          "hint": "a count adds that much",
+          "goal": [
+            "version 10"
+          ],
+          "solution": "3<C-a>",
+          "why": "3<C-a> adds three in one stroke — repeatable in a macro."
+        },
+        {
+          "start": [
+            "margin: 0px"
+          ],
+          "par_keys": 4,
+          "hint": "subtract with a count; the cursor jumps to the digit",
+          "goal": [
+            "margin: -180px"
+          ],
+          "solution": "180<C-x>",
+          "why": "180<C-x> reaches the 0 and subtracts 180 — same keys every line."
+        }
+      ]
+    },
+    {
+      "id": "insert-paste-register",
+      "title": "Paste a register without leaving Insert mode",
+      "category": "register",
+      "teach": "Mid-flow in Insert mode you can paste a register with <C-r>{reg} — no trip back to Normal mode. <C-r>0 pastes the yank register (what you last y-anked, untouched by deletes), which is perfect for echoing text you already grabbed.",
+      "key_commands": [
+        "<C-r>0",
+        "<C-r>\"",
+        "y$",
+        "yiw"
+      ],
+      "difficulty": 3,
+      "challenges": [
+        {
+          "start": [
+            "Bright Harbor",
+            "Visit "
+          ],
+          "par_keys": 7,
+          "hint": "yank the title, drop to line 2, append, then <C-r>0",
+          "goal": [
+            "Bright Harbor",
+            "Visit Bright Harbor"
+          ],
+          "solution": "y$jA<C-r>0<Esc>",
+          "why": "<C-r>0 replays the yank register straight into Insert mode."
+        },
+        {
+          "start": [
+            "status: ACTIVE",
+            "flag = "
+          ],
+          "par_keys": 9,
+          "hint": "yank the word, then paste it into the next line from Insert",
+          "goal": [
+            "status: ACTIVE",
+            "flag = ACTIVE"
+          ],
+          "solution": "$yiwjA<C-r>0<Esc>",
+          "why": "Grab once with yiw, echo it anywhere with <C-r>0."
+        }
+      ]
+    },
+    {
+      "id": "insert-expression-calc",
+      "title": "Calculate in place (<C-r>=)",
+      "category": "register",
+      "teach": "The expression register, reached with <C-r>= from Insert mode, evaluates any Vim expression and inserts the result. It turns the editor into a back-of-the-envelope calculator without breaking your flow.",
+      "key_commands": [
+        "<C-r>=",
+        "A",
+        "<CR>"
+      ],
+      "difficulty": 3,
+      "challenges": [
+        {
+          "start": [
+            "answer: "
+          ],
+          "par_keys": 8,
+          "hint": "append, open the expression register, type the sum",
+          "goal": [
+            "answer: 42"
+          ],
+          "solution": "A<C-r>=6*7<CR><Esc>",
+          "why": "<C-r>= evaluates 6*7 and drops 42 right where you're typing."
+        },
+        {
+          "start": [
+            "items x price = "
+          ],
+          "par_keys": 10,
+          "hint": "let Vim do the arithmetic for you",
+          "goal": [
+            "items x price = 1450"
+          ],
+          "solution": "A<C-r>=29*50<CR><Esc>",
+          "why": "No mental math: <C-r>= computes and inserts the total."
+        }
+      ]
+    },
+    {
+      "id": "visual-prefer-operator",
+      "title": "Prefer operators to Visual commands",
+      "category": "operator",
+      "teach": "Visual mode is intuitive but it doesn't play well with the dot command: a repeated Visual change reuses the SAME amount of text, not the same structure. For repetitive edits, use a Normal-mode operator instead — gUit (an operator + a text object) repeats perfectly with j.",
+      "key_commands": [
+        "gUit",
+        "j.",
+        "vit",
+        "gU"
+      ],
+      "difficulty": 3,
+      "challenges": [
+        {
+          "start": [
+            "<a>one</a>",
+            "<a>two</a>",
+            "<a>three</a>"
+          ],
+          "par_keys": 8,
+          "hint": "uppercase inside the tag, then ripple with j.",
+          "goal": [
+            "<a>ONE</a>",
+            "<a>TWO</a>",
+            "<a>THREE</a>"
+          ],
+          "solution": "gUitj.j.",
+          "why": "gUit is operator+motion, so . repeats it on each tag's real width."
+        },
+        {
+          "start": [
+            "<b>cat</b>",
+            "<b>hippopotamus</b>"
+          ],
+          "par_keys": 6,
+          "hint": "the dot respects each tag's own length",
+          "goal": [
+            "<b>CAT</b>",
+            "<b>HIPPOPOTAMUS</b>"
+          ],
+          "solution": "gUitj.",
+          "why": "vitU would reuse a 3-char width and break on the long word."
+        }
+      ]
+    },
+    {
+      "id": "visual-block-insert",
+      "title": "Edit columns with Visual-Block mode",
+      "category": "operator",
+      "teach": "<C-v> selects a rectangular (or ragged) block across lines. I inserts before the block on every line, A appends after it, and with $ the block traces the ragged right edge so A appends at each line's own end. Type on the top line; the change propagates to the rest on <Esc>.",
+      "key_commands": [
+        "<C-v>",
+        "I",
+        "A",
+        "$"
+      ],
+      "difficulty": 3,
+      "challenges": [
+        {
+          "start": [
+            "one",
+            "two",
+            "three"
+          ],
+          "par_keys": 7,
+          "hint": "block down the first column, then I to insert a prefix",
+          "goal": [
+            "x_one",
+            "x_two",
+            "x_three"
+          ],
+          "solution": "<C-v>jjIx_<Esc>",
+          "why": "Block-I types once and stamps the prefix onto every selected line."
+        },
+        {
+          "start": [
+            "var a = 1",
+            "var bb = 22",
+            "var ccc = 333"
+          ],
+          "par_keys": 7,
+          "hint": "block, $ for the ragged ends, then A to append",
+          "goal": [
+            "var a = 1;",
+            "var bb = 22;",
+            "var ccc = 333;"
+          ],
+          "solution": "<C-v>jj$A;<Esc>",
+          "why": "$ frees the block from a rectangle so A hits each true line end."
+        }
+      ]
+    },
+    {
+      "id": "ex-normal-range",
+      "title": "Run Normal commands across a range (:normal)",
+      "category": "ex_command",
+      "teach": ":[range]normal {cmds} runs any Normal-mode sequence on every line in the range — the fastest way to make the same edit on many lines without a macro. Pair it with the Dot Formula's repeatable changes (A;, I//) over a whole file (%) or a line range (2,5).",
+      "key_commands": [
+        ":%normal",
+        ":'<,'>normal",
+        ":normal",
+        "."
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "alpha",
+            "beta",
+            "gamma"
+          ],
+          "par_keys": 12,
+          "hint": "apply A; to every line in one command",
+          "goal": [
+            "alpha;",
+            "beta;",
+            "gamma;"
+          ],
+          "solution": ":%normal A;<CR>",
+          "why": ":%normal A; appends to all lines — no j. ladder needed."
+        },
+        {
+          "start": [
+            "title",
+            "draft()",
+            "render()",
+            "footer"
+          ],
+          "par_keys": 16,
+          "hint": "restrict the range to lines 2 and 3",
+          "goal": [
+            "title",
+            "// draft()",
+            "// render()",
+            "footer"
+          ],
+          "solution": ":2,3normal I// <CR>",
+          "why": "A line range targets exactly the lines you mean, far or near."
+        }
+      ]
+    },
+    {
+      "id": "ex-copy-line",
+      "title": "Duplicate lines with :t (copy)",
+      "category": "ex_command",
+      "teach": ":[range]t{address} copies the range to just below {address} (think 'copy to'). It's a cursor-free way to duplicate a line anywhere: :t. clones the current line in place, :t$ sends a copy to the end of the file, :t0 to the top.",
+      "key_commands": [
+        ":t",
+        ":copy",
+        ":t.",
+        ":t$"
+      ],
+      "difficulty": 3,
+      "challenges": [
+        {
+          "start": [
+            "header",
+            "---",
+            "body"
+          ],
+          "par_keys": 5,
+          "hint": "copy line 1 to below the last line",
+          "goal": [
+            "header",
+            "---",
+            "body",
+            "header"
+          ],
+          "solution": ":1t$<CR>",
+          "why": ":t duplicates a distant line without moving the cursor there."
+        },
+        {
+          "start": [
+            "row",
+            "spacer"
+          ],
+          "par_keys": 5,
+          "hint": "copy line 1 to just below itself",
+          "goal": [
+            "row",
+            "row",
+            "spacer"
+          ],
+          "solution": ":1t1<CR>",
+          "why": ":1t1 clones a line in place — handy for repeating boilerplate."
+        }
+      ]
+    },
+    {
+      "id": "ex-move-line",
+      "title": "Relocate lines with :m (move)",
+      "category": "ex_command",
+      "teach": ":[range]m{address} moves the range to just below {address}. Use :m0 to send a line to the very top, :m$ to the bottom, or :m{n} to slot it after line n. It rearranges lines from afar without cut-and-paste.",
+      "key_commands": [
+        ":m",
+        ":move",
+        ":m0",
+        ":m$"
+      ],
+      "difficulty": 3,
+      "challenges": [
+        {
+          "start": [
+            "second",
+            "first",
+            "third"
+          ],
+          "par_keys": 5,
+          "hint": "move line 2 ('first') to the very top",
+          "goal": [
+            "first",
+            "second",
+            "third"
+          ],
+          "solution": ":2m0<CR>",
+          "why": ":m0 lifts a line to the top in one stroke."
+        },
+        {
+          "start": [
+            "keep",
+            "wanderer",
+            "keep2",
+            "keep3"
+          ],
+          "par_keys": 5,
+          "hint": "send line 2 to the bottom of the file",
+          "goal": [
+            "keep",
+            "keep2",
+            "keep3",
+            "wanderer"
+          ],
+          "solution": ":2m$<CR>",
+          "why": ":m$ relocates a line to the end without any yanking."
+        }
+      ]
+    },
+    {
+      "id": "ex-repeat-last",
+      "title": "Repeat the last Ex command (@:)",
+      "category": "ex_command",
+      "teach": "The dot command repeats the last NORMAL-mode change, but to repeat the last Ex command you use @: instead. After running it once, @@ repeats that in turn. It's the Ex-mode counterpart of the Dot Formula.",
+      "key_commands": [
+        "@:",
+        "@@",
+        ":t.",
+        "."
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "base"
+          ],
+          "par_keys": 6,
+          "hint": "duplicate the line once, then @: repeats the duplication",
+          "goal": [
+            "base",
+            "base",
+            "base"
+          ],
+          "solution": ":t.<CR>@:",
+          "why": "@: replays :t. — the dot command can't repeat Ex commands."
+        },
+        {
+          "start": [
+            "x",
+            "y",
+            "z"
+          ],
+          "par_keys": 5,
+          "hint": "copy line 1 to the end (the base for an @: repeat)",
+          "goal": [
+            "x",
+            "y",
+            "z",
+            "x"
+          ],
+          "solution": ":1t$<CR>",
+          "why": "Run it once, and @: would append line 1 again."
+        }
+      ]
+    },
+    {
+      "id": "ex-sort",
+      "title": "Sort lines with :sort",
+      "category": "ex_command",
+      "teach": ":[range]sort orders the lines in a range. Bare :sort sorts the whole file alphabetically; :sort! reverses it; :sort n sorts by the first number (numeric, so 10 follows 2); :sort u sorts and removes duplicate lines.",
+      "key_commands": [
+        ":sort",
+        ":sort!",
+        ":sort n",
+        ":sort u"
+      ],
+      "difficulty": 3,
+      "challenges": [
+        {
+          "start": [
+            "banana",
+            "apple",
+            "cherry"
+          ],
+          "par_keys": 6,
+          "hint": "one command alphabetises every line",
+          "goal": [
+            "apple",
+            "banana",
+            "cherry"
+          ],
+          "solution": ":sort<CR>",
+          "why": ":sort beats hand-rearranging lines with dd/p."
+        },
+        {
+          "start": [
+            "item 10",
+            "item 2",
+            "item 1"
+          ],
+          "par_keys": 8,
+          "hint": "sort by the numbers, not the text",
+          "goal": [
+            "item 1",
+            "item 2",
+            "item 10"
+          ],
+          "solution": ":sort n<CR>",
+          "why": "Without n, '10' would sort before '2' as a string."
+        },
+        {
+          "start": [
+            "dup",
+            "dup",
+            "once"
+          ],
+          "par_keys": 8,
+          "hint": "sort and drop duplicate lines in one go",
+          "goal": [
+            "dup",
+            "once"
+          ],
+          "solution": ":sort u<CR>",
+          "why": ":sort u collapses repeats — no manual de-duping."
+        }
+      ]
+    },
+    {
+      "id": "motion-find-char",
+      "title": "Find by character (f, t, ;)",
+      "category": "motion",
+      "teach": "f{char} flies the cursor to the next {char} on the line; t{char} stops just before it. ; repeats the last find, , reverses it. Aim at rare characters (punctuation, capitals) so you strike in one hop.",
+      "key_commands": [
+        "f",
+        "t",
+        ";",
+        ","
+      ],
+      "difficulty": 2,
+      "challenges": [
+        {
+          "start": [
+            "find the X spot"
+          ],
+          "par_keys": 2,
+          "hint": "fly straight to a rare character",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            1,
+            10
+          ],
+          "solution": "fX",
+          "why": "A capital X is unique here, so f hits it in one move."
+        },
+        {
+          "start": [
+            "a-b-c-d-e"
+          ],
+          "par_keys": 4,
+          "hint": "find the first dash, then ; to repeat the find",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            1,
+            6
+          ],
+          "solution": "f-;;",
+          "why": "; repeats f{char} so you don't respell the search."
+        },
+        {
+          "start": [
+            "stop right|here now"
+          ],
+          "par_keys": 2,
+          "hint": "t stops one short of the target",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            1,
+            10
+          ],
+          "solution": "t|",
+          "why": "t{char} lands BEFORE the char — ideal in front of an operator."
+        },
+        {
+          "start": [
+            "borrow borrow forest Q cellar"
+          ],
+          "par_keys": 2,
+          "hint": "fly straight to the rare marker character",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            1,
+            22
+          ],
+          "solution": "fQ",
+          "why": "'Q' is unique here, so f hits it in one hop."
+        },
+        {
+          "start": [
+            "stack J quiet feather sketch polish"
+          ],
+          "par_keys": 2,
+          "hint": "fly straight to the rare marker character",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            1,
+            7
+          ],
+          "solution": "fJ",
+          "why": "'J' is unique here, so f hits it in one hop."
+        },
+        {
+          "start": [
+            "anchor gentle beacon harbor Z bridge"
+          ],
+          "par_keys": 2,
+          "hint": "fly straight to the rare marker character",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            1,
+            29
+          ],
+          "solution": "fZ",
+          "why": "'Z' is unique here, so f hits it in one hop."
+        },
+        {
+          "start": [
+            "cellar K bridge cactus"
+          ],
+          "par_keys": 2,
+          "hint": "fly straight to the rare marker character",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            1,
+            8
+          ],
+          "solution": "fK",
+          "why": "'K' is unique here, so f hits it in one hop."
+        },
+        {
+          "start": [
+            "forest Z pencil cactus button"
+          ],
+          "par_keys": 2,
+          "hint": "fly straight to the rare marker character",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            1,
+            8
+          ],
+          "solution": "fZ",
+          "why": "'Z' is unique here, so f hits it in one hop."
+        },
+        {
+          "start": [
+            "golden cheerful Z shimmer"
+          ],
+          "par_keys": 2,
+          "hint": "fly straight to the rare marker character",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            1,
+            17
+          ],
+          "solution": "fZ",
+          "why": "'Z' is unique here, so f hits it in one hop."
+        }
+      ]
+    },
+    {
+      "id": "operator-to-char",
+      "title": "Operate up to a character (dt, df, ct)",
+      "category": "operator",
+      "teach": "Character searches shine in Operator-Pending mode. d/c/y followed by t{char} acts up to (but not including) the char; f{char} includes it. f,dt. — jump to the comma, then delete the rest of the clause — is a classic 'finger macro'.",
+      "key_commands": [
+        "dt",
+        "df",
+        "ct",
+        "yt"
+      ],
+      "difficulty": 3,
+      "challenges": [
+        {
+          "start": [
+            "finish lunch, then nap soon."
+          ],
+          "par_keys": 5,
+          "hint": "jump to the comma, then delete up to the period",
+          "goal": [
+            "finish lunch."
+          ],
+          "solution": "f,dt.",
+          "why": "dt. deletes the clause but leaves the period in place."
+        },
+        {
+          "start": [
+            "remove[this]keep"
+          ],
+          "par_keys": 3,
+          "hint": "delete through the closing bracket, inclusive",
+          "goal": [
+            "keep"
+          ],
+          "solution": "df]",
+          "why": "df] includes the bracket; dt] would leave it behind."
+        },
+        {
+          "start": [
+            "name: OLD; rest"
+          ],
+          "par_keys": 7,
+          "hint": "change everything up to the semicolon",
+          "goal": [
+            "name: NEW; rest"
+          ],
+          "start_cursor": [
+            1,
+            7
+          ],
+          "solution": "ct;NEW<Esc>",
+          "why": "ct; swaps the value and stops cleanly before the ;."
+        }
+      ]
+    },
+    {
+      "id": "motion-line-anchors",
+      "title": "Jump to line anchors (0, ^, $)",
+      "category": "motion",
+      "teach": "0 snaps to the very first column, ^ to the first non-blank character, and $ to the end of the line. These three are far quicker than holding h or l.",
+      "key_commands": [
+        "0",
+        "^",
+        "$"
+      ],
+      "difficulty": 1,
+      "challenges": [
+        {
+          "start": [
+            "    indented line"
+          ],
+          "par_keys": 1,
+          "hint": "land on the first real character, past the indent",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            1,
+            5
+          ],
+          "solution": "^",
+          "why": "^ skips leading whitespace; 0 would stop at column 1."
+        },
+        {
+          "start": [
+            "go to the end"
+          ],
+          "par_keys": 1,
+          "hint": "one key to the last character",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            1,
+            13
+          ],
+          "solution": "$",
+          "why": "$ reaches the line end regardless of its length."
+        },
+        {
+          "start": [
+            "return to home"
+          ],
+          "par_keys": 1,
+          "hint": "snap back to column one",
+          "start_cursor": [
+            1,
+            8
+          ],
+          "target": [
+            1,
+            1
+          ],
+          "solution": "0",
+          "why": "0 always hits the hard left edge."
+        }
+      ]
+    },
+    {
+      "id": "motion-WORD-wise",
+      "title": "Move by WORDs (W, B, E)",
+      "category": "motion",
+      "teach": "A 'word' breaks on punctuation, but a WORD (capital) is any run of non-blank characters — so WORD-wise motions skip over dots, slashes and brackets in one leap. W/B/E mirror w/b/e but on the bigger unit.",
+      "key_commands": [
+        "W",
+        "B",
+        "E",
+        "w"
+      ],
+      "difficulty": 2,
+      "challenges": [
+        {
+          "start": [
+            "e.g. we're going slow"
+          ],
+          "par_keys": 1,
+          "hint": "one WORD jump clears 'e.g.' in a single bound",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            1,
+            6
+          ],
+          "solution": "W",
+          "why": "w would stop on every dot; W treats 'e.g.' as one WORD."
+        },
+        {
+          "start": [
+            "a.b.c hello world"
+          ],
+          "par_keys": 1,
+          "hint": "the dotted run is a single WORD",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            1,
+            7
+          ],
+          "solution": "W",
+          "why": "W leaps past 'a.b.c' that w would crawl through."
+        }
+      ]
+    },
+    {
+      "id": "operator-WORD-change",
+      "title": "Change a WORD / append at word end (cW, ea)",
+      "category": "operator",
+      "teach": "cW changes a whole WORD, punctuation and all — handy for things like contractions or paths that w-based motions would split. ea ('append at end of word') drops you into Insert mode right after the current word.",
+      "key_commands": [
+        "cW",
+        "ea",
+        "cw",
+        "gea"
+      ],
+      "difficulty": 3,
+      "challenges": [
+        {
+          "start": [
+            "e.g. we're going slow"
+          ],
+          "par_keys": 8,
+          "hint": "jump a WORD, then change the whole WORD",
+          "goal": [
+            "e.g. it's going slow"
+          ],
+          "solution": "WcWit's<Esc>",
+          "why": "cW swallows the apostrophe; cw would stop at it."
+        },
+        {
+          "start": [
+            "make slow"
+          ],
+          "par_keys": 6,
+          "hint": "hop to the word's end, then append",
+          "goal": [
+            "make slower"
+          ],
+          "solution": "eeaer<Esc>",
+          "why": "ea appends right after a word without hunting for its end."
+        }
+      ]
+    },
+    {
+      "id": "motion-search-navigate",
+      "title": "Search to navigate (/)",
+      "category": "motion",
+      "teach": "For distances beyond the current line, search IS a motion. Type / and just enough characters to be unique, then <CR> — Vim jumps to the first match. n repeats forward, N backward. It's often the fewest keystrokes to anywhere.",
+      "key_commands": [
+        "/",
+        "n",
+        "N",
+        "?"
+      ],
+      "difficulty": 2,
+      "challenges": [
+        {
+          "start": [
+            "alpha beta",
+            "gamma delta",
+            "epsilon zeta"
+          ],
+          "par_keys": 4,
+          "hint": "search a couple of unique letters to leap there",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            3,
+            1
+          ],
+          "solution": "/ep<CR>",
+          "why": "/ep is unique, so one short search lands on 'epsilon'."
+        },
+        {
+          "start": [
+            "the quick fox",
+            "jumps over",
+            "the lazy dog"
+          ],
+          "par_keys": 5,
+          "hint": "search the word to fly straight to it",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            3,
+            10
+          ],
+          "solution": "/dog<CR>",
+          "why": "A search motion crosses lines that f{char} cannot."
+        }
+      ]
+    },
+    {
+      "id": "textobj-change-inner-word",
+      "title": "Change the word under the cursor (ciw)",
+      "category": "text_object",
+      "teach": "iw is the inner-word text object: ciw changes the WHOLE word the cursor is on — from any position within it — without first moving to its start. It is the everyday way to swap one word for another, and it is dot-repeatable.",
+      "key_commands": [
+        "ciw",
+        "caw",
+        "diw",
+        "viw"
+      ],
+      "difficulty": 2,
+      "challenges": [
+        {
+          "start": [
+            "the swift otter dives"
+          ],
+          "par_keys": 10,
+          "hint": "the cursor sits on the word — change just it",
+          "goal": [
+            "the silent otter dives"
+          ],
+          "start_cursor": [
+            1,
+            5
+          ],
+          "solution": "ciwsilent<Esc>",
+          "why": "ciw replaces the whole word from anywhere inside it."
+        },
+        {
+          "start": [
+            "planet fold ponder restless"
+          ],
+          "par_keys": 10,
+          "hint": "the cursor sits on the word — change just it",
+          "goal": [
+            "planet fold copper restless"
+          ],
+          "start_cursor": [
+            1,
+            13
+          ],
+          "solution": "ciwcopper<Esc>",
+          "why": "ciw replaces the whole word from anywhere inside it."
+        },
+        {
+          "start": [
+            "planet brittle ribbon"
+          ],
+          "par_keys": 10,
+          "hint": "the cursor sits on the word — change just it",
+          "goal": [
+            "planet brittle anchor"
+          ],
+          "start_cursor": [
+            1,
+            16
+          ],
+          "solution": "ciwanchor<Esc>",
+          "why": "ciw replaces the whole word from anywhere inside it."
+        },
+        {
+          "start": [
+            "quiet rescue forest vanish amber"
+          ],
+          "par_keys": 11,
+          "hint": "the cursor sits on the word — change just it",
+          "goal": [
+            "quiet rescue forest compass amber"
+          ],
+          "start_cursor": [
+            1,
+            21
+          ],
+          "solution": "ciwcompass<Esc>",
+          "why": "ciw replaces the whole word from anywhere inside it."
+        },
+        {
+          "start": [
+            "narrow carve kettle"
+          ],
+          "par_keys": 10,
+          "hint": "the cursor sits on the word — change just it",
+          "goal": [
+            "cellar carve kettle"
+          ],
+          "start_cursor": [
+            1,
+            1
+          ],
+          "solution": "ciwcellar<Esc>",
+          "why": "ciw replaces the whole word from anywhere inside it."
+        },
+        {
+          "start": [
+            "bundle rugged tumble gather swift"
+          ],
+          "par_keys": 10,
+          "hint": "the cursor sits on the word — change just it",
+          "goal": [
+            "bundle rugged tumble gather walnut"
+          ],
+          "start_cursor": [
+            1,
+            29
+          ],
+          "solution": "ciwwalnut<Esc>",
+          "why": "ciw replaces the whole word from anywhere inside it."
+        },
+        {
+          "start": [
+            "carve glossy ribbon walnut"
+          ],
+          "par_keys": 10,
+          "hint": "the cursor sits on the word — change just it",
+          "goal": [
+            "carve basket ribbon walnut"
+          ],
+          "start_cursor": [
+            1,
+            7
+          ],
+          "solution": "ciwbasket<Esc>",
+          "why": "ciw replaces the whole word from anywhere inside it."
+        },
+        {
+          "start": [
+            "basket ribbon polish quiet bundle"
+          ],
+          "par_keys": 9,
+          "hint": "the cursor sits on the word — change just it",
+          "goal": [
+            "basket ribbon polish quiet river"
+          ],
+          "start_cursor": [
+            1,
+            28
+          ],
+          "solution": "ciwriver<Esc>",
+          "why": "ciw replaces the whole word from anywhere inside it."
+        },
+        {
+          "start": [
+            "hollow hammer ponder restless shimmer"
+          ],
+          "par_keys": 10,
+          "hint": "the cursor sits on the word — change just it",
+          "goal": [
+            "hollow window ponder restless shimmer"
+          ],
+          "start_cursor": [
+            1,
+            8
+          ],
+          "solution": "ciwwindow<Esc>",
+          "why": "ciw replaces the whole word from anywhere inside it."
+        },
+        {
+          "start": [
+            "frosty golden vivid forest"
+          ],
+          "par_keys": 10,
+          "hint": "the cursor sits on the word — change just it",
+          "goal": [
+            "frosty cactus vivid forest"
+          ],
+          "start_cursor": [
+            1,
+            8
+          ],
+          "solution": "ciwcactus<Esc>",
+          "why": "ciw replaces the whole word from anywhere inside it."
+        }
+      ]
+    },
+    {
+      "id": "textobj-change-inside-delims",
+      "title": "Change inside delimiters (ci( ci{ cit ...)",
+      "category": "text_object",
+      "teach": "Text objects act on structure, not position. i{delim} targets the text INSIDE a pair of (), {}, [], <>, quotes, or <xml>tags</xml> — from anywhere within them. ci( changes inside parens, ci{ inside braces, cit inside a tag. Two keystrokes select what would take many motions.",
+      "key_commands": [
+        "ci(",
+        "ci{",
+        "ci[",
+        "cit"
+      ],
+      "difficulty": 2,
+      "challenges": [
+        {
+          "start": [
+            "call(oldarg)"
+          ],
+          "par_keys": 10,
+          "hint": "change inside the parentheses",
+          "goal": [
+            "call(newarg)"
+          ],
+          "solution": "ci(newarg<Esc>",
+          "why": "ci( grabs the argument list wherever the cursor sits."
+        },
+        {
+          "start": [
+            "config = {debug}"
+          ],
+          "par_keys": 6,
+          "hint": "change inside the braces",
+          "goal": [
+            "config = {ok}"
+          ],
+          "solution": "ci{ok<Esc>",
+          "why": "ci{ targets the block's contents, braces left intact."
+        },
+        {
+          "start": [
+            "<p>old text</p>"
+          ],
+          "par_keys": 9,
+          "hint": "change inside the tag",
+          "goal": [
+            "<p>fresh</p>"
+          ],
+          "solution": "citfresh<Esc>",
+          "why": "cit reads the XML structure — no counting characters."
+        },
+        {
+          "start": [
+            "arr[OLD]"
+          ],
+          "par_keys": 7,
+          "hint": "change inside the square brackets",
+          "goal": [
+            "arr[NEW]"
+          ],
+          "solution": "ci[NEW<Esc>",
+          "why": "ci[ swaps the subscript in one move."
+        },
+        {
+          "start": [
+            "fold[blanket]"
+          ],
+          "par_keys": 10,
+          "hint": "change what's inside the pair, brackets untouched",
+          "goal": [
+            "fold[ladder]"
+          ],
+          "solution": "ci[ladder<Esc>",
+          "why": "ci[ targets the contents wherever the cursor sits."
+        },
+        {
+          "start": [
+            "wander[bridge]"
+          ],
+          "par_keys": 10,
+          "hint": "change what's inside the pair, brackets untouched",
+          "goal": [
+            "wander[magnet]"
+          ],
+          "solution": "ci[magnet<Esc>",
+          "why": "ci[ targets the contents wherever the cursor sits."
+        },
+        {
+          "start": [
+            "scatter{compass}"
+          ],
+          "par_keys": 10,
+          "hint": "change what's inside the pair, brackets untouched",
+          "goal": [
+            "scatter{cobweb}"
+          ],
+          "solution": "ci{cobweb<Esc>",
+          "why": "ci{ targets the contents wherever the cursor sits."
+        },
+        {
+          "start": [
+            "stumble{anchor}"
+          ],
+          "par_keys": 10,
+          "hint": "change what's inside the pair, brackets untouched",
+          "goal": [
+            "stumble{cobweb}"
+          ],
+          "solution": "ci{cobweb<Esc>",
+          "why": "ci{ targets the contents wherever the cursor sits."
+        },
+        {
+          "start": [
+            "fold{planet}"
+          ],
+          "par_keys": 10,
+          "hint": "change what's inside the pair, brackets untouched",
+          "goal": [
+            "fold{pocket}"
+          ],
+          "solution": "ci{pocket<Esc>",
+          "why": "ci{ targets the contents wherever the cursor sits."
+        },
+        {
+          "start": [
+            "tumble(orchard)"
+          ],
+          "par_keys": 10,
+          "hint": "change what's inside the pair, brackets untouched",
+          "goal": [
+            "tumble(pebble)"
+          ],
+          "solution": "ci(pebble<Esc>",
+          "why": "ci( targets the contents wherever the cursor sits."
+        },
+        {
+          "start": [
+            "<b>window</b>"
+          ],
+          "par_keys": 10,
+          "hint": "change inside the tag",
+          "goal": [
+            "<b>bridge</b>"
+          ],
+          "solution": "citbridge<Esc>",
+          "why": "cit reads the tag structure — no counting characters."
+        },
+        {
+          "start": [
+            "<em>saddle</em>"
+          ],
+          "par_keys": 10,
+          "hint": "change inside the tag",
+          "goal": [
+            "<em>candle</em>"
+          ],
+          "solution": "citcandle<Esc>",
+          "why": "cit reads the tag structure — no counting characters."
+        }
+      ]
+    },
+    {
+      "id": "textobj-around-vs-inside",
+      "title": "Around vs inside (daw, das, dap, di()",
+      "category": "text_object",
+      "teach": "Bounded text objects come in two flavours: i{obj} is INSIDE (just the word/sentence/paragraph), a{obj} is AROUND (and grabs a trailing space or blank line too). Rule of thumb: delete with the 'a' form (daw, das) for clean spacing; change with the 'i' form (ciw) so you don't run words together.",
+      "key_commands": [
+        "daw",
+        "das",
+        "dap",
+        "diw"
+      ],
+      "difficulty": 3,
+      "challenges": [
+        {
+          "start": [
+            "remove this adjective please"
+          ],
+          "par_keys": 5,
+          "hint": "hop to the word, delete A word (with its space)",
+          "goal": [
+            "remove this please"
+          ],
+          "solution": "2wdaw",
+          "why": "daw leaves no double space; diw would."
+        },
+        {
+          "start": [
+            "First sentence. Drop me here. Third one."
+          ],
+          "par_keys": 5,
+          "hint": "land in the middle sentence, delete A sentence",
+          "goal": [
+            "First sentence. Third one."
+          ],
+          "solution": "fDdas",
+          "why": "das removes the whole sentence and its trailing space."
+        },
+        {
+          "start": [
+            "total = sum(a, b, c)"
+          ],
+          "par_keys": 5,
+          "hint": "get onto a paren, then delete INSIDE it",
+          "goal": [
+            "total = sum()"
+          ],
+          "solution": "f(di(",
+          "why": "di( empties the parentheses but keeps them."
+        }
+      ]
+    },
+    {
+      "id": "textobj-paragraph",
+      "title": "Operate on whole paragraphs (dip, dap, cip)",
+      "category": "text_object",
+      "teach": "ip is the INSIDE-paragraph object (the block of non-blank lines); ap is AROUND (and grabs an adjoining blank line too). dip/dap delete a block, cip changes it, yip yanks it — all regardless of cursor position within the paragraph. Linewise cousins of iw/aw.",
+      "key_commands": [
+        "dip",
+        "dap",
+        "cip",
+        "yip"
+      ],
+      "difficulty": 3,
+      "challenges": [
+        {
+          "start": [
+            "alpha",
+            "beta",
+            "",
+            "gamma"
+          ],
+          "par_keys": 3,
+          "hint": "delete the inner paragraph, leave the blank line",
+          "goal": [
+            "",
+            "gamma"
+          ],
+          "solution": "dip",
+          "why": "dip removes the text block without touching the separator."
+        },
+        {
+          "start": [
+            "intro a",
+            "intro b",
+            "",
+            "body"
+          ],
+          "par_keys": 3,
+          "hint": "delete AROUND the paragraph, blank line and all",
+          "goal": [
+            "body"
+          ],
+          "solution": "dap",
+          "why": "dap clears the whole stanza plus its trailing blank."
+        },
+        {
+          "start": [
+            "old one",
+            "old two",
+            "",
+            "tail"
+          ],
+          "par_keys": 9,
+          "hint": "change the whole paragraph at once",
+          "goal": [
+            "fresh",
+            "",
+            "tail"
+          ],
+          "solution": "cipfresh<Esc>",
+          "why": "cip swaps an entire block for new text in one motion."
+        }
+      ]
+    },
+    {
+      "id": "motion-match-pair",
+      "title": "Jump between matching pairs (%)",
+      "category": "motion",
+      "teach": "% jumps between the opening and closing of a matched pair — (), {}, or []. Land on (or before) one bracket and % flies to its partner, however far and however nested. It also marks where you jumped from.",
+      "key_commands": [
+        "%",
+        "`",
+        "ci(",
+        "d%"
+      ],
+      "difficulty": 2,
+      "challenges": [
+        {
+          "start": [
+            "function(a, b, c)"
+          ],
+          "par_keys": 1,
+          "hint": "leap from the open paren to its match",
+          "start_cursor": [
+            1,
+            9
+          ],
+          "target": [
+            1,
+            17
+          ],
+          "solution": "%",
+          "why": "% finds the matching ) no matter what's between."
+        },
+        {
+          "start": [
+            "{ outer { inner } tail }"
+          ],
+          "par_keys": 1,
+          "hint": "from the outer brace to its partner, past the nested one",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            1,
+            24
+          ],
+          "solution": "%",
+          "why": "% respects nesting — it skips the inner pair correctly."
+        }
+      ]
+    },
+    {
+      "id": "operator-search-motion",
+      "title": "Operate to a search match (d/pat)",
+      "category": "operator",
+      "teach": "A search is a motion, so it can be the operand of an operator. d/{pat}<CR> deletes from the cursor up to (not including) the next match — perfect for excising text up to a landmark without counting words or visual selecting.",
+      "key_commands": [
+        "d/",
+        "c/",
+        "y/",
+        "v/"
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "This phrase takes time but eventually gets here"
+          ],
+          "par_keys": 7,
+          "hint": "from 'takes', delete up to the search for 'ge'",
+          "goal": [
+            "This phrase gets here"
+          ],
+          "solution": "2wd/ge<CR>",
+          "why": "d/ge deletes to the match; search is an exclusive motion."
+        },
+        {
+          "start": [
+            "keep START middle END keep"
+          ],
+          "par_keys": 8,
+          "hint": "delete from START up to END",
+          "goal": [
+            "keep END keep"
+          ],
+          "solution": "fSd/END<CR>",
+          "why": "An operator + search motion carves out a labelled span."
+        }
+      ]
+    },
+    {
+      "id": "marks-set-and-snap",
+      "title": "Set a mark and snap back (m, `)",
+      "category": "motion",
+      "teach": "m{a-z} drops a named mark at the cursor (invisible, but there). `{mark} leaps the cursor straight back to that exact line and column from anywhere in the buffer; '{mark} goes to the line's first non-blank. Marks are the fastest way to bookmark a spot before wandering off.",
+      "key_commands": [
+        "ma",
+        "`a",
+        "'a",
+        "``"
+      ],
+      "difficulty": 3,
+      "challenges": [
+        {
+          "start": [
+            "anchor here",
+            "wander",
+            "down",
+            "far away"
+          ],
+          "par_keys": 6,
+          "hint": "mark line 1, roam to the bottom, then snap back",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            1,
+            1
+          ],
+          "solution": "maGl`a",
+          "why": "`a restores the exact spot — no scrolling to find it."
+        }
+      ]
+    },
+    {
+      "id": "marks-as-ex-range",
+      "title": "Use marks as an Ex range ('a,'b)",
+      "category": "ex_command",
+      "teach": "Marks make great range endpoints. Drop 'a at the top of a region and 'b at the bottom, then any Ex command can act on :'a,'b — delete, substitute, normal, whatever. It beats counting lines for a far-apart range.",
+      "key_commands": [
+        ":'a,'b",
+        "ma",
+        "mb",
+        ":'a,'bd"
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "one",
+            "two",
+            "three",
+            "four"
+          ],
+          "par_keys": 14,
+          "hint": "mark line 1 (a), drop to line 3 (b), delete the range",
+          "goal": [
+            "four"
+          ],
+          "solution": "majjmb:'a,'bd<CR>",
+          "why": ":'a,'bd deletes from mark a to mark b in one command."
+        },
+        {
+          "start": [
+            "head",
+            "x()",
+            "y()",
+            "z()",
+            "tail"
+          ],
+          "par_keys": 25,
+          "hint": "bracket the code lines with marks, then :normal the range",
+          "goal": [
+            "head",
+            "// x()",
+            "// y()",
+            "// z()",
+            "tail"
+          ],
+          "solution": "jma2jmb:'a,'bnormal I// <CR>",
+          "why": "Marks pin the range so :normal hits exactly those lines."
+        }
+      ]
+    },
+    {
+      "id": "register-transpose",
+      "title": "Transpose with delete + put (xp, ddp)",
+      "category": "register",
+      "teach": "Vim calls cut/copy/paste delete/yank/put. p puts the unnamed register AFTER the cursor (P before). Two famous one-liners fall out of this: xp swaps two characters, and ddp swaps two lines — delete into the register, then put it back on the other side.",
+      "key_commands": [
+        "p",
+        "P",
+        "xp",
+        "ddp"
+      ],
+      "difficulty": 2,
+      "challenges": [
+        {
+          "start": [
+            "hte cat"
+          ],
+          "par_keys": 2,
+          "hint": "delete the char, put it back after the next one",
+          "goal": [
+            "the cat"
+          ],
+          "solution": "xp",
+          "why": "xp transposes the two leading characters in one breath."
+        },
+        {
+          "start": [
+            "line two",
+            "line one"
+          ],
+          "par_keys": 3,
+          "hint": "delete the line, put it back below",
+          "goal": [
+            "line one",
+            "line two"
+          ],
+          "solution": "ddp",
+          "why": "ddp swaps a line with the one beneath it."
+        }
+      ]
+    },
+    {
+      "id": "register-yank-reliable",
+      "title": "Yank survives a delete (\"0)",
+      "category": "register",
+      "teach": "Every delete (x, d, c) overwrites the unnamed register, so a yank you meant to paste can get clobbered. The yank register \"0 is set ONLY by y, so it survives intervening deletes. Grab text with y, then paste it reliably with \"0p even after deleting something in the way.",
+      "key_commands": [
+        "\"0p",
+        "yiw",
+        "viw\"0p",
+        "<C-r>0"
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "keep TREASURE here",
+            "lose GARBAGE now"
+          ],
+          "par_keys": 10,
+          "hint": "yank the good word, then replace the junk from \"0",
+          "goal": [
+            "keep TREASURE here",
+            "lose TREASURE now"
+          ],
+          "start_cursor": [
+            1,
+            6
+          ],
+          "solution": "yiwjviw\"0p",
+          "why": "\"0 still holds TREASURE even though viw's delete hit unnamed."
+        }
+      ]
+    },
+    {
+      "id": "register-named",
+      "title": "Stash text in a named register (\"a)",
+      "category": "register",
+      "teach": "The 26 named registers \"a-\"z each hold their own text: \"ay{motion} yanks into a, \"ap puts from it. A lowercase letter overwrites; the uppercase \"A APPENDS to the same register. Use them to carry several snippets at once without them stepping on each other.",
+      "key_commands": [
+        "\"ayy",
+        "\"ap",
+        "\"Ayy",
+        "\"ad"
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "boilerplate",
+            "x",
+            "y"
+          ],
+          "par_keys": 8,
+          "hint": "yank line 1 into register a, go to the end, put it",
+          "goal": [
+            "boilerplate",
+            "x",
+            "y",
+            "boilerplate"
+          ],
+          "solution": "\"ayyG\"ap",
+          "why": "A named register parks text safely until you put it."
+        }
+      ]
+    },
+    {
+      "id": "macro-record-replay",
+      "title": "Record and replay a macro (q, @)",
+      "category": "macro",
+      "teach": "q{reg} starts recording your keystrokes into a register; q stops. @{reg} replays them, and a count replays many times (3@a). Golden rule: normalize first (0 or ^), strike with repeatable motions (f., w), so each replay lands correctly on the next line.",
+      "key_commands": [
+        "qa",
+        "q",
+        "@a",
+        "3@a"
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "1. one",
+            "2. two",
+            "3. three",
+            "4. four"
+          ],
+          "par_keys": 14,
+          "hint": "record the edit on line 1 (ending with j), then 3@a for the rest",
+          "goal": [
+            "1) One",
+            "2) Two",
+            "3) Three",
+            "4) Four"
+          ],
+          "solution": "qa0f.r)w~jq3@a",
+          "why": "One recorded unit of work replays down the whole list."
+        },
+        {
+          "start": [
+            "a+b+c+d+e"
+          ],
+          "par_keys": 16,
+          "hint": "record ;. as a tiny macro, then over-count with 22@q",
+          "goal": [
+            "a + b + c + d + e"
+          ],
+          "solution": "f+s + <Esc>qq;.q22@q",
+          "why": "A macro can take a count where the dot command can't; the failing ; motion safely aborts the extra reps."
+        }
+      ]
+    },
+    {
+      "id": "macro-multistep",
+      "title": "Record a multi-step edit (q)",
+      "category": "macro",
+      "teach": "A macro shines when one 'unit of work' is several commands. Record the whole sequence once on the first line — entering and leaving Insert mode is fine — then replay with a count. Keep motions repeatable (0, A) so each line gets the identical treatment.",
+      "key_commands": [
+        "qa",
+        "@a",
+        "I",
+        "A"
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "apple",
+            "banana",
+            "cherry"
+          ],
+          "par_keys": 14,
+          "hint": "wrap line 1 in quotes-and-comma, end with j, then 2@a",
+          "goal": [
+            "\"apple\",",
+            "\"banana\",",
+            "\"cherry\","
+          ],
+          "solution": "qaI\"<Esc>A\",<Esc>jq2@a",
+          "why": "One recorded unit (prefix + suffix + advance) replays as a count."
+        },
+        {
+          "start": [
+            "x",
+            "y",
+            "z"
+          ],
+          "par_keys": 15,
+          "hint": "prefix a checkbox on line 1, then replay down",
+          "goal": [
+            "- [ ] x",
+            "- [ ] y",
+            "- [ ] z"
+          ],
+          "solution": "qaI- [ ] <Esc>jq2@a",
+          "why": "Macros turn fiddly multi-key prefixes into one replayable action."
+        }
+      ]
+    },
+    {
+      "id": "macro-parallel-normal",
+      "title": "Run a macro in parallel (:normal @a)",
+      "category": "macro",
+      "teach": "Replaying a macro in series (5@a) stops dead if one line makes a motion fail. Running it in parallel — :[range]normal @a — executes the macro independently on each line, so a line that aborts is skipped while the rest still get done. A failing motion (f.) doubles as a per-line guard.",
+      "key_commands": [
+        ":%normal @a",
+        ":'<,'>normal @a",
+        "qa",
+        "q"
+      ],
+      "difficulty": 5,
+      "challenges": [
+        {
+          "start": [
+            "1. one",
+            "2. two",
+            "// keep this",
+            "3. three"
+          ],
+          "par_keys": 22,
+          "hint": "record without the j, then :%normal @a over every line",
+          "goal": [
+            "1) One",
+            "2) Two",
+            "// keep this",
+            "3) Three"
+          ],
+          "solution": "qa0f.r)w~q:%normal @a<CR>",
+          "why": "Parallel replay skips the comment (f. fails there) and finishes the numbered lines that series replay would have stalled on."
+        },
+        {
+          "start": [
+            "1- one",
+            "2- two",
+            "skip",
+            "3- three"
+          ],
+          "par_keys": 22,
+          "hint": "the failing f- guards both the 'skip' line and re-runs",
+          "goal": [
+            "1) One",
+            "2) Two",
+            "skip",
+            "3) Three"
+          ],
+          "solution": "qa0f-r)w~q:%normal @a<CR>",
+          "why": "A non-matching line aborts its own replay, so :%normal is safe even on lines already done."
+        }
+      ]
+    },
+    {
+      "id": "regex-very-magic",
+      "title": "Very magic regex (\\v)",
+      "category": "search_replace",
+      "teach": "Put \\v at the start of a pattern for 'very magic' mode: every non-alphanumeric (besides _) is special, so (), |, +, {} work WITHOUT backslashes — just like Perl/Python regex. It turns Vim's escape-heavy default syntax into something readable.",
+      "key_commands": [
+        "\\v",
+        "\\d",
+        "(a|b)",
+        "+"
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "item1 item22 item333"
+          ],
+          "par_keys": 14,
+          "hint": "\\v lets \\d+ match digit runs without escaping the +",
+          "goal": [
+            "itemN itemN itemN"
+          ],
+          "solution": ":%s/\\v\\d+/N/g<CR>",
+          "why": "In default magic mode you'd need \\d\\+; \\v cleans it up."
+        },
+        {
+          "start": [
+            "cat or dog or cat"
+          ],
+          "par_keys": 22,
+          "hint": "\\v makes ( ) and | special with no backslashes",
+          "goal": [
+            "pet or pet or pet"
+          ],
+          "solution": ":%s/\\v(cat|dog)/pet/g<CR>",
+          "why": "Alternation reads naturally under \\v: (cat|dog)."
+        }
+      ]
+    },
+    {
+      "id": "regex-very-nomagic",
+      "title": "Verbatim search (\\V)",
+      "category": "search_replace",
+      "teach": "When you want to match text literally, \\V ('very nomagic') strips the special meaning from . * $ and friends, so they match themselves. Ideal for paths, version strings, or anything full of regex metacharacters.",
+      "key_commands": [
+        "\\V",
+        ".",
+        "$",
+        "*"
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "a.b.c matches",
+            "axbxc also"
+          ],
+          "par_keys": 17,
+          "hint": "\\V makes the dots literal so axbxc is NOT matched",
+          "goal": [
+            "DOT matches",
+            "axbxc also"
+          ],
+          "solution": ":%s/\\Va.b.c/DOT/<CR>",
+          "why": "Without \\V, a.b.c would also hit 'axbxc' (. = any char)."
+        },
+        {
+          "start": [
+            "pay $5.00 now"
+          ],
+          "par_keys": 18,
+          "hint": "\\V treats $ and . as ordinary characters",
+          "goal": [
+            "pay DONE now"
+          ],
+          "solution": ":%s/\\V$5.00/DONE/<CR>",
+          "why": "\\V lets you match currency/decimals without escaping each one."
+        }
+      ]
+    },
+    {
+      "id": "regex-case-toggle",
+      "title": "Case-insensitive match (\\c)",
+      "category": "search_replace",
+      "teach": "Tack \\c anywhere in a pattern to force a case-INsensitive match (\\C forces sensitive), regardless of your 'ignorecase' setting. Handy for catching a word however it's capitalised.",
+      "key_commands": [
+        "\\c",
+        "\\C",
+        "ignorecase",
+        "smartcase"
+      ],
+      "difficulty": 3,
+      "challenges": [
+        {
+          "start": [
+            "Foo foo FOO bar"
+          ],
+          "par_keys": 14,
+          "hint": "\\c makes the match ignore case for the whole pattern",
+          "goal": [
+            "x x x bar"
+          ],
+          "solution": ":%s/foo\\c/x/g<CR>",
+          "why": "One \\c catches Foo, foo and FOO in a single substitute."
+        }
+      ]
+    },
+    {
+      "id": "regex-submatch-backref",
+      "title": "Capture and reuse submatches (\\1)",
+      "category": "search_replace",
+      "teach": "Wrap part of a pattern in () to capture it; reference the captures in the replacement as \\1, \\2, ... up to \\9 (\\0 is the whole match). This is how you reorder fields — swap 'First Last' to 'Last, First' in one substitute.",
+      "key_commands": [
+        "\\v(...)",
+        "\\1",
+        "\\2",
+        "\\0"
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "John Smith",
+            "Jane Doe"
+          ],
+          "par_keys": 26,
+          "hint": "capture the two names, then swap them in the replacement",
+          "goal": [
+            "Smith, John",
+            "Doe, Jane"
+          ],
+          "solution": ":%s/\\v(\\w+) (\\w+)/\\2, \\1/<CR>",
+          "why": "\\1 and \\2 replay the captured words in any order you like."
+        },
+        {
+          "start": [
+            "alpha,1",
+            "beta,2"
+          ],
+          "par_keys": 25,
+          "hint": "capture both CSV fields, rebuild them swapped",
+          "goal": [
+            "1=alpha",
+            "2=beta"
+          ],
+          "solution": ":%s/\\v(\\w+),(\\w+)/\\2=\\1/<CR>",
+          "why": "Submatches turn a substitute into a field-reshuffler."
+        }
+      ]
+    },
+    {
+      "id": "regex-word-boundary",
+      "title": "Match whole words (\\< \\>)",
+      "category": "search_replace",
+      "teach": "The zero-width items \\< and \\> (or bare < > under \\v) anchor to word boundaries, so a pattern matches a WHOLE word and not fragments inside bigger words. Essential when renaming a short identifier that appears as a substring elsewhere.",
+      "key_commands": [
+        "\\<",
+        "\\>",
+        "\\v<x>",
+        "*"
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "in into inside in"
+          ],
+          "par_keys": 15,
+          "hint": "anchor both ends so only the standalone word matches",
+          "goal": [
+            "X into inside X"
+          ],
+          "solution": ":%s/\\v<in>/X/g<CR>",
+          "why": "<in> skips 'into'/'inside'; a bare 'in' would hit them all."
+        },
+        {
+          "start": [
+            "id idx grid id"
+          ],
+          "par_keys": 17,
+          "hint": "boundaries keep 'idx' and 'grid' safe",
+          "goal": [
+            "KEY idx grid KEY"
+          ],
+          "solution": ":%s/\\v<id>/KEY/g<CR>",
+          "why": "Whole-word matching prevents clobbering substrings."
+        }
+      ]
+    },
+    {
+      "id": "regex-match-boundary-zs",
+      "title": "Crop the match with \\zs",
+      "category": "search_replace",
+      "teach": "\\zs sets where the match really STARTS and \\ze where it ENDS, so you can require context without consuming it (like a lookbehind/lookahead). Match 'foo bar' but only replace the 'bar' part.",
+      "key_commands": [
+        "\\zs",
+        "\\ze",
+        "lookbehind",
+        "lookahead"
+      ],
+      "difficulty": 5,
+      "challenges": [
+        {
+          "start": [
+            "Silver Lake and Silver Birch"
+          ],
+          "par_keys": 25,
+          "hint": "\\zs starts the match after 'Silver ', so only Lake is changed",
+          "goal": [
+            "Silver LAKE and Silver Birch"
+          ],
+          "solution": ":%s/Silver \\zsLake/LAKE/<CR>",
+          "why": "\\zs keeps the prefix as context but out of the replacement."
+        }
+      ]
+    },
+    {
+      "id": "search-operate-gn",
+      "title": "Operate on the search match (gn)",
+      "category": "operator",
+      "teach": "gn selects the next match of the last search (or the one under the cursor). cgn changes it, dgn deletes it — and because it's a single change, the dot command repeats it, jumping to the next match for free. Search once, then cgn<new><Esc> and tap . to roll through the rest.",
+      "key_commands": [
+        "cgn",
+        "dgn",
+        ".",
+        "/"
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "red sky",
+            "red sea",
+            "red rose"
+          ],
+          "par_keys": 15,
+          "hint": "search red, change the match with cgn, then dot for the rest",
+          "goal": [
+            "blue sky",
+            "blue sea",
+            "blue rose"
+          ],
+          "solution": "/red<CR>cgnblue<Esc>..",
+          "why": "cgn + dot is the modern find-and-replace-by-hand: no n needed."
+        },
+        {
+          "start": [
+            "TODO first",
+            "ok",
+            "TODO second"
+          ],
+          "par_keys": 15,
+          "hint": "cgn skips straight to the next match, so . alone advances",
+          "goal": [
+            "DONE first",
+            "ok",
+            "DONE second"
+          ],
+          "solution": "/TODO<CR>cgnDONE<Esc>.",
+          "why": "gn folds the jump into the change — fewer keystrokes than n.."
+        }
+      ]
+    },
+    {
+      "id": "substitute-flags",
+      "title": "Substitute with flags and range (:s///g)",
+      "category": "search_replace",
+      "teach": ":[range]s/{pat}/{str}/[flags]. By default :s changes the FIRST match on each line of the range; the g flag changes ALL matches on a line. % is the whole file, 2,4 a line range. No g, no %: just the first match on the current line.",
+      "key_commands": [
+        ":%s///g",
+        ":s//",
+        ":2,4s//",
+        "c"
+      ],
+      "difficulty": 3,
+      "challenges": [
+        {
+          "start": [
+            "a a a",
+            "a a",
+            "a"
+          ],
+          "par_keys": 10,
+          "hint": "whole file (%), every match per line (g)",
+          "goal": [
+            "b b b",
+            "b b",
+            "b"
+          ],
+          "solution": ":%s/a/b/g<CR>",
+          "why": "g is what makes :s replace more than the first hit on a line."
+        },
+        {
+          "start": [
+            "x x",
+            "x x"
+          ],
+          "par_keys": 9,
+          "hint": "no g flag — only the first match on each line changes",
+          "goal": [
+            "y x",
+            "y x"
+          ],
+          "solution": ":%s/x/y/<CR>",
+          "why": "Default :s is first-per-line; leaving off g is deliberate here."
+        },
+        {
+          "start": [
+            "keep",
+            "swap",
+            "swap",
+            "keep"
+          ],
+          "par_keys": 14,
+          "hint": "restrict to lines 2-3, uppercase each",
+          "goal": [
+            "keep",
+            "SWAP",
+            "SWAP",
+            "keep"
+          ],
+          "solution": ":2,3s/.*/\\U&/<CR>",
+          "why": "A line range scopes the substitute to exactly those rows."
+        },
+        {
+          "start": [
+            "ladder snatch",
+            "shimmer rescue ladder"
+          ],
+          "par_keys": 21,
+          "hint": "whole file (%), every match per line (g)",
+          "goal": [
+            "lantern snatch",
+            "shimmer rescue lantern"
+          ],
+          "solution": ":%s/ladder/lantern/g<CR>",
+          "why": "g replaces every occurrence, not just the first per line."
+        },
+        {
+          "start": [
+            "hover thunder rescue",
+            "shimmer borrow thunder"
+          ],
+          "par_keys": 21,
+          "hint": "whole file (%), every match per line (g)",
+          "goal": [
+            "hover signal rescue",
+            "shimmer borrow signal"
+          ],
+          "solution": ":%s/thunder/signal/g<CR>",
+          "why": "g replaces every occurrence, not just the first per line."
+        },
+        {
+          "start": [
+            "compass harvest",
+            "ponder compass",
+            "ponder compass"
+          ],
+          "par_keys": 21,
+          "hint": "whole file (%), every match per line (g)",
+          "goal": [
+            "ladder harvest",
+            "ponder ladder",
+            "ponder ladder"
+          ],
+          "solution": ":%s/compass/ladder/g<CR>",
+          "why": "g replaces every occurrence, not just the first per line."
+        },
+        {
+          "start": [
+            "button harvest button",
+            "stumble button gather"
+          ],
+          "par_keys": 20,
+          "hint": "whole file (%), every match per line (g)",
+          "goal": [
+            "signal harvest signal",
+            "stumble signal gather"
+          ],
+          "solution": ":%s/button/signal/g<CR>",
+          "why": "g replaces every occurrence, not just the first per line."
+        },
+        {
+          "start": [
+            "feather tumble snatch feather",
+            "feather feather linger",
+            "snatch feather feather"
+          ],
+          "par_keys": 21,
+          "hint": "whole file (%), every match per line (g)",
+          "goal": [
+            "forest tumble snatch forest",
+            "forest forest linger",
+            "snatch forest forest"
+          ],
+          "solution": ":%s/feather/forest/g<CR>",
+          "why": "g replaces every occurrence, not just the first per line."
+        },
+        {
+          "start": [
+            "lantern vanish fasten lantern",
+            "lantern lantern whisper snatch",
+            "shimmer juggle lantern lantern"
+          ],
+          "par_keys": 21,
+          "hint": "whole file (%), every match per line (g)",
+          "goal": [
+            "tunnel vanish fasten tunnel",
+            "tunnel tunnel whisper snatch",
+            "shimmer juggle tunnel tunnel"
+          ],
+          "solution": ":%s/lantern/tunnel/g<CR>",
+          "why": "g replaces every occurrence, not just the first per line."
+        }
+      ]
+    },
+    {
+      "id": "substitute-whole-match-amp",
+      "title": "Reuse the whole match (&)",
+      "category": "search_replace",
+      "teach": "In the replacement string, & stands for the entire matched text. It's the quickest way to WRAP or decorate matches — surround every word with brackets, quote every number — without retyping what you matched.",
+      "key_commands": [
+        "&",
+        "\\0",
+        "[&]",
+        "\\v\\w+"
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "cat dog bird"
+          ],
+          "par_keys": 16,
+          "hint": "& is the matched word; wrap it in brackets",
+          "goal": [
+            "[cat] [dog] [bird]"
+          ],
+          "solution": ":%s/\\v\\w+/[&]/g<CR>",
+          "why": "& replays the match, so you decorate without retyping it."
+        },
+        {
+          "start": [
+            "sku 100, sku 250"
+          ],
+          "par_keys": 16,
+          "hint": "quote every number with & inside the quotes",
+          "goal": [
+            "sku \"100\", sku \"250\""
+          ],
+          "solution": ":%s/\\v\\d+/\"&\"/g<CR>",
+          "why": "& makes 'wrap each match' a one-liner."
+        }
+      ]
+    },
+    {
+      "id": "substitute-change-case",
+      "title": "Change case in the replacement (\\U, \\u)",
+      "category": "search_replace",
+      "teach": "Replacement escapes change case: \\u upper-cases the NEXT character, \\l lower-cases it, while \\U / \\L affect everything until \\E. Combine with & or submatches to Title-Case words or SHOUT a line.",
+      "key_commands": [
+        "\\u",
+        "\\U",
+        "\\l",
+        "\\E"
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "loud and clear"
+          ],
+          "par_keys": 12,
+          "hint": "\\U upper-cases the whole matched line",
+          "goal": [
+            "LOUD AND CLEAR"
+          ],
+          "solution": ":%s/.*/\\U&/<CR>",
+          "why": "\\U& shouts the entire match in one substitute."
+        },
+        {
+          "start": [
+            "john ronald tolkien"
+          ],
+          "par_keys": 15,
+          "hint": "match each word's first letter, \\u capitalises it",
+          "goal": [
+            "John Ronald Tolkien"
+          ],
+          "solution": ":%s/\\v<./\\u&/g<CR>",
+          "why": "\\u& Title-Cases by upper-casing just the leading letter."
+        }
+      ]
+    },
+    {
+      "id": "substitute-confirm",
+      "title": "Eyeball each substitution (c flag)",
+      "category": "search_replace",
+      "teach": "The c flag turns :s into an interactive review: at each match Vim asks y (yes), n (no), a (all the rest), q (quit), or l (last). It's the safe way to find-and-replace when some matches are false positives.",
+      "key_commands": [
+        ":s//gc",
+        "y",
+        "n",
+        "a"
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "foo foo foo"
+          ],
+          "par_keys": 16,
+          "hint": "add the c flag, then answer 'a' to accept all remaining",
+          "goal": [
+            "bar bar bar"
+          ],
+          "solution": ":%s/foo/bar/gc<CR>a",
+          "why": "With c you confirm each match; 'a' green-lights the rest."
+        },
+        {
+          "start": [
+            "x x x x"
+          ],
+          "par_keys": 15,
+          "hint": "confirm selectively: yes, no, yes, no",
+          "goal": [
+            "y x y x"
+          ],
+          "solution": ":%s/x/y/gc<CR>ynyn",
+          "why": "The c flag lets you accept some matches and reject others."
+        }
+      ]
+    },
+    {
+      "id": "substitute-expression",
+      "title": "Compute the replacement (\\=)",
+      "category": "search_replace",
+      "teach": "Prefix the replacement with \\= and the rest is a Vim-script EXPRESSION whose result becomes the replacement. submatch(0) is the whole match, submatch(1) the first group. Great for bumping every number or computing values inline.",
+      "key_commands": [
+        "\\=",
+        "submatch(0)",
+        "line('.')",
+        "\\=...+1"
+      ],
+      "difficulty": 5,
+      "challenges": [
+        {
+          "start": [
+            "item 1",
+            "item 2",
+            "item 3"
+          ],
+          "par_keys": 27,
+          "hint": "\\= runs an expression; add 1 to the matched number",
+          "goal": [
+            "item 2",
+            "item 3",
+            "item 4"
+          ],
+          "solution": ":%s/\\v\\d+/\\=submatch(0)+1/<CR>",
+          "why": "\\=submatch(0)+1 increments every number in place."
+        },
+        {
+          "start": [
+            "box 3",
+            "box 5",
+            "box 8"
+          ],
+          "par_keys": 28,
+          "hint": "double each number with an expression",
+          "goal": [
+            "box 6",
+            "box 10",
+            "box 16"
+          ],
+          "solution": ":%s/\\v\\d+/\\=submatch(0)*2/g<CR>",
+          "why": "\\= can do any arithmetic on the match, not just +1."
+        }
+      ]
+    },
+    {
+      "id": "substitute-repeat-global",
+      "title": "Repeat the last substitute (g&)",
+      "category": "search_replace",
+      "teach": "& repeats the last :substitute on the current line (no flags). g& is smarter: it re-runs the last substitution across the WHOLE file with the same flags — equivalent to :%s//~/&. Handy after testing a :s on one line.",
+      "key_commands": [
+        "g&",
+        "&",
+        ":%s//~/&",
+        "@:"
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "aXa",
+            "bXb",
+            "cXc"
+          ],
+          "par_keys": 10,
+          "hint": "substitute on line 1, then g& to apply it everywhere",
+          "goal": [
+            "aYa",
+            "bYb",
+            "cYc"
+          ],
+          "solution": ":s/X/Y/<CR>g&",
+          "why": "g& replays the last :s over the whole file in two keystrokes."
+        }
+      ]
+    },
+    {
+      "id": "global-delete",
+      "title": "Delete lines by pattern (:g/re/d, :v/re/d)",
+      "category": "ex_command",
+      "teach": ":g/{pat}/d deletes every line matching a pattern; :v/{pat}/d (a.k.a. :g!/{pat}/d) deletes every line that does NOT match — i.e. it KEEPS only the matches. One command filters a whole file.",
+      "key_commands": [
+        ":g//d",
+        ":v//d",
+        ":g!//d",
+        ":g//"
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "keep one",
+            "# comment",
+            "keep two",
+            "# note",
+            "keep three"
+          ],
+          "par_keys": 8,
+          "hint": "delete every line that starts with #",
+          "goal": [
+            "keep one",
+            "keep two",
+            "keep three"
+          ],
+          "solution": ":g/^#/d<CR>",
+          "why": ":g//d sweeps out all matching lines in a single pass."
+        },
+        {
+          "start": [
+            "error: disk",
+            "info: ok",
+            "error: net",
+            "debug: x"
+          ],
+          "par_keys": 11,
+          "hint": "delete the lines that do NOT contain 'error'",
+          "goal": [
+            "error: disk",
+            "error: net"
+          ],
+          "solution": ":v/error/d<CR>",
+          "why": ":v keeps only the matches — an inverse filter."
+        }
+      ]
+    },
+    {
+      "id": "global-normal",
+      "title": "Run a Normal command on matches (:g/re/normal)",
+      "category": "ex_command",
+      "teach": "Combine :g with :normal to fire a Normal-mode edit on every matching line. :g/{pat}/normal {cmds} is the surgical version of :%normal — it touches only the lines you care about.",
+      "key_commands": [
+        ":g//normal",
+        ":g//normal A",
+        ":g//normal I",
+        "."
+      ],
+      "difficulty": 5,
+      "challenges": [
+        {
+          "start": [
+            "fn alpha()",
+            "let x = 1",
+            "fn beta()",
+            "let y = 2"
+          ],
+          "par_keys": 18,
+          "hint": "only the fn lines get the comment prefix",
+          "goal": [
+            "// fn alpha()",
+            "let x = 1",
+            "// fn beta()",
+            "let y = 2"
+          ],
+          "solution": ":g/fn/normal I// <CR>",
+          "why": ":g picks the lines, :normal makes the edit — far and precise."
+        },
+        {
+          "start": [
+            "a = 1",
+            "note",
+            "b = 2",
+            "c = 3"
+          ],
+          "par_keys": 15,
+          "hint": "append ; only to the assignment lines",
+          "goal": [
+            "a = 1;",
+            "note",
+            "b = 2;",
+            "c = 3;"
+          ],
+          "solution": ":g/=/normal A;<CR>",
+          "why": ":g/=/ targets the code lines and skips the prose."
+        }
+      ]
+    },
+    {
+      "id": "global-copy-collect",
+      "title": "Collect matching lines (:g/re/t$)",
+      "category": "ex_command",
+      "teach": "Pair :g with :t (copy) to gather every matching line at the end of the file: :g/{pat}/t$ copies each match to the bottom, so you can review all the TODOs (or headings, or errors) in one place.",
+      "key_commands": [
+        ":g//t$",
+        ":g//yank A",
+        ":g//m$",
+        ":t$"
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "TODO wire up",
+            "done",
+            "TODO write tests",
+            "more"
+          ],
+          "par_keys": 11,
+          "hint": "copy each TODO line to the end of the file",
+          "goal": [
+            "TODO wire up",
+            "done",
+            "TODO write tests",
+            "more",
+            "TODO wire up",
+            "TODO write tests"
+          ],
+          "solution": ":g/TODO/t$<CR>",
+          "why": ":g//t$ harvests all matches into one spot to scan at a glance."
+        },
+        {
+          "start": [
+            "# Intro",
+            "blah",
+            "# Setup",
+            "more",
+            "# End"
+          ],
+          "par_keys": 9,
+          "hint": "copy every heading line to the bottom",
+          "goal": [
+            "# Intro",
+            "blah",
+            "# Setup",
+            "more",
+            "# End",
+            "# Intro",
+            "# Setup",
+            "# End"
+          ],
+          "solution": ":g/^#/t$<CR>",
+          "why": "A pattern + :t$ builds a table of contents in one command."
+        }
+      ]
+    },
+    {
+      "id": "global-substitute",
+      "title": "Substitute only on matching lines (:g/re/s)",
+      "category": "ex_command",
+      "teach": "Nest a :substitute inside :global to transform only the lines that match an outer pattern: :g/{pat}/s/{a}/{b}/. The first pattern selects the lines; the substitute reshapes them.",
+      "key_commands": [
+        ":g//s///",
+        ":g//s/$//",
+        ":v//s///",
+        "&"
+      ],
+      "difficulty": 5,
+      "challenges": [
+        {
+          "start": [
+            "user: alice",
+            "admin: bob",
+            "user: carol"
+          ],
+          "par_keys": 23,
+          "hint": "on user lines only, append a tag at end-of-line",
+          "goal": [
+            "user: alice [member]",
+            "admin: bob",
+            "user: carol [member]"
+          ],
+          "solution": ":g/user/s/$/ [member]/<CR>",
+          "why": "The outer :g scopes the substitute to just the user rows."
+        },
+        {
+          "start": [
+            "log: start",
+            "err: oops",
+            "log: stop"
+          ],
+          "par_keys": 16,
+          "hint": "only on log lines, rewrite the colon",
+          "goal": [
+            "log => start",
+            "err: oops",
+            "log => stop"
+          ],
+          "solution": ":g/log/s/:/ =>/<CR>",
+          "why": ":g+:s reshapes a subset without touching the err line."
+        }
+      ]
+    },
+    {
+      "id": "global-block-range",
+      "title": "Act inside each block (:g with a sub-range)",
+      "category": "ex_command",
+      "teach": "Ex commands under :g can take their OWN range, measured from the matching line. :g/{/ .+1,/}/-1 sort runs :sort on the lines BETWEEN each { and its } — alphabetising the body of every block in the file at once.",
+      "key_commands": [
+        ":g/{/",
+        ".+1,/}/-1",
+        "sort",
+        ":g//normal"
+      ],
+      "difficulty": 5,
+      "challenges": [
+        {
+          "start": [
+            "box {",
+            "  z: 1;",
+            "  m: 2;",
+            "  a: 3;",
+            "}"
+          ],
+          "par_keys": 20,
+          "hint": "for each {, sort the lines up to the matching }",
+          "goal": [
+            "box {",
+            "  a: 3;",
+            "  m: 2;",
+            "  z: 1;",
+            "}"
+          ],
+          "solution": ":g/{/.+1,/}/-1 sort<CR>",
+          "why": "A per-match sub-range lets :g reach inside every block."
+        },
+        {
+          "start": [
+            "a {",
+            "  cat;",
+            "  ant;",
+            "}",
+            "b {",
+            "  dog;",
+            "  bee;",
+            "}"
+          ],
+          "par_keys": 20,
+          "hint": "the same command sorts the body of EVERY block",
+          "goal": [
+            "a {",
+            "  ant;",
+            "  cat;",
+            "}",
+            "b {",
+            "  bee;",
+            "  dog;",
+            "}"
+          ],
+          "solution": ":g/{/.+1,/}/-1 sort<CR>",
+          "why": "One :g handles arbitrarily many blocks — it scales for free."
+        }
+      ]
+    },
+    {
+      "id": "autocomplete-keyword",
+      "title": "Keyword autocompletion (<C-n>)",
+      "category": "operator",
+      "teach": "In Insert mode <C-n> completes the partial word before the cursor from words already in your buffers (<C-p> walks the list backward). Type enough to be unambiguous, press <C-n>, and Vim finishes a long identifier for you — no retyping, no typos.",
+      "key_commands": [
+        "<C-n>",
+        "<C-p>",
+        "<C-x><C-n>",
+        "<C-y>"
+      ],
+      "difficulty": 3,
+      "challenges": [
+        {
+          "start": [
+            "authentication flow",
+            "auth"
+          ],
+          "par_keys": 4,
+          "hint": "append to the partial word, then <C-n> to complete it",
+          "goal": [
+            "authentication flow",
+            "authentication"
+          ],
+          "solution": "jA<C-n><Esc>",
+          "why": "<C-n> recalls 'authentication' from the buffer — type it once."
+        }
+      ]
+    },
+    {
+      "id": "autocomplete-whole-line",
+      "title": "Whole-line completion (<C-x><C-l>)",
+      "category": "operator",
+      "teach": "<C-x><C-l> completes an ENTIRE line that matches what you've typed so far, pulled from elsewhere in the buffer. Perfect for repeating a boilerplate line — a guard clause, an import — without copy-paste.",
+      "key_commands": [
+        "<C-x><C-l>",
+        "<C-n>",
+        "<C-p>",
+        "<C-y>"
+      ],
+      "difficulty": 4,
+      "challenges": [
+        {
+          "start": [
+            "    return self.value",
+            "    ret"
+          ],
+          "par_keys": 5,
+          "hint": "start the line, then complete the whole thing",
+          "goal": [
+            "    return self.value",
+            "    return self.value"
+          ],
+          "solution": "jA<C-x><C-l><Esc>",
+          "why": "<C-x><C-l> echoes a matching line verbatim from the buffer."
+        }
+      ]
+    }
+  ]
+}
