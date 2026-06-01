@@ -12,6 +12,12 @@ __pycache__/
 # Player state — local, never committed
 progress.json
 
+# Build cursor + LLM augmentation pools — local intermediates, not distributed
+# (the merged result lives in the tracked content/skills.json)
+content/build_state.json
+content/llm_pool.json
+content/llm_rejects.json
+
 # Local tooling / reference material — not distributed
 .claude/
 source-material.md

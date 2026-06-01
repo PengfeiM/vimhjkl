@@ -1,0 +1,35 @@
+name: Publish to AUR
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to publish (e.g. v0.1.0)"
+        required: true
+
+jobs:
+  publish-aur:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set pkgver from tag
+        run: |
+          TAG="${{ github.event.release.tag_name || github.event.inputs.tag }}"
+          VERSION="${TAG#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          sed -i "s/^pkgver=.*/pkgver=$VERSION/" packaging/aur/PKGBUILD
+
+      - name: Publish to AUR
+        uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
+        with:
+          pkgname: vimhjkl
+          pkgbuild: ./packaging/aur/PKGBUILD
+          commit_username: ${{ github.actor }}
+          commit_email: sakshyamsigdel1@gmail.com
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: "release ${{ env.VERSION }}"
+          updpkgsums: true
+          ssh_keyscan_types: rsa,ed25519

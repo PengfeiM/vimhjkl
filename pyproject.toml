@@ -7,6 +7,8 @@ name = "vimhjkl"
 version = "0.1.0"
 description = "A terminal trainer that drills advanced Vim techniques in real vim/nvim and grades your keystrokes."
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.11"
 authors = [{ name = "vimhjkl" }]
 # No third-party runtime dependencies: the package is pure standard library.
