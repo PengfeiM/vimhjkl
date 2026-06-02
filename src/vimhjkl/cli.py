@@ -737,6 +737,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Optional[list[str]] = None) -> int:
     args = build_parser().parse_args(argv)
+    tui.install_signal_guard()
     show_moves = not args.hide_moves
     skills = store.load_skills()
     progress = store.load_progress()

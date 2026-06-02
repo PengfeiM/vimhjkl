@@ -9,6 +9,7 @@ exits its alt-screen before we ever hand the tty to vim).
 
 from __future__ import annotations
 
+import contextlib
 import sys
 from typing import Optional
 
@@ -125,7 +126,8 @@ def read_key() -> str:
     old = termios.tcgetattr(fd)
     try:
         tty.setraw(fd)
-        ch = sys.stdin.read(1)
+        with _suspend_guard(fd, old):
+            ch = sys.stdin.read(1)
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
     if ch == "\x03":  # Ctrl-C
@@ -136,6 +138,67 @@ def read_key() -> str:
 def pause(msg: str = "press any key to continue…") -> None:
     print(c("  " + msg, GREY))
     read_key()
+
+
+def install_signal_guard() -> None:
+    """Restore the tty to its cooked startup state if the process is killed by
+    SIGTERM/SIGHUP — those terminate without running the try/finally restores in
+    read_key/menu/pager, which would otherwise leave the terminal raw and corrupt
+    the user's shell (sudo echoing until ``stty sane``).  Re-raises the default
+    action so the process still dies.  Installed once, globally, for the whole run.
+
+    SIGTSTP (Ctrl-Z) is deliberately NOT handled here: it's handled only inside
+    the raw regions that own the tty (see ``_suspend_guard``), so it never
+    interferes with a child like vim that manages its own job control."""
+    if not sys.stdin.isatty():
+        return
+    try:
+        import os
+        import signal
+        import termios
+    except ImportError:  # pragma: no cover (non-unix)
+        return
+    fd = sys.stdin.fileno()
+    cooked = termios.tcgetattr(fd)
+
+    def _die(signum, _frame):
+        termios.tcsetattr(fd, termios.TCSADRAIN, cooked)
+        signal.signal(signum, signal.SIG_DFL)  # re-raise with default action
+        os.kill(os.getpid(), signum)
+
+    for _sig in (signal.SIGTERM, signal.SIGHUP):
+        signal.signal(_sig, _die)
+
+
+@contextlib.contextmanager
+def _suspend_guard(fd: int, cooked):
+    """Context manager: while a raw region holds the tty, make Ctrl-Z (SIGTSTP)
+    drop back to the ``cooked`` mode *before* the process stops — so the shell it
+    hands control to is sane — and re-enter raw on resume.  Scoped to the ``with``
+    body; the previous SIGTSTP disposition is restored on exit, so outside these
+    regions (e.g. while vim runs) Ctrl-Z keeps its default behaviour."""
+    try:
+        import os
+        import signal
+        import termios
+        import tty
+    except ImportError:  # pragma: no cover (non-unix)
+        yield
+        return
+
+    def _suspend(signum, _frame):
+        termios.tcsetattr(fd, termios.TCSADRAIN, cooked)  # sane shell while stopped
+        signal.signal(signum, signal.SIG_DFL)
+        os.kill(os.getpid(), signum)                      # actually stop here
+        # --- resumes here on SIGCONT (e.g. `fg`) ---
+        signal.signal(signum, _suspend)                   # re-arm
+        tty.setraw(fd)                                    # back into raw
+
+    prev = signal.signal(signal.SIGTSTP, _suspend)
+    try:
+        yield
+    finally:
+        signal.signal(signal.SIGTSTP, prev)
 
 
 def _read_raw_key(fd: int) -> str:
@@ -233,20 +296,21 @@ def menu(title: str, options: list[tuple], subtitle: str = "",
     # never flaps back to cooked/echo between renders; restored on exit.
     try:
         tty.setraw(fd)
-        while True:
-            sys.stdout.write(_menu_frame(title, subtitle, header_lines, options, idx))
-            sys.stdout.flush()
-            k = _read_raw_key(fd)
-            if k in ("UP", "k"):
-                idx = (idx - 1) % n
-            elif k in ("DOWN", "j"):
-                idx = (idx + 1) % n
-            elif k in ("ENTER", " "):
-                return _opt_parts(options[idx])[0]
-            elif k in ("ESC", "q"):
-                return None
-            elif k.isdigit() and 1 <= int(k) <= n:
-                return _opt_parts(options[int(k) - 1])[0]
+        with _suspend_guard(fd, old):
+            while True:
+                sys.stdout.write(_menu_frame(title, subtitle, header_lines, options, idx))
+                sys.stdout.flush()
+                k = _read_raw_key(fd)
+                if k in ("UP", "k"):
+                    idx = (idx - 1) % n
+                elif k in ("DOWN", "j"):
+                    idx = (idx + 1) % n
+                elif k in ("ENTER", " "):
+                    return _opt_parts(options[idx])[0]
+                elif k in ("ESC", "q"):
+                    return None
+                elif k.isdigit() and 1 <= int(k) <= n:
+                    return _opt_parts(options[int(k) - 1])[0]
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
         clear()
@@ -327,30 +391,31 @@ def pager(title: str, lines: list[str], *, subtitle: str = "",
     top = 0
     try:
         tty.setraw(fd)
-        while True:
-            size = shutil.get_terminal_size((80, 24))
-            chrome = 5 + (len(header_lines) + 1 if header_lines else 0)
-            view_h = max(3, size.lines - chrome)
-            max_top = max(0, len(lines) - view_h)
-            top = min(top, max_top)
-            sys.stdout.write(_pager_frame(title, subtitle, header_lines, lines,
-                                          top, view_h, footer))
-            sys.stdout.flush()
-            k = _read_raw_key(fd)
-            if k in ("DOWN", "j"):
-                top = min(max_top, top + 1)
-            elif k in ("UP", "k"):
-                top = max(0, top - 1)
-            elif k == " ":
-                top = min(max_top, top + view_h)
-            elif k in ("b", "B"):
-                top = max(0, top - view_h)
-            elif k == "g":
-                top = 0
-            elif k == "G":
-                top = max_top
-            elif k in ("ESC", "q", "Q"):
-                return
+        with _suspend_guard(fd, old):
+            while True:
+                size = shutil.get_terminal_size((80, 24))
+                chrome = 5 + (len(header_lines) + 1 if header_lines else 0)
+                view_h = max(3, size.lines - chrome)
+                max_top = max(0, len(lines) - view_h)
+                top = min(top, max_top)
+                sys.stdout.write(_pager_frame(title, subtitle, header_lines, lines,
+                                              top, view_h, footer))
+                sys.stdout.flush()
+                k = _read_raw_key(fd)
+                if k in ("DOWN", "j"):
+                    top = min(max_top, top + 1)
+                elif k in ("UP", "k"):
+                    top = max(0, top - 1)
+                elif k == " ":
+                    top = min(max_top, top + view_h)
+                elif k in ("b", "B"):
+                    top = max(0, top - view_h)
+                elif k == "g":
+                    top = 0
+                elif k == "G":
+                    top = max_top
+                elif k in ("ESC", "q", "Q"):
+                    return
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
         clear()
