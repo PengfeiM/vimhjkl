@@ -1,11 +1,11 @@
 name: Bump Homebrew formula
 
 # On every published release, update the formula in S-Sigdel/homebrew-tap to the
-# new version (the action recomputes the tarball sha256 itself).
+# new version (recomputing the tarball sha256) and push it.
 #
 # Requires a repo secret HOMEBREW_TAP_TOKEN: a GitHub token (classic PAT with
 # `repo` scope, or a fine-grained token with Contents: read/write on
-# S-Sigdel/homebrew-tap) so the workflow can push the formula update.
+# S-Sigdel/homebrew-tap).
 
 on:
   release:
@@ -20,13 +20,27 @@ jobs:
   bump-homebrew:
     runs-on: ubuntu-latest
     steps:
-      - name: Bump formula
-        uses: mislav/bump-homebrew-formula-action@v3
-        with:
-          formula-name: vimhjkl
-          formula-path: Formula/vimhjkl.rb
-          homebrew-tap: S-Sigdel/homebrew-tap
-          tag-name: ${{ github.event.release.tag_name || github.event.inputs.tag }}
-          download-url: "https://github.com/S-Sigdel/vimhjkl/archive/refs/tags/${{ github.event.release.tag_name || github.event.inputs.tag }}.tar.gz"
+      - name: Update tap formula
         env:
-          COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          TAG: ${{ github.event.release.tag_name || github.event.inputs.tag }}
+        run: |
+          set -euo pipefail
+          VERSION="${TAG#v}"
+          URL="https://github.com/S-Sigdel/vimhjkl/archive/refs/tags/${TAG}.tar.gz"
+          SHA="$(curl -fsSL "$URL" | sha256sum | cut -d' ' -f1)"
+          echo "Bumping vimhjkl -> ${VERSION} (sha256 ${SHA})"
+
+          git clone "https://x-access-token:${TOKEN}@github.com/S-Sigdel/homebrew-tap.git" tap
+          cd tap
+          sed -i -E "s|^  url \".*\"|  url \"${URL}\"|" Formula/vimhjkl.rb
+          sed -i -E "s|^  sha256 \".*\"|  sha256 \"${SHA}\"|" Formula/vimhjkl.rb
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "Formula already up to date — nothing to push."
+            exit 0
+          fi
+          git commit -am "vimhjkl ${VERSION}"
+          git push
