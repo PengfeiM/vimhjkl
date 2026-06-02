@@ -1,27 +1,63 @@
 # vimhjkl
 
-A terminal trainer for advanced Vim technique. It picks up where `vimtutor`
-stops — the dot command, operator + motion grammar, text objects, registers,
-macros, ex commands (`:g`, `:normal`, ranges), and substitution — and drills
-them inside **real vim/nvim**, grading the actual keystrokes you type against an
-optimal par.
+A fast, keyboard-only terminal trainer for advanced Vim technique. It picks up
+where `vimtutor` stops — the dot command, operator + motion grammar, text
+objects, registers, macros, ex commands (`:g`, `:normal`, ranges), and
+substitution — and drills them inside **real vim/nvim**, grading the actual
+keystrokes you type against an optimal par.
+
+**61 lessons · 563 challenges** across seven technique categories — motion,
+operator, text object, register, macro, ex command, and search & replace. Every
+challenge is replayed through real vim at build time, so the "optimal" solution
+it shows you is one that actually works, and each lesson's example is shaped so
+the technique is genuinely the shortest path (no trivial buffers where a simpler
+move would beat it).
 
 The practice happens in a real editor, not an emulator: each challenge launches
 vim on a start buffer, logs your keystrokes, and scores the result on
-correctness and efficiency.
+correctness and efficiency. While you edit, the **goal sits in a read-only pane
+beside the buffer** — so you practise the move instead of trying to remember what
+the target looked like.
 
-## Requirements
+## Highlights
+
+- **Real vim, real grading.** No emulator. Keystrokes are logged with `-W` and
+  scored on correctness *and* efficiency against a verified par.
+- **The goal stays in view.** A side pane shows the target buffer while you edit;
+  a minimum terminal-size check keeps drills from launching into a cramped split.
+- **It enforces the technique.** An "ex command" drill won't accept a result you
+  hand-edited — you have to actually use the `:` command it teaches.
+- **Spaced repetition.** Per-skill Leitner boxes, a belt rank that unlocks harder
+  material, and five modes: Learn, Blind, Practice, Grind, and Review.
+
+## Install
+
+### Arch Linux (AUR)
+
+`vimhjkl` is on the [AUR](https://aur.archlinux.org/packages/vimhjkl). With an AUR
+helper:
+
+```sh
+paru -S vimhjkl      # or: yay -S vimhjkl
+```
+
+Then just run `vimhjkl`. Install `neovim` (preferred) or `vim` for the live
+drills — they are optional dependencies of the package.
+
+### From source (any platform)
+
+Requirements:
 
 - [uv](https://docs.astral.sh/uv/) (manages the Python toolchain and the venv)
 - Python ≥ 3.11 — provisioned by uv; you do not need a system Python
 - `vim` or `nvim` on `PATH` (nvim is preferred, vim is the fallback)
 
-There are no third-party Python dependencies. The package is pure standard
+There are no third-party Python dependencies — the package is pure standard
 library; the only external requirement is the editor binary.
 
-## Setup
-
 ```sh
+git clone https://github.com/S-Sigdel/vimhjkl
+cd vimhjkl
 uv sync
 ```
 
@@ -98,17 +134,16 @@ saves and exits cleanly from anywhere.
 ## Architecture
 
 ```
-content/
-  skills.json         # the curriculum (data, not code)
-progress.json         # player mastery state
+progress.json              # player mastery state (local, not packaged)
 src/vimhjkl/
-  cli.py              # entry point: menu, modes, session orchestration
-  engine.py           # scheduling and scoring; knows nothing about specific tricks
-  challenge.py        # Challenge/Skill model and the category registry
-  grader.py           # launches real vim, captures result + keystrokes, scores
-  store.py            # JSON persistence for the curriculum and progress
-  tui.py              # ANSI rendering and terminal input
-tests/                # headless grader and engine verification
+  cli.py                   # entry point: menu, modes, session orchestration
+  engine.py                # scheduling and scoring; knows nothing about specific tricks
+  challenge.py             # Challenge/Skill model and the category registry
+  grader.py                # launches real vim, captures result + keystrokes, scores
+  store.py                 # JSON persistence for the curriculum and progress
+  tui.py                   # ANSI rendering and terminal input
+  data/skills.json         # the curriculum (data, not code) — bundled in the package
+tests/                     # headless grader and engine verification
 ```
 
 The engine is generic. Adding a technique means adding a data entry in
@@ -125,6 +160,6 @@ uv run python -m tests.test_grader
 uv run python -m tests.test_engine
 ```
 
-The curriculum lives in `content/skills.json`, keyed by the category registry in
-`challenge.py`. Each entry stores a technique's lesson, key commands, and several
-example challenge instances with their optimal keystroke par.
+The curriculum lives in `src/vimhjkl/data/skills.json`, keyed by the category
+registry in `challenge.py`. Each entry stores a technique's lesson, key commands,
+and several example challenge instances with their optimal keystroke par.

@@ -16,7 +16,7 @@
       "challenges": [
         {
           "start": [
-            "alpha beta gamma delta"
+            "the quick brown fox"
           ],
           "par_keys": 2,
           "hint": "a count in front of w repeats it",
@@ -26,14 +26,14 @@
           ],
           "target": [
             1,
-            12
+            11
           ],
           "solution": "2w",
-          "why": "Two word-jumps land on 'gamma' in two keystrokes."
+          "why": "Two word-jumps land on 'brown' in two keystrokes."
         },
         {
           "start": [
-            "one two three four"
+            "roll the dice now"
           ],
           "par_keys": 2,
           "hint": "count then w",
@@ -43,7 +43,7 @@
           ],
           "target": [
             1,
-            9
+            10
           ],
           "solution": "2w",
           "why": "w counts words, not characters — distance is irrelevant."
@@ -568,53 +568,59 @@
       "challenges": [
         {
           "start": [
-            "let a = 1",
-            "let b = 2",
-            "let c = 3"
+            "margin = 0",
+            "padding = 8",
+            "radius = 4",
+            "border = 1",
+            "shadow = 2"
           ],
-          "par_keys": 7,
-          "hint": "A; once, then j. to ripple it down",
+          "par_keys": 11,
+          "hint": "A; on the first line, then j. all the way down",
           "goal": [
-            "let a = 1;",
-            "let b = 2;",
-            "let c = 3;"
+            "margin = 0;",
+            "padding = 8;",
+            "radius = 4;",
+            "border = 1;",
+            "shadow = 2;"
           ],
-          "solution": "A;<Esc>j.j.",
-          "why": "A appends at the line end from anywhere, so . repeats cleanly."
+          "solution": "A;<Esc>j.j.j.j.",
+          "why": "A appends at the line end from anywhere, so . repeats cleanly down the block."
         },
         {
           "start": [
-            "alpha",
-            "bravo",
-            "charlie",
-            "delta"
+            "validate()",
+            "transform()",
+            "persist()",
+            "notify()",
+            "cleanup()"
           ],
-          "par_keys": 9,
-          "hint": "one change, then walk down with j.",
+          "par_keys": 13,
+          "hint": "comment the first call, then j. ripples it through the rest",
           "goal": [
-            "alpha.",
-            "bravo.",
-            "charlie.",
-            "delta."
+            "// validate()",
+            "// transform()",
+            "// persist()",
+            "// notify()",
+            "// cleanup()"
           ],
-          "solution": "A.<Esc>j.j.j.",
-          "why": "One keystroke to move, one to execute — the Dot Formula."
+          "solution": "I// <Esc>j.j.j.j.",
+          "why": "I// is a repeatable change; one move + one execute comments each line."
         },
         {
           "start": [
-            "run()",
-            "stop()",
-            "reset()"
+            "DROP TABLE users",
+            "DROP TABLE orders",
+            "DROP TABLE carts"
           ],
           "par_keys": 9,
-          "hint": "I inserts at the line start; then j. repeats",
+          "hint": "I-- to comment out the first scary line, then j. for the rest",
           "goal": [
-            "// run()",
-            "// stop()",
-            "// reset()"
+            "-- DROP TABLE users",
+            "-- DROP TABLE orders",
+            "-- DROP TABLE carts"
           ],
-          "solution": "I// <Esc>j.j.",
-          "why": "I// is a repeatable change; j. comments the rest for free."
+          "solution": "I-- <Esc>j.j.",
+          "why": "Make the first change repeatable and the dot does the rest for free."
         },
         {
           "start": [
@@ -1112,21 +1118,21 @@
       "challenges": [
         {
           "start": [
-            "foo bar",
-            "baz foo qux"
+            "the budget is tight",
+            "trim the budget now"
           ],
           "par_keys": 1,
           "hint": "one key searches for the word you're sitting on",
           "start_cursor": [
             1,
-            1
+            5
           ],
           "target": [
             2,
-            5
+            10
           ],
           "solution": "*",
-          "why": "* spares you from typing /foo — just point and jump."
+          "why": "* spares you from typing /budget — just point and jump."
         },
         {
           "start": [
@@ -1203,24 +1209,24 @@
       "challenges": [
         {
           "start": [
-            "alpha beta gamma delta"
+            "please delete these leftovers"
           ],
           "par_keys": 3,
-          "hint": "delete three words in one coherent change",
+          "hint": "delete the three throwaway words in one coherent change",
           "goal": [
-            "delta"
+            "leftovers"
           ],
           "solution": "d3w",
           "why": "A count keeps undo a single chunk — handy before more edits."
         },
         {
           "start": [
-            "one two three"
+            "just trust the process"
           ],
           "par_keys": 3,
-          "hint": "delete a word, then repeat it",
+          "hint": "delete a word, then repeat with the dot",
           "goal": [
-            "three"
+            "the process"
           ],
           "solution": "dw.",
           "why": "dw. gives word-at-a-time undo; back out with one u if you overshoot."
@@ -1964,16 +1970,16 @@
       "challenges": [
         {
           "start": [
-            "<a>one</a>",
-            "<a>two</a>",
-            "<a>three</a>"
+            "<li>apples</li>",
+            "<li>oranges</li>",
+            "<li>pears</li>"
           ],
           "par_keys": 8,
           "hint": "uppercase inside the tag, then ripple with j.",
           "goal": [
-            "<a>ONE</a>",
-            "<a>TWO</a>",
-            "<a>THREE</a>"
+            "<li>APPLES</li>",
+            "<li>ORANGES</li>",
+            "<li>PEARS</li>"
           ],
           "solution": "gUitj.j.",
           "why": "gUit is operator+motion, so . repeats it on each tag's real width."
@@ -2059,19 +2065,21 @@
       "challenges": [
         {
           "start": [
-            "one",
-            "two",
-            "three"
+            "gremlin",
+            "goblin",
+            "ogre",
+            "troll"
           ],
-          "par_keys": 7,
-          "hint": "block down the first column, then I to insert a prefix",
+          "par_keys": 12,
+          "hint": "block down the first column, then I to insert the prefix once",
           "goal": [
-            "x_one",
-            "x_two",
-            "x_three"
+            "summon gremlin",
+            "summon goblin",
+            "summon ogre",
+            "summon troll"
           ],
-          "solution": "<C-v>jjIx_<Esc>",
-          "why": "Block-I types once and stamps the prefix onto every selected line."
+          "solution": "<C-v>3jIsummon <Esc>",
+          "why": "Block-I types 'summon ' once and stamps it onto every selected line."
         },
         {
           "start": [
@@ -2202,37 +2210,49 @@
       "challenges": [
         {
           "start": [
-            "alpha",
-            "beta",
-            "gamma"
+            "let total = 0",
+            "let rate = 0.05",
+            "let tax = total * rate",
+            "let net = total - tax",
+            "print(net)",
+            "return net"
           ],
           "par_keys": 12,
-          "hint": "apply A; to every line in one command",
+          "hint": "append ; to every line in one command",
           "goal": [
-            "alpha;",
-            "beta;",
-            "gamma;"
+            "let total = 0;",
+            "let rate = 0.05;",
+            "let tax = total * rate;",
+            "let net = total - tax;",
+            "print(net);",
+            "return net;"
           ],
           "solution": ":%normal A;<CR>",
-          "why": ":%normal A; appends to all lines — no j. ladder needed."
+          "why": "Six lines means six A;j by hand — :%normal A; does the lot at once."
         },
         {
           "start": [
-            "title",
-            "draft()",
-            "render()",
-            "footer"
+            "import sys",
+            "def deploy():",
+            "    check_env()",
+            "    push_build()",
+            "    notify_team()",
+            "    return True",
+            "deploy()"
           ],
-          "par_keys": 16,
-          "hint": "restrict the range to lines 2 and 3",
+          "par_keys": 15,
+          "hint": "comment only the function body — lines 3 to 6",
           "goal": [
-            "title",
-            "// draft()",
-            "// render()",
-            "footer"
+            "import sys",
+            "def deploy():",
+            "    # check_env()",
+            "    # push_build()",
+            "    # notify_team()",
+            "    # return True",
+            "deploy()"
           ],
-          "solution": ":2,3normal I// <CR>",
-          "why": "A line range targets exactly the lines you mean, far or near."
+          "solution": ":3,6normal I# <CR>",
+          "why": "A line range hits exactly the body and spares the def and the call."
         },
         {
           "start": [
@@ -2265,20 +2285,6 @@
           ],
           "solution": ":%normal I# <CR>",
           "why": "Prepares each item with hashtag level importance."
-        },
-        {
-          "start": [
-            "buyPotatoes()",
-            "buyTomatoes()"
-          ],
-          "par_keys": 25,
-          "hint": "Cheese up your shopping functions.",
-          "goal": [
-            "buyPotatoes() with cheese",
-            "buyTomatoes() with cheese"
-          ],
-          "solution": ":1,2normal A with cheese<CR>",
-          "why": "Adds a cheesy twist to each purchase function."
         },
         {
           "start": [
@@ -2836,50 +2842,70 @@
       "challenges": [
         {
           "start": [
-            "banana",
-            "apple",
-            "cherry"
+            "gandalf",
+            "boromir",
+            "aragorn",
+            "legolas",
+            "gimli",
+            "frodo",
+            "eowyn"
           ],
           "par_keys": 6,
-          "hint": "one command alphabetises every line",
+          "hint": "one command alphabetises the whole roster",
           "goal": [
-            "apple",
-            "banana",
-            "cherry"
+            "aragorn",
+            "boromir",
+            "eowyn",
+            "frodo",
+            "gandalf",
+            "gimli",
+            "legolas"
           ],
           "solution": ":sort<CR>",
-          "why": ":sort beats hand-rearranging lines with dd/p."
+          "why": "Hand-sorting seven lines with dd/p is a nightmare — :sort is instant."
         },
         {
           "start": [
-            "item 10",
-            "item 2",
-            "item 1"
+            "build 9",
+            "build 10",
+            "build 1",
+            "build 23",
+            "build 4",
+            "build 100"
           ],
           "par_keys": 8,
-          "hint": "sort by the numbers, not the text",
+          "hint": "sort by the numbers, not as text",
           "goal": [
-            "item 1",
-            "item 2",
-            "item 10"
+            "build 1",
+            "build 4",
+            "build 9",
+            "build 10",
+            "build 23",
+            "build 100"
           ],
           "solution": ":sort n<CR>",
-          "why": "Without n, '10' would sort before '2' as a string."
+          "why": "Without n, '100' sorts before '23' as a string — n reads them as numbers."
         },
         {
           "start": [
-            "dup",
-            "dup",
-            "once"
+            "keys",
+            "wallet",
+            "keys",
+            "phone",
+            "wallet",
+            "keys",
+            "charger"
           ],
           "par_keys": 8,
-          "hint": "sort and drop duplicate lines in one go",
+          "hint": "sort and drop the duplicate lines in one pass",
           "goal": [
-            "dup",
-            "once"
+            "charger",
+            "keys",
+            "phone",
+            "wallet"
           ],
           "solution": ":sort u<CR>",
-          "why": ":sort u collapses repeats — no manual de-duping."
+          "why": ":sort u collapses the repeated keys/wallet — no manual de-duping."
         },
         {
           "start": [
@@ -3688,7 +3714,7 @@
         },
         {
           "start": [
-            "a.b.c hello world"
+            "node.js runs fast"
           ],
           "par_keys": 1,
           "hint": "the dotted run is a single WORD",
@@ -3698,10 +3724,10 @@
           ],
           "target": [
             1,
-            7
+            9
           ],
           "solution": "W",
-          "why": "W leaps past 'a.b.c' that w would crawl through."
+          "why": "W leaps past 'node.js' that w would crawl through dot by dot."
         },
         {
           "start": [
@@ -4321,30 +4347,6 @@
           ],
           "solution": "f(di(",
           "why": "di( empties the parentheses but keeps them."
-        },
-        {
-          "start": [
-            "ingredients = ['flour', 'water', 'yeast'];"
-          ],
-          "par_keys": 5,
-          "hint": "Land on the bracket, delete INSIDE it.",
-          "goal": [
-            "ingredients = [];"
-          ],
-          "solution": "f[di[",
-          "why": "di[ empties the list but keeps brackets."
-        },
-        {
-          "start": [
-            "if (weather === 'sunny') { wear('sunglasses'); }"
-          ],
-          "par_keys": 5,
-          "hint": "Land on the opening quote and delete INSIDE quotes.",
-          "goal": [
-            "if (weather === '') { wear('sunglasses'); }"
-          ],
-          "solution": "f(di'",
-          "why": "di' empties the quotes but keeps them intact."
         }
       ]
     },
@@ -4363,50 +4365,50 @@
       "challenges": [
         {
           "start": [
-            "alpha",
-            "beta",
+            "first thought",
+            "still mulling",
             "",
-            "gamma"
+            "new idea"
           ],
           "par_keys": 3,
           "hint": "delete the inner paragraph, leave the blank line",
           "goal": [
             "",
-            "gamma"
+            "new idea"
           ],
           "solution": "dip",
           "why": "dip removes the text block without touching the separator."
         },
         {
           "start": [
-            "intro a",
-            "intro b",
+            "dear diary",
+            "today was long",
             "",
-            "body"
+            "the end"
           ],
           "par_keys": 3,
           "hint": "delete AROUND the paragraph, blank line and all",
           "goal": [
-            "body"
+            "the end"
           ],
           "solution": "dap",
           "why": "dap clears the whole stanza plus its trailing blank."
         },
         {
           "start": [
-            "old one",
-            "old two",
+            "rough draft",
+            "messy notes",
             "",
-            "tail"
+            "keep this"
           ],
-          "par_keys": 9,
+          "par_keys": 12,
           "hint": "change the whole paragraph at once",
           "goal": [
-            "fresh",
+            "polished",
             "",
-            "tail"
+            "keep this"
           ],
-          "solution": "cipfresh<Esc>",
+          "solution": "cippolished<Esc>",
           "why": "cip swaps an entire block for new text in one motion."
         },
         {
@@ -4749,6 +4751,30 @@
           ],
           "solution": "fhd/fez<CR>",
           "why": "d/ creates room for a fez-focused fashion statement."
+        },
+        {
+          "start": [
+            "The cat sat on the mat, munching a rat, wearing a tiny wizard hat."
+          ],
+          "par_keys": 6,
+          "hint": "The cat's adventure ends at rat. Delete up to 'rat'.",
+          "goal": [
+            "rat, wearing a tiny wizard hat."
+          ],
+          "solution": "d/rat<CR>",
+          "why": "d/ enables surgical removal of feline narratives."
+        },
+        {
+          "start": [
+            "The great debate: pizza with pineapple or without, cats with hats or without."
+          ],
+          "par_keys": 12,
+          "hint": "Slice away toppings from the pizza argument.",
+          "goal": [
+            "pineapple or without, cats with hats or without."
+          ],
+          "solution": "d/pineapple<CR>",
+          "why": "d/ makes debates as concise as ordering at midnight."
         }
       ]
     },
@@ -4919,154 +4945,68 @@
       "challenges": [
         {
           "start": [
-            "one",
-            "two",
-            "three",
-            "four"
+            "release checklist",
+            "  bump the version tag",
+            "TODO-START",
+            "  ask the cat for approval",
+            "  rename everything twice",
+            "  break the build on purpose",
+            "TODO-END",
+            "  ship it and hope"
           ],
-          "par_keys": 14,
-          "hint": "mark line 1 (a), drop to line 3 (b), delete the range",
+          "par_keys": 34,
+          "hint": "search to each TODO marker, drop a mark there, delete the span",
           "goal": [
-            "four"
+            "release checklist",
+            "  bump the version tag",
+            "  ship it and hope"
           ],
-          "solution": "majjmb:'a,'bd<CR>",
-          "why": ":'a,'bd deletes from mark a to mark b in one command."
+          "solution": "/TODO-START<CR>ma/TODO-END<CR>mb:'a,'bd<CR>",
+          "why": "Marks set at search landings beat counting lines to a far boundary."
         },
         {
           "start": [
-            "head",
-            "x()",
-            "y()",
-            "z()",
-            "tail"
+            "banner: do not touch",
+            "def conjure():",
+            "    return spell",
+            "def banish():",
+            "    return void",
+            "banner: don't touch this either"
+          ],
+          "par_keys": 24,
+          "hint": "mark the first and last code line, :normal only that range",
+          "goal": [
+            "banner: do not touch",
+            "# def conjure():",
+            "    # return spell",
+            "# def banish():",
+            "    # return void",
+            "banner: don't touch this either"
+          ],
+          "solution": "jma3jmb:'a,'bnormal I# <CR>",
+          "why": "A whole-file :normal would comment the banners — marks fence it in."
+        },
+        {
+          "start": [
+            "[hosts]",
+            "primary = old",
+            "backup = old",
+            "cache = old",
+            "[fallback]",
+            "spare = old"
           ],
           "par_keys": 25,
-          "hint": "bracket the code lines with marks, then :normal the range",
+          "hint": "mark the first and last block line, substitute only that range",
           "goal": [
-            "head",
-            "// x()",
-            "// y()",
-            "// z()",
-            "tail"
+            "[hosts]",
+            "primary = new",
+            "backup = new",
+            "cache = new",
+            "[fallback]",
+            "spare = old"
           ],
-          "solution": "jma2jmb:'a,'bnormal I// <CR>",
-          "why": "Marks pin the range so :normal hits exactly those lines."
-        },
-        {
-          "start": [
-            "Dear Diary,",
-            "Today I met a time traveler.",
-            "He insisted that he invented pizza.",
-            "Also, he owes me $5."
-          ],
-          "par_keys": 46,
-          "hint": "Target the middle lines for text replacement.",
-          "goal": [
-            "Dear Diary,",
-            "Today I met a UFO enthusiast.",
-            "He insisted that he invented pizza.",
-            "Also, he owes me $5."
-          ],
-          "solution": "jma2jmb:'a,'bs/time traveler/UFO enthusiast/g<CR>",
-          "why": "Marks let us pinpoint the area to substitute text."
-        },
-        {
-          "start": [
-            "Poem Title:",
-            "Oh mighty spaghetti",
-            "Twirl thy noodles of destiny",
-            "Sauced with the wisdom of ages"
-          ],
-          "par_keys": 25,
-          "hint": "Replace 'thy' with 'our' for shared pasta glory.",
-          "goal": [
-            "Poem Title:",
-            "Oh mighty spaghetti",
-            "Twirl our noodles of destiny",
-            "Sauced with the wisdom of ages"
-          ],
-          "solution": "jma3jmb:'a,'bs/thy/our/g<CR>",
-          "why": "Marks make substitutions over a line range easy."
-        },
-        {
-          "start": [
-            "Meeting Agenda",
-            "1. Discuss the paradox of socks eating dryers",
-            "2. Plan for world domination using rubber ducks",
-            "3. Decide if pineapple belongs on pizza",
-            "4. Adjourn meeting"
-          ],
-          "par_keys": 37,
-          "hint": "Substitute 'pineapple' for 'chocolate' — a bold new debate!",
-          "goal": [
-            "Meeting Agenda",
-            "1. Discuss the paradox of socks eating dryers",
-            "2. Plan for world domination using rubber ducks",
-            "3. Decide if chocolate belongs on pizza",
-            "4. Adjourn meeting"
-          ],
-          "solution": "jma3jmb:'a,'bs/pineapple/chocolate/g<CR>",
-          "why": "Marking a range focuses the substitution effort."
-        },
-        {
-          "start": [
-            "Troubleshooting Steps:",
-            "1. Turn it off and on again",
-            "2. Sacrifice a USB cable to the tech gods",
-            "3. Pull the plug and hope for the best",
-            "4. Cry a little",
-            "5. Success!"
-          ],
-          "par_keys": 27,
-          "hint": "Adjust the optimism level in the middle steps.",
-          "goal": [
-            "Troubleshooting Steps:",
-            "1. Turn it off and on again",
-            "2. Sacrifice a USB cable to the tech gods",
-            "3. Pull the plug and pray for the best",
-            "4. Cry a little",
-            "5. Success!"
-          ],
-          "solution": "jma3jmb:'a,'bs/hope/pray/g<CR>",
-          "why": "Marks offer precise control over line edits."
-        },
-        {
-          "start": [
-            "Banned Words List:",
-            "moist",
-            "delicious",
-            "gulp",
-            "slurp",
-            "End List"
-          ],
-          "par_keys": 15,
-          "hint": "Protect the world by deleting these words.",
-          "goal": [
-            "Banned Words List:",
-            "End List"
-          ],
-          "solution": "jma3jmb:'a,'bd<CR>",
-          "why": "Use marks to surgically remove forbidden words."
-        },
-        {
-          "start": [
-            "Important Reminders:",
-            "1. Email the cat",
-            "2. Feed the boss",
-            "3. Submit the goldfish report",
-            "Remember: No llamas allowed in the meeting room."
-          ],
-          "par_keys": 27,
-          "hint": "Llamas need emails too, change 'cat' to 'llama'.",
-          "goal": [
-            "Important Reminders:",
-            "1. Email the llama",
-            "2. Feed the boss",
-            "3. Submit the goldfish report",
-            "Remember: No llamas allowed in the meeting room."
-          ],
-          "solution": "jma3jmb:'a,'bs/cat/llama/g<CR>",
-          "why": "Marks facilitate precise, hilarious substitutions."
+          "solution": "jma2jmb:'a,'bs/old/new/g<CR>",
+          "why": "Marks scope the :s to the block so the fallback's 'old' survives."
         }
       ]
     },
@@ -5097,17 +5037,17 @@
         },
         {
           "start": [
-            "line two",
-            "line one"
+            "return result",
+            "compute result"
           ],
           "par_keys": 3,
           "hint": "delete the line, put it back below",
           "goal": [
-            "line one",
-            "line two"
+            "compute result",
+            "return result"
           ],
           "solution": "ddp",
-          "why": "ddp swaps a line with the one beneath it."
+          "why": "ddp swaps a line with the one beneath it — fix the wrong order fast."
         },
         {
           "start": [
@@ -5428,30 +5368,32 @@
       "challenges": [
         {
           "start": [
-            "1. one",
-            "2. two",
-            "3. three",
-            "4. four"
+            "1. wash the car",
+            "2. mow the lawn",
+            "3. paint the fence",
+            "4. fix the gate",
+            "5. trim the hedge"
           ],
           "par_keys": 14,
-          "hint": "record the edit on line 1 (ending with j), then 3@a for the rest",
+          "hint": "record the edit on line 1 (ending with j), then 4@a for the rest",
           "goal": [
-            "1) One",
-            "2) Two",
-            "3) Three",
-            "4) Four"
+            "1) Wash the car",
+            "2) Mow the lawn",
+            "3) Paint the fence",
+            "4) Fix the gate",
+            "5) Trim the hedge"
           ],
-          "solution": "qa0f.r)w~jq3@a",
-          "why": "One recorded unit of work replays down the whole list."
+          "solution": "qa0f.r)w~jq4@a",
+          "why": "One recorded unit of work replays down the whole five-line list."
         },
         {
           "start": [
-            "a+b+c+d+e"
+            "a+b+c+d+e+f"
           ],
           "par_keys": 16,
           "hint": "record ;. as a tiny macro, then over-count with 22@q",
           "goal": [
-            "a + b + c + d + e"
+            "a + b + c + d + e + f"
           ],
           "solution": "f+s + <Esc>qq;.q22@q",
           "why": "A macro can take a count where the dot command can't; the failing ; motion safely aborts the extra reps."
@@ -5522,32 +5464,38 @@
           "start": [
             "apple",
             "banana",
-            "cherry"
+            "cherry",
+            "mango",
+            "peach"
           ],
           "par_keys": 14,
-          "hint": "wrap line 1 in quotes-and-comma, end with j, then 2@a",
+          "hint": "wrap line 1 in quotes-and-comma, end with j, then 4@a",
           "goal": [
             "\"apple\",",
             "\"banana\",",
-            "\"cherry\","
+            "\"cherry\",",
+            "\"mango\",",
+            "\"peach\","
           ],
-          "solution": "qaI\"<Esc>A\",<Esc>jq2@a",
+          "solution": "qaI\"<Esc>A\",<Esc>jq4@a",
           "why": "One recorded unit (prefix + suffix + advance) replays as a count."
         },
         {
           "start": [
-            "x",
-            "y",
-            "z"
+            "buy groceries",
+            "call the dentist",
+            "renew passport",
+            "water plants"
           ],
           "par_keys": 15,
-          "hint": "prefix a checkbox on line 1, then replay down",
+          "hint": "prefix a checkbox on line 1, then replay down the to-do list",
           "goal": [
-            "- [ ] x",
-            "- [ ] y",
-            "- [ ] z"
+            "- [ ] buy groceries",
+            "- [ ] call the dentist",
+            "- [ ] renew passport",
+            "- [ ] water plants"
           ],
-          "solution": "qaI- [ ] <Esc>jq2@a",
+          "solution": "qaI- [ ] <Esc>jq3@a",
           "why": "Macros turn fiddly multi-key prefixes into one replayable action."
         },
         {
@@ -5759,36 +5707,36 @@
       "challenges": [
         {
           "start": [
-            "1. one",
-            "2. two",
-            "// keep this",
-            "3. three"
+            "1. draft the intro",
+            "2. outline the plot",
+            "// leave this note alone",
+            "3. write the ending"
           ],
           "par_keys": 22,
           "hint": "record without the j, then :%normal @a over every line",
           "goal": [
-            "1) One",
-            "2) Two",
-            "// keep this",
-            "3) Three"
+            "1) Draft the intro",
+            "2) Outline the plot",
+            "// leave this note alone",
+            "3) Write the ending"
           ],
           "solution": "qa0f.r)w~q:%normal @a<CR>",
           "why": "Parallel replay skips the comment (f. fails there) and finishes the numbered lines that series replay would have stalled on."
         },
         {
           "start": [
-            "1- one",
-            "2- two",
-            "skip",
-            "3- three"
+            "1- buy milk",
+            "2- buy eggs",
+            "done already",
+            "3- buy bread"
           ],
           "par_keys": 22,
-          "hint": "the failing f- guards both the 'skip' line and re-runs",
+          "hint": "the failing f- guards the 'done already' line and re-runs",
           "goal": [
-            "1) One",
-            "2) Two",
-            "skip",
-            "3) Three"
+            "1) Buy milk",
+            "2) Buy eggs",
+            "done already",
+            "3) Buy bread"
           ],
           "solution": "qa0f-r)w~q:%normal @a<CR>",
           "why": "A non-matching line aborts its own replay, so :%normal is safe even on lines already done."
@@ -5856,14 +5804,14 @@
       "challenges": [
         {
           "start": [
-            "item1 item22 item333"
+            "call 555 then 7000 or 42 today"
           ],
           "par_keys": 14,
           "hint": "\\v lets \\d+ match digit runs without escaping the +",
           "goal": [
-            "itemN itemN itemN"
+            "call # then # or # today"
           ],
-          "solution": ":%s/\\v\\d+/N/g<CR>",
+          "solution": ":%s/\\v\\d+/#/g<CR>",
           "why": "In default magic mode you'd need \\d\\+; \\v cleans it up."
         },
         {
@@ -6103,15 +6051,15 @@
       "challenges": [
         {
           "start": [
-            "Foo foo FOO bar"
+            "The CAT sat, a cat ran, the Cat napped"
           ],
-          "par_keys": 14,
+          "par_keys": 16,
           "hint": "\\c makes the match ignore case for the whole pattern",
           "goal": [
-            "x x x bar"
+            "The dog sat, a dog ran, the dog napped"
           ],
-          "solution": ":%s/foo\\c/x/g<CR>",
-          "why": "One \\c catches Foo, foo and FOO in a single substitute."
+          "solution": ":%s/cat\\c/dog/g<CR>",
+          "why": "One \\c catches CAT, cat and Cat in a single substitute."
         },
         {
           "start": [
@@ -6950,33 +6898,35 @@
       "challenges": [
         {
           "start": [
-            "a a a",
-            "a a",
-            "a"
+            "teh cat saw teh dog and teh bird",
+            "fix teh typos",
+            "teh end"
           ],
-          "par_keys": 10,
+          "par_keys": 14,
           "hint": "whole file (%), every match per line (g)",
           "goal": [
-            "b b b",
-            "b b",
-            "b"
+            "the cat saw the dog and the bird",
+            "fix the typos",
+            "the end"
           ],
-          "solution": ":%s/a/b/g<CR>",
-          "why": "g is what makes :s replace more than the first hit on a line."
+          "solution": ":%s/teh/the/g<CR>",
+          "why": "g is what fixes the 2nd and 3rd 'teh' on a line, not just the first."
         },
         {
           "start": [
-            "x x",
-            "x x"
+            "name, role, team",
+            "alice, admin, ops",
+            "bob, guest, web"
           ],
           "par_keys": 9,
-          "hint": "no g flag — only the first match on each line changes",
+          "hint": "no g flag — only the FIRST comma on each line becomes a colon",
           "goal": [
-            "y x",
-            "y x"
+            "name: role, team",
+            "alice: admin, ops",
+            "bob: guest, web"
           ],
-          "solution": ":%s/x/y/<CR>",
-          "why": "Default :s is first-per-line; leaving off g is deliberate here."
+          "solution": ":%s/,/:/<CR>",
+          "why": "Default :s is first-per-line; here that turns each row into key: value."
         },
         {
           "start": [
@@ -7018,23 +6968,6 @@
             "yo na na batman"
           ],
           "solution": ":%s/na/yo/<CR>"
-        },
-        {
-          "start": [
-            "keep",
-            "fix me",
-            "fix me",
-            "keep"
-          ],
-          "par_keys": 20,
-          "hint": "limit the change to a line range",
-          "goal": [
-            "keep",
-            "FIXED",
-            "FIXED",
-            "keep"
-          ],
-          "solution": ":2,3s/fix me/FIXED/<CR>"
         },
         {
           "start": [
@@ -7338,34 +7271,6 @@
         },
         {
           "start": [
-            "BRING ME THanOS",
-            "I am inevitable"
-          ],
-          "par_keys": 19,
-          "hint": "Reverse the shout, just like in the movies.",
-          "goal": [
-            "BRING ME thanos",
-            "I am inevitable"
-          ],
-          "solution": ":1s/THanOS/thanos/<CR>",
-          "why": "In a whisper, correct that scream!"
-        },
-        {
-          "start": [
-            "JUMP For joy",
-            "munch on marshmallows"
-          ],
-          "par_keys": 22,
-          "hint": "Only the first line gets to celebrate now.",
-          "goal": [
-            "JUMP for joy",
-            "munch on marshmallows"
-          ],
-          "solution": ":s/.*/JUMP for joy/gi<CR>",
-          "why": "For a well-balanced celebration, alternating caps is key."
-        },
-        {
-          "start": [
             "tinker Tailor",
             "soldier SPY"
           ],
@@ -7377,34 +7282,6 @@
           ],
           "solution": ":%s/\\v<\\l/\\u&/g<CR>",
           "why": "Ensure every lowercase leader gets its due title."
-        },
-        {
-          "start": [
-            "bE QuIET AS a mouse!",
-            "time to Rock 'n' Roll!"
-          ],
-          "par_keys": 29,
-          "hint": "The quiet should shout.",
-          "goal": [
-            "BE QUIET AS A MOUSE!",
-            "time to Rock 'n' Roll!"
-          ],
-          "solution": ":1s/.*/BE QUIET AS A MOUSE!/<CR>",
-          "why": "Sometimes whispers need shouting; sometimes not."
-        },
-        {
-          "start": [
-            "neVER tRUST tHE wIZARD",
-            "always be wary"
-          ],
-          "par_keys": 41,
-          "hint": "Turn chaos into zen.",
-          "goal": [
-            "Never trust the wizard",
-            "always be wary"
-          ],
-          "solution": ":s/\\v<neVER>.*/Never trust the wizard/gi<CR>",
-          "why": "Restore pristine order with one neat sweep."
         }
       ]
     },
@@ -7423,95 +7300,41 @@
       "challenges": [
         {
           "start": [
-            "foo foo foo"
+            "The cat dozed on the warm mat.",
+            "A caterpillar wobbled past.",
+            "The cat ignored the catnip.",
+            "Two cats guard the cat flap."
           ],
-          "par_keys": 16,
-          "hint": "add the c flag, then answer 'a' to accept all remaining",
+          "par_keys": 21,
+          "hint": "say y to the real cats, n to caterpillar / catnip / cats",
           "goal": [
-            "bar bar bar"
+            "The bat dozed on the warm mat.",
+            "A caterpillar wobbled past.",
+            "The bat ignored the catnip.",
+            "Two cats guard the bat flap."
           ],
-          "solution": ":%s/foo/bar/gc<CR>a",
-          "why": "With c you confirm each match; 'a' green-lights the rest."
+          "solution": ":%s/cat/bat/gc<CR>ynynny",
+          "why": "A blind :%s would maul caterpillar & catnip — c lets you skip them."
         },
         {
           "start": [
-            "x x x x"
+            "log the request",
+            "the login page loaded",
+            "write to the log file",
+            "read my travel blog",
+            "log out cleanly"
           ],
-          "par_keys": 15,
-          "hint": "confirm selectively: yes, no, yes, no",
+          "par_keys": 22,
+          "hint": "rename the standalone 'log', spare login and blog",
           "goal": [
-            "y x y x"
+            "trace the request",
+            "the login page loaded",
+            "write to the trace file",
+            "read my travel blog",
+            "trace out cleanly"
           ],
-          "solution": ":%s/x/y/gc<CR>ynyn",
-          "why": "The c flag lets you accept some matches and reject others."
-        },
-        {
-          "start": [
-            "I love cheese. Cheese is great. Cheese forever!"
-          ],
-          "par_keys": 27,
-          "hint": "Change cheese to chocolate, but only the second instance.",
-          "goal": [
-            "I love cheese. chocolate is great. Cheese forever!"
-          ],
-          "solution": ":%s/Cheese/chocolate/gc<CR>yqn",
-          "why": "You can choose which instances to replace one by one."
-        },
-        {
-          "start": [
-            "Why did the cow jump over the moon?",
-            "Because the cow wanted some space cheese!"
-          ],
-          "par_keys": 17,
-          "hint": "Say hi to the ant but let the cow remain in the sky.",
-          "goal": [
-            "Why did the cow jump over the moon?",
-            "Because the ant wanted some space cheese!"
-          ],
-          "solution": ":%s/cow/ant/gc<CR>ny",
-          "why": "Selective replacement preserves specific content."
-        },
-        {
-          "start": [
-            "The knight saved the princess,",
-            "but the princess saved herself first."
-          ],
-          "par_keys": 25,
-          "hint": "Change the princess to a prince in one place only.",
-          "goal": [
-            "The knight saved the prince,",
-            "but the princess saved herself first."
-          ],
-          "solution": ":%s/princess/prince/gc<CR>yn",
-          "why": "You can accept or reject each change as needed."
-        },
-        {
-          "start": [
-            "Pickle juice is the best juice.",
-            "Have you tried pickles in your juice?"
-          ],
-          "par_keys": 20,
-          "hint": "Swap out juice for cake just once.",
-          "goal": [
-            "Pickle cake is the best juice.",
-            "Have you tried pickles in your juice?"
-          ],
-          "solution": ":%s/juice/cake/gc<CR>yq",
-          "why": "Confirm substitutions that need precision."
-        },
-        {
-          "start": [
-            "The cat meows softly.",
-            "The caterpillar might meow too."
-          ],
-          "par_keys": 17,
-          "hint": "A surprise change from cats to bats, sparing the worm.",
-          "goal": [
-            "The bat meows softly.",
-            "The caterpillar might meow too."
-          ],
-          "solution": ":%s/cat/bat/gc<CR>yq",
-          "why": "Control the specificity of substitutions."
+          "solution": ":%s/log/trace/gc<CR>ynyny",
+          "why": "c is how you rename a word but spare the ones it's hiding inside."
         },
         {
           "start": [
@@ -7546,19 +7369,19 @@
       "challenges": [
         {
           "start": [
-            "item 1",
-            "item 2",
-            "item 3"
+            "slide 9",
+            "slide 10",
+            "slide 11"
           ],
           "par_keys": 27,
-          "hint": "\\= runs an expression; add 1 to the matched number",
+          "hint": "\\= runs an expression; add 1 to renumber every slide",
           "goal": [
-            "item 2",
-            "item 3",
-            "item 4"
+            "slide 10",
+            "slide 11",
+            "slide 12"
           ],
           "solution": ":%s/\\v\\d+/\\=submatch(0)+1/<CR>",
-          "why": "\\=submatch(0)+1 increments every number in place."
+          "why": "\\=submatch(0)+1 bumps each number in place — instant renumber."
         },
         {
           "start": [
@@ -7797,19 +7620,23 @@
       "challenges": [
         {
           "start": [
-            "aXa",
-            "bXb",
-            "cXc"
+            "TODO buy milk",
+            "TODO walk dog",
+            "TODO call mom",
+            "TODO pay rent",
+            "TODO water plants"
           ],
-          "par_keys": 10,
-          "hint": "substitute on line 1, then g& to apply it everywhere",
+          "par_keys": 16,
+          "hint": "test the :s on line 1, then g& to apply it to the whole list",
           "goal": [
-            "aYa",
-            "bYb",
-            "cYc"
+            "DONE buy milk",
+            "DONE walk dog",
+            "DONE call mom",
+            "DONE pay rent",
+            "DONE water plants"
           ],
-          "solution": ":s/X/Y/<CR>g&",
-          "why": "g& replays the last :s over the whole file in two keystrokes."
+          "solution": ":s/TODO/DONE/<CR>g&",
+          "why": "g& replays the last :s over every line in two keystrokes — no retyping."
         },
         {
           "start": [
@@ -8068,37 +7895,45 @@
       "challenges": [
         {
           "start": [
-            "keep one",
-            "# comment",
-            "keep two",
-            "# note",
-            "keep three"
+            "fetch the payload",
+            "# debug: drop later",
+            "parse the payload",
+            "# TODO: handle errors",
+            "store the result",
+            "# note to self",
+            "return the result",
+            "# end of hacks"
           ],
           "par_keys": 8,
           "hint": "delete every line that starts with #",
           "goal": [
-            "keep one",
-            "keep two",
-            "keep three"
+            "fetch the payload",
+            "parse the payload",
+            "store the result",
+            "return the result"
           ],
           "solution": ":g/^#/d<CR>",
           "why": ":g//d sweeps out all matching lines in a single pass."
         },
         {
           "start": [
-            "error: disk",
-            "info: ok",
-            "error: net",
-            "debug: x"
+            "error: disk full",
+            "info: backup ok",
+            "error: socket closed",
+            "debug: retrying",
+            "warn: low memory",
+            "error: timeout",
+            "info: done"
           ],
           "par_keys": 11,
-          "hint": "delete the lines that do NOT contain 'error'",
+          "hint": "delete every line that does NOT contain 'error'",
           "goal": [
-            "error: disk",
-            "error: net"
+            "error: disk full",
+            "error: socket closed",
+            "error: timeout"
           ],
           "solution": ":v/error/d<CR>",
-          "why": ":v keeps only the matches — an inverse filter."
+          "why": ":v keeps only the matches — an inverse filter over the whole file."
         },
         {
           "start": [
@@ -8355,39 +8190,49 @@
       "challenges": [
         {
           "start": [
-            "fn alpha()",
-            "let x = 1",
-            "fn beta()",
-            "let y = 2"
+            "fn summon()",
+            "  altar.ready = true",
+            "fn banish()",
+            "  altar.clear()",
+            "fn invoke()",
+            "  cast(spell)",
+            "done"
           ],
           "par_keys": 18,
           "hint": "only the fn lines get the comment prefix",
           "goal": [
-            "// fn alpha()",
-            "let x = 1",
-            "// fn beta()",
-            "let y = 2"
+            "// fn summon()",
+            "  altar.ready = true",
+            "// fn banish()",
+            "  altar.clear()",
+            "// fn invoke()",
+            "  cast(spell)",
+            "done"
           ],
           "solution": ":g/fn/normal I// <CR>",
-          "why": ":g picks the lines, :normal makes the edit — far and precise."
+          "why": ":g picks the lines, :normal makes the edit — far apart and precise."
         },
         {
           "start": [
-            "a = 1",
-            "note",
-            "b = 2",
-            "c = 3"
+            "total = 0",
+            "# running tally",
+            "total = total + tax",
+            "# apply discount",
+            "total = total - coupon",
+            "log done"
           ],
           "par_keys": 15,
-          "hint": "append ; only to the assignment lines",
+          "hint": "append ; only to the assignment lines, skip the prose",
           "goal": [
-            "a = 1;",
-            "note",
-            "b = 2;",
-            "c = 3;"
+            "total = 0;",
+            "# running tally",
+            "total = total + tax;",
+            "# apply discount",
+            "total = total - coupon;",
+            "log done"
           ],
           "solution": ":g/=/normal A;<CR>",
-          "why": ":g/=/ targets the code lines and skips the prose."
+          "why": ":g/=/ targets the code lines and leaves the comments alone."
         },
         {
           "start": [
@@ -8586,43 +8431,55 @@
       "challenges": [
         {
           "start": [
-            "TODO wire up",
-            "done",
-            "TODO write tests",
-            "more"
+            "TODO: wire up auth",
+            "shipped the login form",
+            "TODO: write the tests",
+            "fixed the css",
+            "TODO: delete this hack",
+            "deployed to staging",
+            "all green"
           ],
           "par_keys": 11,
           "hint": "copy each TODO line to the end of the file",
           "goal": [
-            "TODO wire up",
-            "done",
-            "TODO write tests",
-            "more",
-            "TODO wire up",
-            "TODO write tests"
+            "TODO: wire up auth",
+            "shipped the login form",
+            "TODO: write the tests",
+            "fixed the css",
+            "TODO: delete this hack",
+            "deployed to staging",
+            "all green",
+            "TODO: wire up auth",
+            "TODO: write the tests",
+            "TODO: delete this hack"
           ],
           "solution": ":g/TODO/t$<CR>",
-          "why": ":g//t$ harvests all matches into one spot to scan at a glance."
+          "why": ":g//t$ harvests every match into one spot to scan at a glance."
         },
         {
           "start": [
-            "# Intro",
-            "blah",
-            "# Setup",
-            "more",
-            "# End"
+            "# Introduction",
+            "some prose here",
+            "# Installation",
+            "more prose",
+            "# Usage",
+            "final prose",
+            "# Gotchas"
           ],
           "par_keys": 9,
           "hint": "copy every heading line to the bottom",
           "goal": [
-            "# Intro",
-            "blah",
-            "# Setup",
-            "more",
-            "# End",
-            "# Intro",
-            "# Setup",
-            "# End"
+            "# Introduction",
+            "some prose here",
+            "# Installation",
+            "more prose",
+            "# Usage",
+            "final prose",
+            "# Gotchas",
+            "# Introduction",
+            "# Installation",
+            "# Usage",
+            "# Gotchas"
           ],
           "solution": ":g/^#/t$<CR>",
           "why": "A pattern + :t$ builds a table of contents in one command."
@@ -8995,34 +8852,46 @@
         {
           "start": [
             "user: alice",
-            "admin: bob",
-            "user: carol"
+            "admin: root",
+            "user: carol",
+            "guest: anon",
+            "user: dave",
+            "service: cron"
           ],
           "par_keys": 23,
           "hint": "on user lines only, append a tag at end-of-line",
           "goal": [
             "user: alice [member]",
-            "admin: bob",
-            "user: carol [member]"
+            "admin: root",
+            "user: carol [member]",
+            "guest: anon",
+            "user: dave [member]",
+            "service: cron"
           ],
           "solution": ":g/user/s/$/ [member]/<CR>",
           "why": "The outer :g scopes the substitute to just the user rows."
         },
         {
           "start": [
-            "log: start",
-            "err: oops",
-            "log: stop"
+            "log: boot ok",
+            "err: panic",
+            "log: load config",
+            "warn: slow",
+            "log: ready",
+            "err: retry"
           ],
           "par_keys": 16,
-          "hint": "only on log lines, rewrite the colon",
+          "hint": "only on log lines, rewrite the first colon",
           "goal": [
-            "log => start",
-            "err: oops",
-            "log => stop"
+            "log => boot ok",
+            "err: panic",
+            "log => load config",
+            "warn: slow",
+            "log => ready",
+            "err: retry"
           ],
           "solution": ":g/log/s/:/ =>/<CR>",
-          "why": ":g+:s reshapes a subset without touching the err line."
+          "why": ":g+:s reshapes a subset without touching the err/warn lines."
         },
         {
           "start": [

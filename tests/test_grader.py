@@ -113,6 +113,15 @@ def integration_checks():
     check("discard (:q!) -> not correct", not r.correct, str(r.final_buffer))
     check("discard flagged not-saved", not r.saved)
 
+    # technique enforcement: a command category must be solved WITH an ex
+    # command.  Reaching the same goal by hand-editing (no ':') is rejected even
+    # though the buffer matches — otherwise an "ex command" drill teaches nothing.
+    rng = Challenge(start=["one", "two", "three", "four"], goal=["four"], par_keys=10)
+    r = run_attempt(rng, "ex_command", playback="dddddd:wq\r")   # hand-edit
+    check("ex_command hand-edit -> not correct", not r.correct, str(r.command_line))
+    r = run_attempt(rng, "ex_command", playback=":1,3d\r:wq\r")  # real command
+    check("ex_command via :range passes", r.correct, str(r.command_line))
+
 
 def main():
     if find_editor() is None:

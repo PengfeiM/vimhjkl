@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import random
 import re
+import shutil
 import sys
 import time
 from functools import partial
@@ -38,6 +39,49 @@ _MODE_TAG = {
     "practice": ("practice", tui.YELLOW),
     "grind":    ("grind", tui.GREEN),
 }
+
+# A live drill splits the window (edit buffer + goal pane), so it needs a floor
+# of room or lines wrap and the goal is hidden.  Below this we warn and let the
+# user override for the rest of the process (see `_gate_terminal_size`).
+MIN_COLS, MIN_ROWS = 80, 24
+
+# Once the user overrides the size warning, don't nag again for the rest of this
+# run.  Process-scoped on purpose: relaunching the trainer re-checks (the
+# override is "for this session" only).
+_size_override = False
+
+
+def _gate_terminal_size() -> bool:
+    """Return True if it's OK to launch a live-vim session.
+
+    If the terminal is smaller than ``MIN_COLS×MIN_ROWS`` and the user hasn't
+    already overridden this session, show a warning: press ``x`` to launch anyway
+    (remembered for the rest of this run) or any other key to back out.
+    """
+    global _size_override
+    if _size_override:
+        return True
+    size = shutil.get_terminal_size((MIN_COLS, MIN_ROWS))
+    if size.columns >= MIN_COLS and size.lines >= MIN_ROWS:
+        return True
+    tui.clear()
+    tui.banner("terminal too small", "live drills split the window")
+    print(tui.c(f"  your terminal is {size.columns}×{size.lines}; drills want at "
+                f"least {MIN_COLS}×{MIN_ROWS}.", tui.YELLOW))
+    print(tui.c("  the goal pane sits beside the buffer, so a cramped window wraps "
+                "lines", tui.GREY))
+    print(tui.c("  and hides the target.  Resize the terminal for the best "
+                "experience.", tui.GREY))
+    print()
+    print(tui.c("  press ", tui.RESET) + tui.c("x", tui.GREEN + tui.BOLD)
+          + tui.c(" to launch anyway (this session)", tui.RESET)
+          + tui.c("    ·    any other key to go back", tui.GREY))
+    print(tui.rule())
+    k = tui.read_key()
+    if k in ("x", "X"):
+        _size_override = True
+        return True
+    return False
 
 
 def _rep_prefix(rep: Optional[tuple], rest: str) -> str:
@@ -211,6 +255,8 @@ def run_drill(skills: list[Skill], progress: dict, count: int,
         print(tui.c("No vim or nvim found on PATH — install one, or try "
                     "`--review` for the no-vim flashcards.", tui.RED))
         return
+    if not _gate_terminal_size():
+        return
     # Auto-gate new skills by belt rank unless the caller forced one.
     if new_gate is None:
         new_gate = mastery_summary(skills, progress)["new_gate"]
@@ -298,6 +344,8 @@ def run_practice(skills: list[Skill], progress: dict, count: int,
         print(tui.c("No vim or nvim found on PATH — install one, or try "
                     "`--review` for the no-vim flashcards.", tui.RED))
         return
+    if not _gate_terminal_size():
+        return
     selected = select_weak_skills(skills, progress, count, rng=random.Random())
     if not selected:
         tui.clear()
@@ -370,6 +418,8 @@ def run_grind(skills: list[Skill], progress: dict, reps: int,
     if find_editor() is None:
         print(tui.c("No vim or nvim found on PATH — install one, or try "
                     "`--review` for the no-vim flashcards.", tui.RED))
+        return
+    if not _gate_terminal_size():
         return
     if reps < 1:
         print(tui.c("--reps needs a positive count.", tui.YELLOW))

@@ -88,10 +88,65 @@ _INTERACTIVE_SETTINGS = (
 )
 
 
+def _vim_list(lines: list[str]) -> str:
+    """A Vimscript single-quoted list literal of ``lines`` (own quotes doubled)."""
+    return "[" + ",".join("'" + ln.replace("'", "''") + "'" for ln in lines) + "]"
+
+
+def _goal_window_script(goal: list[str]) -> str:
+    """A small vim script (to be ``:source``d) that pins the GOAL beside the
+    edit buffer during an interactive drill, so the target is in view instead of
+    held in memory.
+
+    Layout: edit buffer on the LEFT, a read-only GOAL pane on the RIGHT.  The
+    pane is a throwaway ``nofile`` scratch buffer (never written, wiped on
+    close) and is stripped of numbers/cursorline so it reads as reference, not
+    something to edit.
+
+    Because there are now two windows, a bare ``:wq`` / ``:q`` would close only
+    one and leave vim open — so every quit form is remapped to its ``…all``
+    sibling: commit (``:wq`` ``:x`` ``ZZ``) writes the edit buffer and quits
+    BOTH; abandon (``:q!`` ``ZQ``) drops both with no write.  The ``<expr>``
+    guards fire ONLY when the whole command line is exactly that quit word, so a
+    substitution pattern containing ``q``/``x``/``wq`` is never touched.
+
+    Delivered as a single ``-c source`` (nvim caps ``-c`` flags at ten) and run
+    at startup, so it is never logged to the scriptout — keystroke counts are
+    unchanged.
+    """
+    # The pane is decorative (never graded — grading reads the edit buffer on
+    # disk), so it carries a little wording above the target to say what it is.
+    pane = [
+        "  GOAL — make it look like this:",
+        "  (edit the buffer on the left to match)",
+        "",
+    ] + list(goal)
+    return "\n".join([
+        "cnoreabbrev <expr> wq (getcmdtype()==':'&&getcmdline()=~#'^wq$')?'xall':'wq'",
+        "cnoreabbrev <expr> x  (getcmdtype()==':'&&getcmdline()=~#'^x$')?'xall':'x'",
+        "cnoreabbrev <expr> q  (getcmdtype()==':'&&getcmdline()=~#'^q$')?'qall':'q'",
+        "nnoremap ZZ :xall<CR>",
+        "nnoremap ZQ :qall!<CR>",
+        "botright vnew",
+        f"call setline(1, {_vim_list(pane)})",
+        "setlocal buftype=nofile bufhidden=wipe nomodifiable "
+        "nonumber norelativenumber nocursorline nolist nospell",
+        "let &l:statusline=' ── GOAL ──   :wq save · :q! bail · read-only '",
+        # Snug to the pane's own widest line (header or goal), but never wider
+        # than half the terminal — the edit window keeps a fair share so its
+        # lines don't wrap while you work.
+        "let s:gw = max(map(getline(1,'$'), 'strdisplaywidth(v:val)')) + 2",
+        "execute 'vertical resize' min([s:gw, &columns/2])",
+        "wincmd p",
+        "",
+    ])
+
+
 def _build_argv(editor: str, tmpfile: str, scriptout: str, cursorfile: str,
                 playback: Optional[str],
                 start_cursor: Optional[list[int]] = None,
-                interactive: bool = False) -> list[str]:
+                interactive: bool = False,
+                goal_script: Optional[str] = None) -> list[str]:
     # -u NONE / -i NONE : clean config so par counts are stable and no user
     #   autocmd (format-on-save, trim-whitespace, …) can mangle the buffer.
     # -N : nocompatible (matters for vim; harmless for nvim).
@@ -105,6 +160,12 @@ def _build_argv(editor: str, tmpfile: str, scriptout: str, cursorfile: str,
     # of these affect key counts.  Niceties only when a human is watching.
     if interactive:
         argv += ["-c", _INTERACTIVE_SETTINGS]
+        # Pin the goal beside the buffer (buffer-graded categories only — cursor
+        # drills already highlight their target and have no goal buffer).  The
+        # script ends focused back on the edit window, so the start-cursor jump
+        # below lands there.
+        if goal_script:
+            argv += ["-c", f"source {goal_script}"]
     if start_cursor and list(start_cursor) != [1, 1]:
         argv += ["-c", f"call cursor({int(start_cursor[0])},{int(start_cursor[1])})"]
     argv += ["-W", scriptout]
@@ -153,8 +214,17 @@ def run_attempt(challenge: Challenge, category: str,
         with open(playback_file, "wb") as fh:
             fh.write(playback.encode("utf-8"))
 
+    # Show the goal in a side pane during interactive drills, but not for cursor
+    # (motion) categories — those navigate a fixed buffer to a highlighted target
+    # and carry no goal buffer to display.
+    goal_script: Optional[str] = None
+    if interactive and not is_cursor_category(category) and challenge.goal:
+        goal_script = os.path.join(workdir, "goal.vim")
+        with open(goal_script, "w", encoding="utf-8") as fh:
+            fh.write(_goal_window_script(challenge.goal))
     argv = _build_argv(editor, tmpfile, scriptout, cursorfile, playback_file,
-                       start_cursor=challenge.start_cursor, interactive=interactive)
+                       start_cursor=challenge.start_cursor, interactive=interactive,
+                       goal_script=goal_script)
 
     try:
         if playback is not None:
@@ -214,10 +284,16 @@ def _score(challenge: Challenge, category: str, final_buffer: list[str],
         correct = final_buffer == list(challenge.goal)
         if not saved and final_buffer == list(challenge.start) and challenge.goal != challenge.start:
             message = "you quit without saving (:wq writes the buffer)."
-
-    if wants_command(category) and command_line is None:
-        message = (message + " " if message else "") + \
-            "this challenge expects a single ex command (typed with ':')."
+        # Command categories (:g, :s, :normal, ranges) drill the EX command
+        # itself — reaching the goal by hand-editing (no ':') doesn't count,
+        # even if the resulting buffer matches.  This is the one place a
+        # technique is hard-enforced: there is no non-command path here worth
+        # rewarding.  We require only that *a* command did it, not its exact
+        # form (`:3s` vs `:'a,'b s` are both valid), so clever paths still pass.
+        if correct and wants_command(category) and command_line is None:
+            correct = False
+            message = ("this drill wants the change made with ONE :ex command "
+                       "(:s, :g, :normal …) — you edited it by hand.")
 
     efficiency = _efficiency(challenge.par_keys, keystrokes)
     return GradeResult(

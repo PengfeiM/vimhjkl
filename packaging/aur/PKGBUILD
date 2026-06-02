@@ -1,6 +1,6 @@
 # Maintainer: S-Sigdel <sakshyamsigdel1@gmail.com>
 pkgname=vimhjkl
-pkgver=0.1.1
+pkgver=0.2.0
 pkgrel=1
 pkgdesc="A terminal trainer that drills advanced Vim techniques in real vim/nvim and grades your keystrokes"
 arch=('any')
