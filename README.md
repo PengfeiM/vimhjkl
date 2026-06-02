@@ -31,6 +31,12 @@ practise the move instead of remembering it.
 
 ## Install
 
+### macOS / Linux ([Homebrew](https://brew.sh))
+
+```sh
+brew install S-Sigdel/tap/vimhjkl
+```
+
 ### Arch Linux ([AUR](https://aur.archlinux.org/packages/vimhjkl))
 
 ```sh

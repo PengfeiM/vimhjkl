@@ -1,0 +1,32 @@
+name: Bump Homebrew formula
+
+# On every published release, update the formula in S-Sigdel/homebrew-tap to the
+# new version (the action recomputes the tarball sha256 itself).
+#
+# Requires a repo secret HOMEBREW_TAP_TOKEN: a GitHub token (classic PAT with
+# `repo` scope, or a fine-grained token with Contents: read/write on
+# S-Sigdel/homebrew-tap) so the workflow can push the formula update.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to publish (e.g. v0.2.0)"
+        required: true
+
+jobs:
+  bump-homebrew:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bump formula
+        uses: mislav/bump-homebrew-formula-action@v3
+        with:
+          formula-name: vimhjkl
+          formula-path: Formula/vimhjkl.rb
+          homebrew-tap: S-Sigdel/homebrew-tap
+          tag-name: ${{ github.event.release.tag_name || github.event.inputs.tag }}
+          download-url: "https://github.com/S-Sigdel/vimhjkl/archive/refs/tags/${{ github.event.release.tag_name || github.event.inputs.tag }}.tar.gz"
+        env:
+          COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
