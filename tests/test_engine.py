@@ -116,6 +116,26 @@ def main():
     check("sloppy correct does not promote", not outcome_passed(r_sloppy))
     check("wrong never passes", not outcome_passed(r_wrong))
 
+    # --- config: lesson toggle filter + escape-alias validation ------------
+    from vimhjkl import config
+    cfg = config._default()
+    cfg_skills = [mk("a", 1), mk("b", 2), mk("c", 3)]
+    check("all enabled by default",
+          len(config.enabled_skills(cfg_skills, cfg)) == 3)
+    config.set_disabled(cfg, "b", True)
+    en = config.enabled_skills(cfg_skills, cfg)
+    check("disabled skill filtered out",
+          [s.id for s in en] == ["a", "c"], [s.id for s in en])
+    config.set_disabled(cfg, "b", False)
+    check("re-enable restores skill",
+          len(config.enabled_skills(cfg_skills, cfg)) == 3)
+    config.set_many_disabled(cfg, ["a", "c"], True)
+    check("category-style bulk disable",
+          [s.id for s in config.enabled_skills(cfg_skills, cfg)] == ["b"])
+    config.set_escape_aliases(cfg, ["jk", "jj", "BAD1", "waytoolong", "x"])
+    check("escape aliases keep only letter, 1-3 char",
+          config.escape_aliases(cfg) == ["jk", "jj", "x"], config.escape_aliases(cfg))
+
     print(f"\n{PASS} passed, {FAIL} failed")
     return 1 if FAIL else 0
 

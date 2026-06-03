@@ -10,8 +10,9 @@ exits its alt-screen before we ever hand the tty to vim).
 from __future__ import annotations
 
 import contextlib
+import re
 import sys
-from typing import Optional
+from typing import Callable, Optional
 
 
 # ---------------------------------------------------------------------------
@@ -48,6 +49,57 @@ def clear() -> None:
 
 def rule(width: int = 72) -> str:
     return c("─" * width, GREY)
+
+
+_ANSI_RE = re.compile(r"\033\[[0-9;]*m")
+
+
+def visible_len(s: str) -> int:
+    """Length of ``s`` as drawn — ANSI colour codes don't take cells."""
+    return len(_ANSI_RE.sub("", s))
+
+
+def pad_visible(s: str, width: int) -> str:
+    """Right-pad a (possibly coloured) string to ``width`` visible columns."""
+    return s + " " * max(0, width - visible_len(s))
+
+
+def truncate_visible(s: str, width: int) -> str:
+    """Cut a (possibly coloured) string to at most ``width`` visible columns,
+    keeping ANSI codes intact and resetting colour at the end.  Guarantees the
+    result never wraps a terminal line — which is what keeps a two-column frame
+    from spilling onto extra rows and 'jumping' on every redraw."""
+    if width <= 0:
+        return ""
+    if visible_len(s) <= width:
+        return s
+    out, vis, i, had_color = [], 0, 0, False
+    while i < len(s) and vis < width:
+        m = _ANSI_RE.match(s, i)
+        if m:
+            out.append(m.group())
+            had_color = True
+            i = m.end()
+            continue
+        out.append(s[i])
+        vis += 1
+        i += 1
+    res = "".join(out)
+    return res + RESET if had_color else res
+
+
+def wrap_plain(text: str, width: int) -> list[str]:
+    """Greedy word-wrap of plain text to ``width`` columns (no ANSI inside)."""
+    words, lines, cur = text.split(), [], ""
+    for w in words:
+        if cur and len(cur) + 1 + len(w) > width:
+            lines.append(cur)
+            cur = w
+        else:
+            cur = f"{cur} {w}" if cur else w
+    if cur:
+        lines.append(cur)
+    return lines
 
 
 def banner(title: str, subtitle: str = "") -> None:
@@ -247,8 +299,23 @@ def _opt_parts(opt) -> tuple[str, str, str]:
     return opt[0], opt[1], ""
 
 
+def rnu_gutter(i: int, idx: int, selected: bool) -> str:
+    """A vim ``relativenumber`` gutter cell: the current line shows its absolute
+    number (1-based), every other line its distance from the cursor — so you can
+    read a number off any row and jump there with ``{count}j`` / ``{count}k``."""
+    n = (i + 1) if selected else abs(i - idx)
+    return c(f"{n:>2} ", (CYAN + BOLD) if selected else GREY)
+
+
+def _nav_footer(count: str, extra: str = "") -> str:
+    """Shared footer describing the vim-style navigation, with a pending count."""
+    base = c("  j/k move · 3j/5k jump · gg/G top/bottom · Enter choose · q quit"
+             + extra, GREY)
+    return base + (c(f"   {count}", YELLOW + BOLD) if count else "")
+
+
 def _menu_frame(title: str, subtitle: str, header_lines: Optional[list[str]],
-                options: list[tuple], idx: int) -> str:
+                options: list[tuple], idx: int, count: str = "") -> str:
     """Build one full menu screen as a string with raw-safe ``\\r\\n`` endings."""
     rows: list[str] = ["", c("  ⚔  " + title, BOLD + CYAN)]
     if subtitle:
@@ -261,14 +328,29 @@ def _menu_frame(title: str, subtitle: str, header_lines: Optional[list[str]],
     for i, opt in enumerate(options):
         _key, otitle, desc = _opt_parts(opt)
         selected = i == idx
-        pointer = c(" ▸ ", CYAN + BOLD) if selected else "   "
-        line = pointer + c(otitle, CYAN + BOLD if selected else RESET)
+        pointer = c("▸ ", CYAN + BOLD) if selected else "  "
+        line = "  " + rnu_gutter(i, idx, selected) + pointer \
+            + c(otitle, CYAN + BOLD if selected else RESET)
         if desc:
             line += c("  — " + desc, CYAN if selected else GREY)
         rows.append(line)
     rows.append("")
-    rows.append(c("  ↑/↓ or j/k to move · Enter to choose · q to quit", GREY))
+    rows.append(_nav_footer(count))
     return "\033[2J\033[H" + "\r\n".join(rows) + "\r\n"
+
+
+def _count_move(idx: int, n: int, key: str, count: str) -> int:
+    """Apply a vim motion to a list cursor.  ``j``/``k`` move by ``count`` (default
+    1) — wrapping on a bare step, clamping when a count is given; ``gg``/``G`` go to
+    the ends (``{count}G`` to an absolute line).  Returns the new index."""
+    step = int(count) if count.isdigit() else 1
+    if key in ("DOWN", "j"):
+        return min(n - 1, idx + step) if count else (idx + 1) % n
+    if key in ("UP", "k"):
+        return max(0, idx - step) if count else (idx - 1) % n
+    if key == "G":
+        return min(n, int(count)) - 1 if count.isdigit() else n - 1
+    return idx
 
 
 def menu(title: str, options: list[tuple], subtitle: str = "",
@@ -290,6 +372,8 @@ def menu(title: str, options: list[tuple], subtitle: str = "",
 
     n = len(options)
     idx = 0
+    count = ""          # pending vim count (e.g. "3" before j)
+    g_pending = False   # first 'g' of a 'gg' pressed
     fd = sys.stdin.fileno()
     old = termios.tcgetattr(fd)
     # Raw mode is held across the WHOLE loop (not per-keypress) so the terminal
@@ -298,19 +382,27 @@ def menu(title: str, options: list[tuple], subtitle: str = "",
         tty.setraw(fd)
         with _suspend_guard(fd, old):
             while True:
-                sys.stdout.write(_menu_frame(title, subtitle, header_lines, options, idx))
+                sys.stdout.write(_menu_frame(title, subtitle, header_lines,
+                                             options, idx, count))
                 sys.stdout.flush()
                 k = _read_raw_key(fd)
-                if k in ("UP", "k"):
-                    idx = (idx - 1) % n
-                elif k in ("DOWN", "j"):
-                    idx = (idx + 1) % n
+                if k.isdigit():
+                    count += k          # build a count; consumed by the next motion
+                    g_pending = False
+                    continue
+                if k == "g":            # gg -> top
+                    if g_pending:
+                        idx, g_pending = 0, False
+                    else:
+                        g_pending = True
+                        continue
+                elif k in ("UP", "k", "DOWN", "j", "G"):
+                    idx = _count_move(idx, n, k, count)
                 elif k in ("ENTER", " "):
                     return _opt_parts(options[idx])[0]
                 elif k in ("ESC", "q"):
                     return None
-                elif k.isdigit() and 1 <= int(k) <= n:
-                    return _opt_parts(options[int(k) - 1])[0]
+                count, g_pending = "", False
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
         clear()
@@ -343,11 +435,54 @@ def prompt_line(msg: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Live view — a generic raw-mode render/key loop for interactive screens
+# (settings toggles, etc.).  tui owns raw mode + key decoding + signal safety;
+# the caller owns all state, supplying a frame renderer and a key handler.
+# ---------------------------------------------------------------------------
+
+
+def live_view(render: Callable[[], str],
+              on_key: Callable[[str], Optional[str]]) -> None:
+    """Drive an interactive screen until the key handler asks to stop.
+
+    ``render()`` returns a full frame string (use ``\\r\\n`` line endings and a
+    leading ``\\033[2J\\033[H`` clear — see ``_menu_frame``).  ``on_key(key)`` is
+    called with a decoded key token (``UP``/``DOWN``/``LEFT``/``RIGHT``/``ENTER``/
+    ``ESC`` or a literal char) and returns ``"exit"`` to end the loop.  Raw mode is
+    held across the whole loop and restored on exit, exactly like ``menu``.
+    """
+    if not sys.stdin.isatty():
+        # No tty: render once, no interaction.
+        sys.stdout.write(render().replace("\r\n", "\n"))
+        return
+    try:
+        import termios
+        import tty
+    except ImportError:  # pragma: no cover (non-unix)
+        sys.stdout.write(render().replace("\r\n", "\n"))
+        return
+    fd = sys.stdin.fileno()
+    old = termios.tcgetattr(fd)
+    try:
+        tty.setraw(fd)
+        with _suspend_guard(fd, old):
+            while True:
+                sys.stdout.write(render())
+                sys.stdout.flush()
+                if on_key(_read_raw_key(fd)) == "exit":
+                    return
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old)
+        clear()
+
+
+# ---------------------------------------------------------------------------
 # Pager — a scrollable read-only view (the curriculum screen)
 # ---------------------------------------------------------------------------
 
 def _pager_frame(title: str, subtitle: str, header_lines: Optional[list[str]],
-                 lines: list[str], top: int, view_h: int, footer: str) -> str:
+                 lines: list[str], top: int, view_h: int, footer: str,
+                 count: str = "") -> str:
     rows: list[str] = ["", c("  ⚔  " + title, BOLD + CYAN)]
     if subtitle:
         rows.append(c("     " + subtitle, GREY))
@@ -361,7 +496,8 @@ def _pager_frame(title: str, subtitle: str, header_lines: Optional[list[str]],
     rows.append(rule())
     shown_to = top + len(window)
     pos = f"{(top + 1) if lines else 0}-{shown_to}/{len(lines)}"
-    rows.append(c(f"  {footer}", GREY) + c(f"    [{pos}]", GREY))
+    tail = c(f"    [{pos}]", GREY) + (c(f"  {count}", YELLOW + BOLD) if count else "")
+    rows.append(c(f"  {footer}", GREY) + tail)
     return "\033[2J\033[H" + "\r\n".join(rows) + "\r\n"
 
 
@@ -389,6 +525,7 @@ def pager(title: str, lines: list[str], *, subtitle: str = "",
     fd = sys.stdin.fileno()
     old = termios.tcgetattr(fd)
     top = 0
+    count = ""          # pending vim count for count-scrolling / {count}G
     try:
         tty.setraw(fd)
         with _suspend_guard(fd, old):
@@ -399,23 +536,28 @@ def pager(title: str, lines: list[str], *, subtitle: str = "",
                 max_top = max(0, len(lines) - view_h)
                 top = min(top, max_top)
                 sys.stdout.write(_pager_frame(title, subtitle, header_lines, lines,
-                                              top, view_h, footer))
+                                              top, view_h, footer, count))
                 sys.stdout.flush()
                 k = _read_raw_key(fd)
+                if k.isdigit():
+                    count += k                       # build a count for j/k/G
+                    continue
+                step = int(count) if count else 1
                 if k in ("DOWN", "j"):
-                    top = min(max_top, top + 1)
+                    top = min(max_top, top + step)
                 elif k in ("UP", "k"):
-                    top = max(0, top - 1)
+                    top = max(0, top - step)
                 elif k == " ":
                     top = min(max_top, top + view_h)
                 elif k in ("b", "B"):
                     top = max(0, top - view_h)
                 elif k == "g":
                     top = 0
-                elif k == "G":
-                    top = max_top
+                elif k == "G":                       # {count}G -> jump to that line
+                    top = min(max_top, int(count) - 1) if count else max_top
                 elif k in ("ESC", "q", "Q"):
                     return
+                count = ""
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
         clear()

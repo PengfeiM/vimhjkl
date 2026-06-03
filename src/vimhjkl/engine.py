@@ -9,6 +9,7 @@ Leitner boxes in progress.json.
 from __future__ import annotations
 
 import random
+import textwrap
 import time
 from dataclasses import dataclass, field
 from typing import Callable, Optional
@@ -356,6 +357,30 @@ def attempt_abstained(result: GradeResult, category: str) -> bool:
 # Drill session
 # ---------------------------------------------------------------------------
 
+def reveal_pane_lines(skill: Skill, challenge: Challenge,
+                      width: int = 26) -> list[str]:
+    """Plain-text cheat-sheet lines for the in-vim GOAL pane (Learn/Practice/Grind,
+    never Blind): the idiomatic move, why it's idiomatic, the hint, and the key
+    family.  Each line is ``2 + 11 (label) + width`` ≈ 39 cols, so it fits the
+    side pane (capped at half the terminal) without the pane truncating it."""
+    out: list[str] = []
+
+    def field(label: str, text: str) -> None:
+        if not text:
+            return
+        wrapped = textwrap.wrap(text, width) or [""]
+        out.append(f"  {label}{wrapped[0]}")
+        pad = " " * (2 + len(label))
+        out.extend(pad + w for w in wrapped[1:])
+
+    field("the move:  ", challenge.solution)
+    field("why:       ", challenge.why)
+    field("hint:      ", challenge.hint)
+    field("keys:      ", "  ".join(skill.key_commands))
+    out.append(f"  par:       {challenge.par_keys} keystrokes")
+    return out
+
+
 @dataclass
 class AttemptRecord:
     skill: Skill
@@ -400,7 +425,10 @@ class DrillSession:
                  review: Callable[[AttemptRecord], str],
                  rng: Optional[random.Random] = None,
                  editor: Optional[str] = None,
-                 on_record: Optional[Callable[[], None]] = None):
+                 on_record: Optional[Callable[[], None]] = None,
+                 escape_aliases: Optional[list[str]] = None,
+                 highlight_target: bool = False,
+                 reveal_detail: bool = False):
         self.skills = skills
         self.progress = progress
         self.present = present
@@ -410,6 +438,13 @@ class DrillSession:
         # Called after each graded attempt is recorded — used to flush progress
         # to disk so a Ctrl-C / crash mid-session never loses finished work.
         self.on_record = on_record
+        # User insert-mode escape aliases (jk, …), passed through to vim on the
+        # interactive path only.
+        self.escape_aliases = escape_aliases
+        # Show the motion target in-buffer (learn/practice) vs hide it (blind).
+        self.highlight_target = highlight_target
+        # Show the move/why/hint cheat-sheet in the GOAL pane (learn) vs hide it.
+        self.reveal_detail = reveal_detail
 
     def run(self, selected: list[Skill]) -> SessionSummary:
         """Drill each selected skill.  ``review`` returns an action string:
@@ -427,7 +462,12 @@ class DrillSession:
                 if present_next:
                     self.present(skill, challenge)
                 present_next = True
-                result = run_attempt(challenge, skill.category, editor=self.editor)
+                goal_extra = (reveal_pane_lines(skill, challenge)
+                              if self.reveal_detail else None)
+                result = run_attempt(challenge, skill.category, editor=self.editor,
+                                     escape_aliases=self.escape_aliases,
+                                     highlight_target=self.highlight_target,
+                                     goal_extra=goal_extra)
                 abstained = attempt_abstained(result, skill.category)
                 passed = (not abstained) and outcome_passed(result)
                 record = AttemptRecord(skill, challenge, result, passed,

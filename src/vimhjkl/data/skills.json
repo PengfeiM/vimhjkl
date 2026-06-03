@@ -16,7 +16,7 @@
       "challenges": [
         {
           "start": [
-            "the quick brown fox"
+            "deploy the staging build"
           ],
           "par_keys": 2,
           "hint": "a count in front of w repeats it",
@@ -26,14 +26,14 @@
           ],
           "target": [
             1,
-            11
+            12
           ],
           "solution": "2w",
-          "why": "Two word-jumps land on 'brown' in two keystrokes."
+          "why": "Two word-jumps land on 'staging' in two keystrokes."
         },
         {
           "start": [
-            "roll the dice now"
+            "restart the failed worker"
           ],
           "par_keys": 2,
           "hint": "count then w",
@@ -43,27 +43,10 @@
           ],
           "target": [
             1,
-            10
+            13
           ],
           "solution": "2w",
           "why": "w counts words, not characters — distance is irrelevant."
-        },
-        {
-          "start": [
-            "cat dog parrot"
-          ],
-          "par_keys": 1,
-          "hint": "Just a single 'w' will do!",
-          "start_cursor": [
-            1,
-            5
-          ],
-          "target": [
-            1,
-            9
-          ],
-          "solution": "w",
-          "why": "Move forward to 'parrot'."
         },
         {
           "start": [
@@ -185,15 +168,15 @@
       "challenges": [
         {
           "start": [
-            "valid line one",
+            "keep this record",
             "DELETE THIS LINE",
-            "valid line two"
+            "keep this one too"
           ],
           "par_keys": 3,
           "hint": "move down to the bad line, then delete it",
           "goal": [
-            "valid line one",
-            "valid line two"
+            "keep this record",
+            "keep this one too"
           ],
           "solution": "jdd",
           "why": "j reaches the line, dd removes it linewise."
@@ -943,24 +926,24 @@
       "challenges": [
         {
           "start": [
-            "a+b+c+d"
+            "1+2+3+4"
           ],
           "par_keys": 11,
           "hint": "find a +, substitute it with ' + ', then ;. repeats",
           "goal": [
-            "a + b + c + d"
+            "1 + 2 + 3 + 4"
           ],
           "solution": "f+s + <Esc>;.;.",
           "why": "Making BOTH the find (;) and the change (.) repeatable wins."
         },
         {
           "start": [
-            "x|y|z"
+            "mon|tue|wed"
           ],
           "par_keys": 9,
           "hint": "f| to the bar, s to ' / ', ;. for the rest",
           "goal": [
-            "x / y / z"
+            "mon / tue / wed"
           ],
           "solution": "f|s / <Esc>;.",
           "why": "The Dot Formula again: one find-repeat, one change-repeat."
@@ -1018,28 +1001,28 @@
       "challenges": [
         {
           "start": [
-            "clear the morning fog"
+            "close the stale connection"
           ],
           "par_keys": 3,
           "hint": "delete A word — it takes the trailing/leading space too",
           "goal": [
-            "clear the morning"
+            "close the connection"
           ],
           "start_cursor": [
             1,
-            19
+            11
           ],
           "solution": "daw",
           "why": "daw is one tidy change you can repeat; db then x is not."
         },
         {
           "start": [
-            "remove this word here"
+            "drop the redundant flag now"
           ],
           "par_keys": 5,
           "hint": "hop to the word, then daw",
           "goal": [
-            "remove this here"
+            "drop the flag now"
           ],
           "solution": "2wdaw",
           "why": "aw grabs the word plus a space so no double space is left."
@@ -1069,17 +1052,6 @@
         },
         {
           "start": [
-            "the the duplicate word"
-          ],
-          "par_keys": 3,
-          "hint": "kill the stutter",
-          "goal": [
-            "the duplicate word"
-          ],
-          "solution": "daw"
-        },
-        {
-          "start": [
             "chop chop chop wood"
           ],
           "par_keys": 4,
@@ -1089,17 +1061,6 @@
           ],
           "solution": "daw.",
           "why": "daw is dot-repeatable; db x is not."
-        },
-        {
-          "start": [
-            "remove ADJECTIVE please"
-          ],
-          "par_keys": 4,
-          "hint": "drop the loud word",
-          "goal": [
-            "remove please"
-          ],
-          "solution": "wdaw"
         }
       ]
     },
@@ -1209,24 +1170,24 @@
       "challenges": [
         {
           "start": [
-            "please delete these leftovers"
+            "the legacy auth module is dead"
           ],
           "par_keys": 3,
-          "hint": "delete the three throwaway words in one coherent change",
+          "hint": "delete the four stale words as one undo-chunk",
           "goal": [
-            "leftovers"
+            "is dead"
           ],
-          "solution": "d3w",
+          "solution": "d4w",
           "why": "A count keeps undo a single chunk — handy before more edits."
         },
         {
           "start": [
-            "just trust the process"
+            "really very urgent ticket"
           ],
           "par_keys": 3,
           "hint": "delete a word, then repeat with the dot",
           "goal": [
-            "the process"
+            "urgent ticket"
           ],
           "solution": "dw.",
           "why": "dw. gives word-at-a-time undo; back out with one u if you overshoot."
@@ -1368,57 +1329,57 @@
         "gU",
         "gu",
         "g~",
-        "gUaw"
+        "g~~"
       ],
       "difficulty": 2,
       "challenges": [
         {
           "start": [
-            "make this loud"
+            "http_method = get"
           ],
           "par_keys": 5,
-          "hint": "jump to the word, then UPPER-case inside it",
+          "hint": "HTTP verbs are constants — uppercase the value",
           "goal": [
-            "make THIS loud"
+            "http_method = GET"
           ],
-          "solution": "wgUiw",
-          "why": "gU is an operator; iw is its motion — pure grammar."
+          "solution": "$gUiw",
+          "why": "gU is the operator, iw its motion: turn a word into a constant."
         },
         {
           "start": [
-            "shout the whole line"
+            "warning: do not edit below"
           ],
           "par_keys": 3,
-          "hint": "double the operator to hit the whole line",
+          "hint": "double the operator to shout the whole banner line",
           "goal": [
-            "SHOUT THE WHOLE LINE"
+            "WARNING: DO NOT EDIT BELOW"
           ],
           "solution": "gUU",
           "why": "A doubled operator (gUU) acts linewise, like dd or >>."
         },
         {
           "start": [
-            "QUIET please"
+            "the SERVER restarted cleanly"
           ],
-          "par_keys": 4,
-          "hint": "lowercase inside the first word",
+          "par_keys": 5,
+          "hint": "tame the one word left in caps-lock",
           "goal": [
-            "quiet please"
+            "the server restarted cleanly"
           ],
-          "solution": "guiw",
-          "why": "guiw lowercases just the word under the cursor."
+          "solution": "wguiw",
+          "why": "guiw lowercases just the stray all-caps word, not the line."
         },
         {
           "start": [
-            "MixedCase Word"
+            "hELLO tEAM, gOOD mORNING"
           ],
           "par_keys": 3,
-          "hint": "swap case from the cursor to end of line",
+          "hint": "caps-lock was inverted for the whole line",
           "goal": [
-            "mIXEDcASE wORD"
+            "Hello Team, Good Morning"
           ],
-          "solution": "g~$",
-          "why": "g~ takes a motion too; $ carries it to the line end."
+          "solution": "g~~",
+          "why": "g~~ flips every character's case — undo a stuck caps-lock at once."
         },
         {
           "start": [
@@ -2631,34 +2592,34 @@
       "challenges": [
         {
           "start": [
-            "second",
-            "first",
-            "third"
+            "<h1>Welcome</h1>",
+            "<!DOCTYPE html>",
+            "<body>"
           ],
           "par_keys": 5,
-          "hint": "move line 2 ('first') to the very top",
+          "hint": "the doctype must come first — lift line 2 to the top",
           "goal": [
-            "first",
-            "second",
-            "third"
+            "<!DOCTYPE html>",
+            "<h1>Welcome</h1>",
+            "<body>"
           ],
           "solution": ":2m0<CR>",
           "why": ":m0 lifts a line to the top in one stroke."
         },
         {
           "start": [
-            "keep",
-            "wanderer",
-            "keep2",
-            "keep3"
+            "import sys",
+            "# fixme later",
+            "import os",
+            "run()"
           ],
           "par_keys": 5,
-          "hint": "send line 2 to the bottom of the file",
+          "hint": "banish the stray note to the bottom of the file",
           "goal": [
-            "keep",
-            "keep2",
-            "keep3",
-            "wanderer"
+            "import sys",
+            "import os",
+            "run()",
+            "# fixme later"
           ],
           "solution": ":2m$<CR>",
           "why": ":m$ relocates a line to the end without any yanking."
@@ -2768,62 +2729,32 @@
       "challenges": [
         {
           "start": [
-            "base"
+            "- [ ] review the PR"
           ],
           "par_keys": 6,
-          "hint": "duplicate the line once, then @: repeats the duplication",
+          "hint": "duplicate the checklist line, then @: repeats it",
           "goal": [
-            "base",
-            "base",
-            "base"
+            "- [ ] review the PR",
+            "- [ ] review the PR",
+            "- [ ] review the PR"
           ],
           "solution": ":t.<CR>@:",
           "why": "@: replays :t. — the dot command can't repeat Ex commands."
         },
         {
           "start": [
-            "x",
-            "y",
-            "z"
+            "log.debug('a')",
+            "log.debug('b')"
           ],
           "par_keys": 5,
           "hint": "copy line 1 to the end (the base for an @: repeat)",
           "goal": [
-            "x",
-            "y",
-            "z",
-            "x"
+            "log.debug('a')",
+            "log.debug('b')",
+            "log.debug('a')"
           ],
           "solution": ":1t$<CR>",
           "why": "Run it once, and @: would append line 1 again."
-        },
-        {
-          "start": [
-            "echo"
-          ],
-          "par_keys": 8,
-          "hint": "duplicate a line, then repeat the ex command twice",
-          "goal": [
-            "echo",
-            "echo",
-            "echo",
-            "echo"
-          ],
-          "solution": ":t.<CR>@:@@",
-          "why": "@: replays the last Ex command; @@ repeats that."
-        },
-        {
-          "start": [
-            "log"
-          ],
-          "par_keys": 6,
-          "hint": "triple a line with one repeat",
-          "goal": [
-            "log",
-            "log",
-            "log"
-          ],
-          "solution": ":t.<CR>@:"
         }
       ]
     },
@@ -3352,12 +3283,16 @@
         },
         {
           "start": [
-            "remove[this]keep"
+            "scores[0].push(x)"
           ],
           "par_keys": 3,
-          "hint": "delete through the closing bracket, inclusive",
+          "hint": "delete the index, bracket and all",
           "goal": [
-            "keep"
+            "scores.push(x)"
+          ],
+          "start_cursor": [
+            1,
+            7
           ],
           "solution": "df]",
           "why": "df] includes the bracket; dt] would leave it behind."
@@ -3377,6 +3312,22 @@
           ],
           "solution": "ct;NEW<Esc>",
           "why": "ct; swaps the value and stops cleanly before the ;."
+        },
+        {
+          "start": [
+            "git push origin main"
+          ],
+          "par_keys": 3,
+          "hint": "delete the remote, stopping before 'main'",
+          "goal": [
+            "git push main"
+          ],
+          "start_cursor": [
+            1,
+            10
+          ],
+          "solution": "dtm",
+          "why": "dt{char} deletes up to a landmark you can see, no counting."
         }
       ]
     },
@@ -3466,7 +3417,7 @@
             "Bacon",
             "Lettuce"
           ],
-          "par_keys": 3,
+          "par_keys": 2,
           "hint": "Take your pick and go to the bacon's end.",
           "start_cursor": [
             1,
@@ -3476,16 +3427,16 @@
             3,
             7
           ],
-          "solution": "3G$",
+          "solution": "G$",
           "why": "$ skips to the juicy part—er, end."
         },
         {
           "start": [
-            "Batman's greatest secret:    ",
-            "He's really nice!"
+            "Batman's greatest secret:",
+            "    he is really nice"
           ],
-          "par_keys": 3,
-          "hint": "Unmask the next line's start.",
+          "par_keys": 2,
+          "hint": "drop to the hard left of the last line, past its indent",
           "start_cursor": [
             1,
             15
@@ -3494,17 +3445,17 @@
             2,
             1
           ],
-          "solution": "2G0",
-          "why": "0 always catches the first act."
+          "solution": "G0",
+          "why": "G lands on the first non-blank; 0 then snaps to column one."
         },
         {
           "start": [
             "Pineapple",
-            "Pizza is",
+            "    Pizza is the best",
             "a delight."
           ],
           "par_keys": 3,
-          "hint": "Be the true start of the controversial dish.",
+          "hint": "jump to the line, then snap to its hard left edge",
           "start_cursor": [
             3,
             4
@@ -3513,15 +3464,15 @@
             2,
             1
           ],
-          "solution": "2G^",
-          "why": "^ rejects whitespace, embracing beginnings."
+          "solution": "2G0",
+          "why": "2G lands on the first non-blank; 0 reaches true column one."
         },
         {
           "start": [
             "Snorlax used Snore!",
             "It's super effective..."
           ],
-          "par_keys": 3,
+          "par_keys": 2,
           "hint": "Feel the effectiveness of reaching the end.",
           "start_cursor": [
             1,
@@ -3531,7 +3482,7 @@
             2,
             23
           ],
-          "solution": "2G$",
+          "solution": "G$",
           "why": "$ captures completeness, like Snorlax's nap."
         },
         {
@@ -3610,7 +3561,7 @@
             "    addIngredient('eye of newt');",
             "}"
           ],
-          "par_keys": 3,
+          "par_keys": 2,
           "hint": "Potion requires precision; find the core ingredient.",
           "start_cursor": [
             1,
@@ -3620,26 +3571,27 @@
             2,
             5
           ],
-          "solution": "j2^",
+          "solution": "j^",
           "why": "^ conjures magic by aligning on essentials."
         },
         {
           "start": [
             "Spaghetti code",
-            "    is just pasta"
+            "    is just pasta",
+            "reheated daily"
           ],
           "par_keys": 3,
-          "hint": "Start untangling where the pasta begins.",
+          "hint": "jump to the middle line, then shoot to its end",
           "start_cursor": [
             1,
             5
           ],
           "target": [
             2,
-            5
+            17
           ],
-          "solution": "2G^",
-          "why": "^ skips the twisty white space."
+          "solution": "2G$",
+          "why": "$ reaches the line end no matter how long the line is."
         },
         {
           "start": [
@@ -3879,11 +3831,11 @@
       "challenges": [
         {
           "start": [
-            "alpha beta",
-            "gamma delta",
-            "epsilon zeta"
+            "import os",
+            "import json",
+            "from db import pool"
           ],
-          "par_keys": 4,
+          "par_keys": 6,
           "hint": "search a couple of unique letters to leap there",
           "start_cursor": [
             1,
@@ -3891,18 +3843,18 @@
           ],
           "target": [
             3,
-            1
+            16
           ],
-          "solution": "/ep<CR>",
-          "why": "/ep is unique, so one short search lands on 'epsilon'."
+          "solution": "/pool<CR>",
+          "why": "/pool is unique, so one short search lands on it."
         },
         {
           "start": [
-            "the quick fox",
-            "jumps over",
-            "the lazy dog"
+            "def parse():",
+            "    return None",
+            "def render():"
           ],
-          "par_keys": 5,
+          "par_keys": 8,
           "hint": "search the word to fly straight to it",
           "start_cursor": [
             1,
@@ -3910,9 +3862,9 @@
           ],
           "target": [
             3,
-            10
+            5
           ],
-          "solution": "/dog<CR>",
+          "solution": "/render<CR>",
           "why": "A search motion crosses lines that f{char} cannot."
         },
         {
@@ -4086,19 +4038,35 @@
       "challenges": [
         {
           "start": [
-            "the swift otter dives"
+            "color = crimson"
           ],
-          "par_keys": 10,
-          "hint": "the cursor sits on the word — change just it",
+          "par_keys": 8,
+          "hint": "the cursor sits on the value — change just it",
           "goal": [
-            "the silent otter dives"
+            "color = teal"
           ],
           "start_cursor": [
             1,
-            5
+            9
           ],
-          "solution": "ciwsilent<Esc>",
+          "solution": "ciwteal<Esc>",
           "why": "ciw replaces the whole word from anywhere inside it."
+        },
+        {
+          "start": [
+            "tmp = computeTotal()"
+          ],
+          "par_keys": 10,
+          "hint": "rename the variable without selecting it first",
+          "goal": [
+            "result = computeTotal()"
+          ],
+          "start_cursor": [
+            1,
+            1
+          ],
+          "solution": "ciwresult<Esc>",
+          "why": "ciw swaps the identifier under the cursor in one move."
         },
         {
           "start": [
@@ -4155,18 +4123,6 @@
             "wizard casts pancakes"
           ],
           "solution": "$ciwpancakes<Esc>"
-        },
-        {
-          "start": [
-            "keep DELETEME keep"
-          ],
-          "par_keys": 4,
-          "hint": "diw deletes, leaving the spaces",
-          "goal": [
-            "keep  keep"
-          ],
-          "solution": "wdiw",
-          "why": "that double space is why you change with ciw, not diw."
         }
       ]
     },
@@ -4314,14 +4270,18 @@
       "challenges": [
         {
           "start": [
-            "remove this adjective please"
+            "the quick temporary hack works"
           ],
-          "par_keys": 5,
-          "hint": "hop to the word, delete A word (with its space)",
+          "par_keys": 3,
+          "hint": "delete A word — it takes the trailing space too",
           "goal": [
-            "remove this please"
+            "the quick hack works"
           ],
-          "solution": "2wdaw",
+          "start_cursor": [
+            1,
+            11
+          ],
+          "solution": "daw",
           "why": "daw leaves no double space; diw would."
         },
         {
@@ -4347,6 +4307,22 @@
           ],
           "solution": "f(di(",
           "why": "di( empties the parentheses but keeps them."
+        },
+        {
+          "start": [
+            "data = arr[old_index]"
+          ],
+          "par_keys": 3,
+          "hint": "empty the subscript but keep the brackets",
+          "goal": [
+            "data = arr[]"
+          ],
+          "start_cursor": [
+            1,
+            12
+          ],
+          "solution": "di[",
+          "why": "di[ clears inside [ ] without removing them."
         }
       ]
     },
@@ -4680,6 +4656,23 @@
           ],
           "solution": "%",
           "why": "% respects nesting — it skips the inner pair correctly."
+        },
+        {
+          "start": [
+            "matrix = [1, 2, 3, 4]"
+          ],
+          "par_keys": 1,
+          "hint": "leap from the open bracket to its closing ]",
+          "start_cursor": [
+            1,
+            10
+          ],
+          "target": [
+            1,
+            21
+          ],
+          "solution": "%",
+          "why": "% matches [ ] too, not just parentheses."
         },
         {
           "start": [
@@ -5288,22 +5281,6 @@
         },
         {
           "start": [
-            "first",
-            "MOVE THIS",
-            "last"
-          ],
-          "par_keys": 9,
-          "hint": "cut the middle line into a register, paste it at the bottom",
-          "goal": [
-            "first",
-            "last",
-            "MOVE THIS"
-          ],
-          "solution": "j\"addG\"ap",
-          "why": "\"add deletes into register a without touching the unnamed register."
-        },
-        {
-          "start": [
             "title: Dragons",
             "body line"
           ],
@@ -5771,21 +5748,6 @@
             "BLUE"
           ],
           "solution": "qagUiwqu:%normal @a<CR>"
-        },
-        {
-          "start": [
-            "task one",
-            "task two",
-            "task three"
-          ],
-          "par_keys": 19,
-          "hint": "append a semicolon to all lines independently",
-          "goal": [
-            "task one;",
-            "task two;",
-            "task three;"
-          ],
-          "solution": "qaA;<Esc>qu:%normal @a<CR>"
         }
       ]
     },
@@ -5816,15 +5778,15 @@
         },
         {
           "start": [
-            "cat or dog or cat"
+            "logo.png hero.jpg icon.png"
           ],
-          "par_keys": 22,
+          "par_keys": 23,
           "hint": "\\v makes ( ) and | special with no backslashes",
           "goal": [
-            "pet or pet or pet"
+            "logo.webp hero.webp icon.webp"
           ],
-          "solution": ":%s/\\v(cat|dog)/pet/g<CR>",
-          "why": "Alternation reads naturally under \\v: (cat|dog)."
+          "solution": ":%s/\\v(png|jpg)/webp/g<CR>",
+          "why": "Alternation reads naturally under \\v: migrate (png|jpg) at once."
         },
         {
           "start": [
@@ -6915,15 +6877,15 @@
         {
           "start": [
             "name, role, team",
-            "alice, admin, ops",
-            "bob, guest, web"
+            "marisol, admin, ops",
+            "devin, guest, web"
           ],
           "par_keys": 9,
           "hint": "no g flag — only the FIRST comma on each line becomes a colon",
           "goal": [
             "name: role, team",
-            "alice: admin, ops",
-            "bob: guest, web"
+            "marisol: admin, ops",
+            "devin: guest, web"
           ],
           "solution": ":%s/,/:/<CR>",
           "why": "Default :s is first-per-line; here that turns each row into key: value."
@@ -7010,14 +6972,14 @@
       "challenges": [
         {
           "start": [
-            "cat dog bird"
+            "fast simple free"
           ],
           "par_keys": 16,
-          "hint": "& is the matched word; wrap it in brackets",
+          "hint": "& is the matched word; wrap each in markdown emphasis",
           "goal": [
-            "[cat] [dog] [bird]"
+            "*fast* *simple* *free*"
           ],
-          "solution": ":%s/\\v\\w+/[&]/g<CR>",
+          "solution": ":%s/\\v\\w+/*&*/g<CR>",
           "why": "& replays the match, so you decorate without retyping it."
         },
         {
@@ -7034,18 +6996,6 @@
         },
         {
           "start": [
-            "rocket ship plane"
-          ],
-          "par_keys": 16,
-          "hint": "Put each match between parentheses using &.",
-          "goal": [
-            "(rocket) (ship) (plane)"
-          ],
-          "solution": ":%s/\\v\\w+/(&)/g<CR>",
-          "why": "Replaying the match with & lets you add decorations efficiently."
-        },
-        {
-          "start": [
             "1234-5678-91011"
           ],
           "par_keys": 16,
@@ -7055,30 +7005,6 @@
           ],
           "solution": ":%s/\\v\\d+/<&>/g<CR>",
           "why": "& repeats the match so you can add stuff around it."
-        },
-        {
-          "start": [
-            "sun moon star"
-          ],
-          "par_keys": 16,
-          "hint": "& repeats the match; enclose with single quotes.",
-          "goal": [
-            "'sun' 'moon' 'star'"
-          ],
-          "solution": ":%s/\\v\\w+/'&'/g<CR>",
-          "why": "Use & to surround each word without typing it again."
-        },
-        {
-          "start": [
-            "giraffe elephant monkey"
-          ],
-          "par_keys": 18,
-          "hint": "Use <<&>> to wrap each word.",
-          "goal": [
-            "<<giraffe>> <<elephant>> <<monkey>>"
-          ],
-          "solution": ":%s/\\v\\w+/<<&>>/g<CR>",
-          "why": "& allows quick decoration of words without rewriting."
         },
         {
           "start": [
@@ -7094,78 +7020,6 @@
         },
         {
           "start": [
-            "strawberry banana kiwi"
-          ],
-          "par_keys": 16,
-          "hint": "Wrap matches in curly braces using &.",
-          "goal": [
-            "{strawberry} {banana} {kiwi}"
-          ],
-          "solution": ":%s/\\v\\w+/{&}/g<CR>",
-          "why": "& is your shortcut for elegant text wrapping."
-        },
-        {
-          "start": [
-            "alpha beta gamma"
-          ],
-          "par_keys": 16,
-          "hint": "Surround words with quotes using &.",
-          "goal": [
-            "\"alpha\" \"beta\" \"gamma\""
-          ],
-          "solution": ":%s/\\v\\w+/\"&\"/g<CR>",
-          "why": "& enables efficient reuse of the matched text."
-        },
-        {
-          "start": [
-            "red blue green"
-          ],
-          "par_keys": 18,
-          "hint": "Insert -- around each word with &.",
-          "goal": [
-            "--red-- --blue-- --green--"
-          ],
-          "solution": ":%s/\\v\\w+/--&--/g<CR>",
-          "why": "& offers a quick way to embellish matches."
-        },
-        {
-          "start": [
-            "ham cheese pickle"
-          ],
-          "par_keys": 18,
-          "hint": "[[&]] is handy to bracket each match.",
-          "goal": [
-            "[[ham]] [[cheese]] [[pickle]]"
-          ],
-          "solution": ":%s/\\v\\w+/[[&]]/g<CR>",
-          "why": "& avoids redundant typing for enclosing matches."
-        },
-        {
-          "start": [
-            "lamp table chair"
-          ],
-          "par_keys": 16,
-          "hint": "Underscore wrap each word using &.",
-          "goal": [
-            "_lamp_ _table_ _chair_"
-          ],
-          "solution": ":%s/\\v\\w+/_&_/g<CR>",
-          "why": "& facilitates efficient styling of text."
-        },
-        {
-          "start": [
-            "run jump skip"
-          ],
-          "par_keys": 16,
-          "hint": "Keep it simple: '&' those verbs with quotes.",
-          "goal": [
-            "'run' 'jump' 'skip'"
-          ],
-          "solution": ":%s/\\v\\w+/'&'/g<CR>",
-          "why": "Add quotes to matches without retyping using &."
-        },
-        {
-          "start": [
             "123 456 789"
           ],
           "par_keys": 15,
@@ -7175,18 +7029,6 @@
           ],
           "solution": ":%s/\\v\\d+/#&/g<CR>",
           "why": "& makes prefixing each match a breeze."
-        },
-        {
-          "start": [
-            "book pen paper"
-          ],
-          "par_keys": 17,
-          "hint": "Prefix each word with a smile using &.",
-          "goal": [
-            "^_^book ^_^pen ^_^paper"
-          ],
-          "solution": ":%s/\\v\\w+/^_^&/g<CR>",
-          "why": "& allows for playful prefixes in a snap."
         }
       ]
     },
@@ -8851,7 +8693,7 @@
       "challenges": [
         {
           "start": [
-            "user: alice",
+            "user: priya",
             "admin: root",
             "user: carol",
             "guest: anon",
@@ -8861,7 +8703,7 @@
           "par_keys": 23,
           "hint": "on user lines only, append a tag at end-of-line",
           "goal": [
-            "user: alice [member]",
+            "user: priya [member]",
             "admin: root",
             "user: carol [member]",
             "guest: anon",

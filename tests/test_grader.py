@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from vimhjkl.challenge import Challenge
 from vimhjkl.grader import (
     run_attempt, find_editor, count_keystrokes, strip_quit, _last_command_line,
+    _goal_window_script,
 )
 
 ESC = "\x1b"
@@ -47,6 +48,25 @@ def unit_checks():
           str(_last_command_line(b":s/a/b/g\r:wq\r")))
     check("quit-only -> no command",
           _last_command_line(b"dd:wq\r") is None)
+    # escape aliases fold to one Esc so there's no efficiency penalty for them.
+    check("jk alias counts as 1 (= par's Esc)",
+          count_keystrokes(b"ciwHELLOjk:wq\r", ["jk"]) == 9,
+          str(count_keystrokes(b"ciwHELLOjk:wq\r", ["jk"])))
+    check("no alias -> jk stays 2 keystrokes",
+          count_keystrokes(b"ciwHELLOjk:wq\r") == 10,
+          str(count_keystrokes(b"ciwHELLOjk:wq\r")))
+    # goal side-pane: buffer drills show the goal buffer; motion drills (no goal
+    # buffer) show a "go to the highlighted place" pane keyed off the target.
+    buf_pane = _goal_window_script(["alpha", "beta"])
+    check("buffer pane shows goal lines",
+          "make it look like this" in buf_pane and "alpha" in buf_pane)
+    mot_pane = _goal_window_script([], motion_target=(3, 8))
+    check("motion pane says go to highlighted place",
+          "go to the highlighted place" in mot_pane
+          and "line 3, col 8" in mot_pane,
+          mot_pane)
+    check("motion pane uses :q quit statusline (not :wq save)",
+          ":q quit" in mot_pane and ":wq save" not in mot_pane)
 
 
 # --- integration: one challenge per category, played back through vim -------

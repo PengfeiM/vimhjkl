@@ -17,14 +17,14 @@ import time
 from functools import partial
 from typing import Optional
 
-from . import store, tui
+from . import store, tui, config
 from .challenge import Skill, Challenge, CATEGORIES, is_cursor_category
 from .engine import (
     DrillSession, AttemptRecord, SessionSummary,
     select_due_skills, select_weak_skills, mastery_summary, is_due,
     is_grooved, MASTERY_REPS,
     pick_challenge, outcome_passed, attempt_abstained, run_attempt,
-    EFFICIENCY_FLOOR,
+    reveal_pane_lines, EFFICIENCY_FLOOR,
 )
 from .grader import find_editor
 
@@ -250,7 +250,9 @@ def _show_result(record: AttemptRecord, show_moves: bool = True,
 
 def run_drill(skills: list[Skill], progress: dict, count: int,
               new_gate: Optional[int] = None, mode: str = "learn",
-              show_moves: bool = True) -> None:
+              show_moves: bool = True,
+              escape_aliases: Optional[list[str]] = None,
+              blind_all: bool = False) -> None:
     if find_editor() is None:
         print(tui.c("No vim or nvim found on PATH — install one, or try "
                     "`--review` for the no-vim flashcards.", tui.RED))
@@ -260,10 +262,15 @@ def run_drill(skills: list[Skill], progress: dict, count: int,
     # Auto-gate new skills by belt rank unless the caller forced one.
     if new_gate is None:
         new_gate = mastery_summary(skills, progress)["new_gate"]
-    # Blind mode recalls what you already know — it never introduces brand-new
-    # skills.  The pool grows on its own as Learn/Practice/Grind mark skills seen.
-    include_new = mode != "blind"
-    selected = select_due_skills(skills, progress, count, new_gate=new_gate,
+    # Blind mode defaults to recalling what you already know — it never introduces
+    # brand-new skills (the pool grows on its own as Learn/Practice/Grind mark
+    # skills seen).  "Blind-all" (cold) opts INTO unseen skills: it bypasses the
+    # difficulty gate and a cold miss marks the skill seen, pulling it into normal
+    # scheduling.
+    cold = mode == "blind" and blind_all
+    include_new = mode != "blind" or blind_all
+    selected = select_due_skills(skills, progress, count,
+                                 new_gate=None if cold else new_gate,
                                  include_new=include_new, rng=random.Random())
     if not selected:
         if not include_new:
@@ -275,7 +282,10 @@ def run_drill(skills: list[Skill], progress: dict, count: int,
     present = partial(_show_task, mode=mode)
     review = partial(_show_result, show_moves=show_moves, mode=mode)
     session = DrillSession(skills, progress, present=present, review=review,
-                           on_record=lambda: store.save_progress(progress))
+                           on_record=lambda: store.save_progress(progress),
+                           escape_aliases=escape_aliases,
+                           highlight_target=(mode != "blind"),
+                           reveal_detail=(mode == "learn"))
     summary = session.run(selected)
     store.save_progress(progress)
     _show_summary(summary, skills, progress, mode=mode)
@@ -339,7 +349,8 @@ def _show_practice_result(record: AttemptRecord, show_moves: bool = True,
 
 
 def run_practice(skills: list[Skill], progress: dict, count: int,
-                 show_moves: bool = True) -> None:
+                 show_moves: bool = True,
+                 escape_aliases: Optional[list[str]] = None) -> None:
     if find_editor() is None:
         print(tui.c("No vim or nvim found on PATH — install one, or try "
                     "`--review` for the no-vim flashcards.", tui.RED))
@@ -372,7 +383,10 @@ def run_practice(skills: list[Skill], progress: dict, count: int,
             if present_next:
                 _show_task(skill, challenge, mode="practice")
             present_next = True
-            result = run_attempt(challenge, skill.category)
+            result = run_attempt(challenge, skill.category,
+                                 escape_aliases=escape_aliases,
+                                 highlight_target=True,
+                                 goal_extra=reveal_pane_lines(skill, challenge))
             abstained = attempt_abstained(result, skill.category)
             if not abstained:
                 genuine_attempt = True
@@ -409,7 +423,8 @@ DEFAULT_GRIND_REPS = 6
 
 
 def run_grind(skills: list[Skill], progress: dict, reps: int,
-              new_gate: Optional[int] = None, show_moves: bool = True) -> None:
+              new_gate: Optional[int] = None, show_moves: bool = True,
+              escape_aliases: Optional[list[str]] = None) -> None:
     """Drill a SINGLE skill ``reps`` times back-to-back, recording every rep, so
     you groove one move into muscle memory in one sitting (depth, vs the breadth
     of a normal session).  Each rep is a fresh random instance of the same skill
@@ -444,7 +459,10 @@ def run_grind(skills: list[Skill], progress: dict, reps: int,
         if present_next:
             _show_task(skill, challenge, mode="grind", rep=(done + 1, reps))
         present_next = True
-        result = run_attempt(challenge, skill.category)
+        result = run_attempt(challenge, skill.category,
+                             escape_aliases=escape_aliases,
+                             highlight_target=True,
+                             goal_extra=reveal_pane_lines(skill, challenge))
         abstained = attempt_abstained(result, skill.category)
         passed = (not abstained) and outcome_passed(result)
         record = AttemptRecord(skill, challenge, result, passed, abstained=abstained)
@@ -471,6 +489,35 @@ def run_grind(skills: list[Skill], progress: dict, reps: int,
             break
         challenge = pick_challenge(skill, rng)
     _show_summary(summary, skills, progress, mode="grind")
+
+
+def _most_missed_lines(skills: list[Skill], progress: dict,
+                       limit: int = 5) -> list[str]:
+    """The techniques you fail most — so mistakes are visible, not buried.  Ranked
+    by fail count, tie-broken by a recent fail then a low box.  Empty if you have
+    not missed anything yet."""
+    pdata = progress.get("skills", {})
+    missed = []
+    for s in skills:
+        e = pdata.get(s.id) or {}
+        fails = e.get("fails", 0)
+        if fails > 0:
+            missed.append((s, e, fails))
+    if not missed:
+        return []
+    missed.sort(key=lambda t: (t[2], t[1].get("last_result") == "fail",
+                               -t[1].get("box", 1)), reverse=True)
+    out = [tui.c("most-missed moves — what trips you up", tui.BOLD + tui.RED)]
+    for s, e, fails in missed[:limit]:
+        seen = e.get("seen", 0)
+        rate = f"{fails}/{seen}" if seen else f"{fails}"
+        box = e.get("box", 1)
+        flag = tui.c(" ← failed last time", tui.RED) if e.get("last_result") == "fail" else ""
+        out.append("  " + tui.c(f"✗ {fails:>2}", tui.RED) + "  "
+                   + tui.c(f"{s.title[:34]:<34}", tui.RESET)
+                   + tui.c(f"  missed {rate}  · box {box}", tui.GREY) + flag)
+    out.append(tui.c("Tip: Practice mode drills exactly these.", tui.YELLOW))
+    return out
 
 
 def _belt_header(skills: list[Skill], progress: dict) -> list[str]:
@@ -620,11 +667,14 @@ _STATUS = {
     "learned":  ("★ learned",   "GREEN"),    # box 5: you know the move, still racking up reps
     "resting":  ("· resting",   "GREY"),     # solid for now, will resurface later
     "locked":   ("· locked",    "GREY"),     # above your current unlock level
+    "off":      ("✕ off",       "GREY"),     # switched off in Settings -> never scheduled
 }
 
 
 def _skill_status(skill: Skill, entry: dict, now: float,
-                  new_gate: Optional[int]) -> str:
+                  new_gate: Optional[int], disabled: bool = False) -> str:
+    if disabled:
+        return "off"
     if not entry.get("last_seen", 0.0):
         if new_gate is None or skill.difficulty <= new_gate:
             return "new"
@@ -652,7 +702,7 @@ def _conf_color(conf: float) -> str:
 
 
 def _skill_line(skill: Skill, entry: dict, now: float,
-                new_gate: Optional[int]) -> str:
+                new_gate: Optional[int], disabled: bool = False) -> str:
     conf = _confidence(entry)
     ccol = _conf_color(conf)
     conf_str = tui.c(f"{conf:.2f}", ccol)
@@ -666,14 +716,18 @@ def _skill_line(skill: Skill, entry: dict, now: float,
         reps_str = tui.c(f"{min(reps, MASTERY_REPS):>2}/{MASTERY_REPS}", rcol)
     stars = tui.c("★" * skill.difficulty + "☆" * (5 - skill.difficulty), tui.YELLOW)
     title = skill.title if len(skill.title) <= 28 else skill.title[:27] + "…"
-    btext, bname = _STATUS[_skill_status(skill, entry, now, new_gate)]
+    btext, bname = _STATUS[_skill_status(skill, entry, now, new_gate, disabled)]
     badge = tui.c(btext, getattr(tui, bname))
     return f"  {conf_str} {bar} {reps_str}  {stars}  {title.ljust(28)}  {badge}"
 
 
-def run_list(skills: list[Skill], progress: dict) -> None:
+def run_list(skills: list[Skill], progress: dict, cfg: Optional[dict] = None) -> None:
     now = time.time()
-    m = mastery_summary(skills, progress)
+    cfg = cfg if cfg is not None else config.load()
+    off = config.disabled_set(cfg)
+    # Belt/mastery reflect only the lessons in play (disabled ones excluded), but
+    # the list itself shows everything so off lessons stay visible/re-enableable.
+    m = mastery_summary([s for s in skills if s.id not in off], progress)
     new_gate = m["new_gate"]
     pdata = progress.get("skills", {})
 
@@ -683,7 +737,8 @@ def run_list(skills: list[Skill], progress: dict) -> None:
     acc_pct = round(100 * total_pass / total_seen) if total_seen else 0
     counts = {k: 0 for k in _STATUS}
     for s in skills:
-        counts[_skill_status(s, pdata.get(s.id, {}), now, new_gate)] += 1
+        counts[_skill_status(s, pdata.get(s.id, {}), now, new_gate,
+                             s.id in off)] += 1
 
     header = _belt_header(skills, progress)
     header.append(
@@ -701,6 +756,9 @@ def run_list(skills: list[Skill], progress: dict) -> None:
         by_cat.setdefault(s.category, []).append(s)
 
     lines: list[str] = []
+    missed = _most_missed_lines(skills, progress)
+    if missed:
+        lines += missed + [""]
     for cat in CATEGORIES:
         group = by_cat.get(cat, [])
         if not group:
@@ -709,7 +767,8 @@ def run_list(skills: list[Skill], progress: dict) -> None:
         lines.append(tui.c(f"  {cat}", tui.BOLD + tui.MAGENTA)
                      + tui.c(f"   ({len(group)} skills)", tui.GREY))
         for s in sorted(group, key=lambda x: (x.difficulty, x.id)):
-            lines.append(_skill_line(s, pdata.get(s.id, {}), now, new_gate))
+            lines.append(_skill_line(s, pdata.get(s.id, {}), now, new_gate,
+                                     s.id in off))
 
     tui.pager("vimhjkl curriculum", lines,
               subtitle="your confidence, accuracy, and what's queued to repeat",
@@ -717,12 +776,379 @@ def run_list(skills: list[Skill], progress: dict) -> None:
 
 
 # ---------------------------------------------------------------------------
+# settings — lessons on/off + escape-key aliases (config.json, not progress)
+# ---------------------------------------------------------------------------
+
+def _lesson_rows(skills: list[Skill], cfg: dict) -> list[dict]:
+    """Flatten the curriculum into selectable rows for the toggle page: a header
+    row per category (toggles the whole group) followed by its skills.  Skill rows
+    carry the teach text + key_commands so the detail panel can describe them."""
+    by_cat: dict[str, list[Skill]] = {}
+    for s in skills:
+        by_cat.setdefault(s.category, []).append(s)
+    rows: list[dict] = []
+    for cat in CATEGORIES:
+        group = by_cat.get(cat, [])
+        if not group:
+            continue
+        ids = [s.id for s in group]
+        on = sum(1 for s in group if not config.is_disabled(cfg, s.id))
+        spec = CATEGORIES.get(cat)
+        rows.append({"kind": "cat", "cat": cat, "ids": ids, "on": on,
+                     "total": len(group), "blurb": spec.blurb if spec else ""})
+        for s in sorted(group, key=lambda x: (x.difficulty, x.id)):
+            rows.append({"kind": "skill", "id": s.id, "title": s.title,
+                         "diff": s.difficulty, "category": s.category,
+                         "teach": s.teach, "keys": s.key_commands,
+                         "enabled": not config.is_disabled(cfg, s.id)})
+    return rows
+
+
+# A state slider sized and drawn like the curriculum confidence bar (width 6, same
+# ▓/░ blocks as tui.progress_bar): a coloured knob block sits at the matching
+# position — LEFT + red = off, MIDDLE + yellow = partly on, RIGHT + green = on.
+_SWITCH_W = 7      # curriculum bar is 6; +10% rounds up to 7
+_KNOB_W = 3        # the coloured knob block (wider than a single cell)
+_SWITCH_COLOR = {"off": tui.RED, "partial": tui.YELLOW, "on": tui.GREEN}
+
+
+def _switch(state: str) -> str:
+    color = _SWITCH_COLOR[state]
+    # Slide the knob block to the LEFT (off), MIDDLE (partial) or RIGHT (on).
+    start = {"off": 0,
+             "partial": (_SWITCH_W - _KNOB_W) // 2,
+             "on": _SWITCH_W - _KNOB_W}[state]
+    return "".join(
+        tui.c("▓", color + tui.BOLD) if start <= i < start + _KNOB_W
+        else tui.c("░", tui.GREY)
+        for i in range(_SWITCH_W)
+    )
+
+
+def _lesson_row_text(row: dict, selected: bool, title_max: int = 40) -> str:
+    pointer = tui.c(" ▸ ", tui.CYAN + tui.BOLD) if selected else "   "
+    if row["kind"] == "cat":
+        state = ("on" if row["on"] == row["total"]
+                 else "off" if row["on"] == 0 else "partial")
+        label = tui.c(row["cat"], tui.BOLD + tui.MAGENTA)
+        tail = tui.c(f"  ({row['on']}/{row['total']} on)", tui.GREY)
+        return pointer + _switch(state) + " " + label + tail
+    sw = _switch("on" if row["enabled"] else "off")
+    stars = tui.c("★" * row["diff"], tui.YELLOW)
+    title = row["title"] if len(row["title"]) <= title_max else row["title"][:title_max - 1] + "…"
+    col = tui.RESET if row["enabled"] else tui.GREY
+    return pointer + "  " + sw + "   " + tui.c(title, col) + "  " + stars
+
+
+def _lesson_match_indices(rows: list[dict], query: str) -> list[int]:
+    """Row indices matching a ``/`` search — case-insensitive substring over a
+    lesson's title + its keys (or a category's name)."""
+    q = query.lower().strip()
+    if not q:
+        return []
+    out = []
+    for i, r in enumerate(rows):
+        if r["kind"] == "skill":
+            hay = (r["title"] + " " + " ".join(r.get("keys", []))).lower()
+        else:
+            hay = r["cat"].lower()
+        if q in hay:
+            out.append(i)
+    return out
+
+
+def _lesson_detail_lines(row: dict, width: int) -> list[str]:
+    """The side panel describing the highlighted row: a category's purpose, or a
+    skill's keys + what it teaches.  Plain wrapped to ``width`` columns."""
+    out: list[str] = []
+    if row["kind"] == "cat":
+        out.append(tui.c(row["cat"], tui.BOLD + tui.MAGENTA))
+        out.append(tui.c(f"{row['on']}/{row['total']} lessons on", tui.GREY))
+        out.append("")
+        for ln in tui.wrap_plain(row["blurb"], width):
+            out.append(tui.c(ln, tui.RESET))
+        out.append("")
+        out.append(tui.c("space toggles the whole group.", tui.YELLOW))
+        return out
+    out.append(tui.c(row["title"], tui.BOLD + tui.CYAN))
+    diff = row["diff"]
+    out.append(tui.c("★" * diff + "☆" * (5 - diff), tui.YELLOW)
+               + tui.c(f"  difficulty {diff}/5", tui.GREY))
+    out.append(tui.c(("● enabled" if row["enabled"] else "✕ off — skipped"),
+                     tui.GREEN if row["enabled"] else tui.GREY))
+    out.append("")
+    if row["keys"]:
+        out.append(tui.c("keys", tui.BOLD))
+        for ln in tui.wrap_plain("  ".join(row["keys"]), width):
+            out.append(tui.c(ln, tui.YELLOW))
+        out.append("")
+    out.append(tui.c("what it is", tui.BOLD))
+    for ln in tui.wrap_plain(row["teach"], width):
+        out.append(tui.c(ln, tui.GREY))
+    return out
+
+
+def run_lessons(skills: list[Skill], cfg: dict) -> None:
+    """Apple-Settings-style on/off page: toggle individual lessons or a whole
+    category.  Disabled lessons are excluded from every session (and the belt
+    maths) but stay listed here so they can be switched back on."""
+    if not skills:
+        tui.clear()
+        tui.banner("lessons", "nothing to configure")
+        print(tui.c("  No curriculum loaded.", tui.YELLOW))
+        tui.pause()
+        return
+    state = {"sel": 0, "top": 0, "count": "", "g": False,
+             "searching": False, "query": "", "search_start": 0}
+
+    def render() -> str:
+        rows = _lesson_rows(skills, cfg)
+        n = len(rows)
+        state["sel"] = max(0, min(state["sel"], n - 1))
+        size = shutil.get_terminal_size((80, 24))
+        cols, lines = size.columns, size.lines
+        view_h = max(6, lines - 10)
+        # Insert a blank SEPARATOR before each category so the groups read as
+        # distinct elements with a gap between them.  Separators are visual only —
+        # NOT in `rows` — so selection/toggle/navigation are unaffected, and the
+        # cursor + rnu gutter stay in lesson units (one j = one lesson, gaps
+        # skipped).  `display` entries are a row index, or None for a gap line.
+        display: list = []
+        for i, r in enumerate(rows):
+            if r["kind"] == "cat" and display:
+                display.append(None)
+            display.append(i)
+        dn = len(display)
+        sel_disp = display.index(state["sel"])
+        # keep the cursor inside the window (in display-line units)
+        if sel_disp < state["top"]:
+            state["top"] = sel_disp
+        elif sel_disp >= state["top"] + view_h:
+            state["top"] = sel_disp - view_h + 1
+        state["top"] = max(0, min(state["top"], max(0, dn - view_h)))
+
+        # Two columns with a clear boundary: the lesson list on the left, a detail
+        # panel on the right.  BOTH columns are width-capped and every cell is
+        # truncated to its column, so no line can ever exceed the terminal and wrap
+        # onto a second row (which is what made the frame grow and 'jump').  The
+        # gap is a padded vertical rule so the boundary actually reads as one.
+        gap = "   " + tui.c("│", tui.GREY) + "   "      # 7 visible columns
+        gap_w = 7
+        if cols >= 84:
+            left_w = min(58, cols - 28 - gap_w)
+            side_w = min(42, cols - left_w - gap_w)
+            if side_w < 26:                            # not enough room -> no panel
+                side_w, left_w = 0, min(76, cols - 4)
+        else:
+            side_w, left_w = 0, min(76, cols - 4)
+        # Row = rnu gutter (3) + prefix (margin+pointer+switch+gaps) + title + 2 +
+        # up to 5 stars; cap the title so the longest row never overflows the
+        # divider.
+        title_max = max(14, left_w - 27)
+
+        detail = _lesson_detail_lines(rows[state["sel"]], side_w) if side_w else []
+
+        body: list[str] = []
+        for k in range(view_h):
+            di = state["top"] + k
+            if di < dn and display[di] is not None:
+                i = display[di]
+                left = ("  " + tui.rnu_gutter(i, state["sel"], i == state["sel"])
+                        + _lesson_row_text(rows[i], i == state["sel"], title_max))
+            else:
+                left = ""        # separator gap or past the end of the list
+            left = tui.pad_visible(tui.truncate_visible(left, left_w), left_w)
+            if side_w:
+                right = tui.truncate_visible(detail[k] if k < len(detail) else "",
+                                             side_w)
+                body.append(left + gap + right)
+            else:
+                body.append(left)
+
+        off_n = len(config.disabled_set(cfg))
+        head = [
+            tui.c(f"{len(skills) - off_n} of {len(skills)} lessons on", tui.GREEN)
+            + tui.c(f"   ·   {off_n} off (skipped in every mode)", tui.GREY),
+            tui.c("★ = difficulty (1–5)", tui.YELLOW)
+            + tui.c("   ·   ", tui.GREY) + _switch("on") + tui.c(" on  ", tui.GREY)
+            + _switch("off") + tui.c(" off  ", tui.GREY)
+            + _switch("partial") + tui.c(" part  ·  a category row toggles all",
+                                         tui.GREY),
+        ]
+        out = ["", tui.c("  ⚔  lessons — what to drill", tui.BOLD + tui.CYAN),
+               tui.c("     turn techniques on/off; off ones never appear", tui.GREY),
+               tui.rule()]
+        out += ["  " + h for h in head]
+        out += [tui.rule()] + body + [tui.rule()]
+        if state["searching"]:
+            matches = _lesson_match_indices(_lesson_rows(skills, cfg), state["query"])
+            hits = (tui.c(f"   ({len(matches)} match)", tui.GREEN) if matches
+                    else tui.c("   (no match)", tui.RED) if state["query"] else "")
+            out.append(tui.c("  /", tui.CYAN + tui.BOLD)
+                       + tui.c(state["query"] + "█", tui.BOLD) + hits
+                       + tui.c("    Enter keep · Esc cancel", tui.GREY))
+        else:
+            foot = tui.c("  j/k move · / search · gg/G ends · space toggle · q back",
+                         tui.GREY)
+            if state["count"]:
+                foot += tui.c(f"   {state['count']}", tui.YELLOW + tui.BOLD)
+            out.append(foot)
+        # Belt-and-braces: no rendered line may exceed the terminal width, or it
+        # wraps and the frame 'jumps' on the next redraw.
+        out = [tui.truncate_visible(line, cols) for line in out]
+        return "\033[2J\033[H" + "\r\n".join(out) + "\r\n"
+
+    def on_key(k: str) -> Optional[str]:
+        rows = _lesson_rows(skills, cfg)
+        n = len(rows)
+        # --- incremental / search mode -----------------------------------
+        if state["searching"]:
+            if k == "ENTER":             # keep the match, leave search mode
+                state["searching"] = False
+            elif k == "ESC":             # cancel -> back to where we started
+                state["searching"] = False
+                state["sel"] = state["search_start"]
+                state["query"] = ""
+            elif k in ("\x7f", "\x08"):  # backspace
+                state["query"] = state["query"][:-1]
+            elif len(k) == 1 and k.isprintable():
+                state["query"] += k
+            m = _lesson_match_indices(rows, state["query"])
+            if m:                        # jump to the first match as you type
+                state["sel"] = m[0]
+            return None
+        if k == "/":                     # open search
+            state.update(searching=True, query="", search_start=state["sel"])
+            return None
+        if k in ("n", "N") and state["query"]:   # cycle matches
+            m = _lesson_match_indices(rows, state["query"])
+            if m:
+                if k == "n":
+                    state["sel"] = next((i for i in m if i > state["sel"]), m[0])
+                else:
+                    state["sel"] = next((i for i in reversed(m)
+                                         if i < state["sel"]), m[-1])
+            return None
+        # --- normal navigation -------------------------------------------
+        if k.isdigit():
+            state["count"] += k          # build a vim count for the next motion
+            state["g"] = False
+            return None
+        if k == "g":                     # gg -> top
+            if state["g"]:
+                state["sel"], state["g"] = 0, False
+            else:
+                state["g"] = True
+                return None
+        elif k in ("UP", "k", "DOWN", "j", "G"):
+            state["sel"] = tui._count_move(state["sel"], n, k, state["count"])
+        elif k in ("ENTER", " "):
+            row = rows[state["sel"]]
+            if row["kind"] == "cat":
+                all_on = row["on"] == row["total"]
+                config.set_many_disabled(cfg, row["ids"], disabled=all_on)
+            else:
+                config.set_disabled(cfg, row["id"], disabled=row["enabled"])
+            config.save(cfg)
+        elif k in ("ESC", "q", "Q"):
+            return "exit"
+        state["count"], state["g"] = "", False
+        return None
+
+    tui.live_view(render, on_key)
+
+
+def run_escape_aliases(cfg: dict) -> None:
+    """Configure insert-mode escape aliases (e.g. jk -> <Esc>).  Plain prompt:
+    the value is just a short list of letter aliases."""
+    tui.clear()
+    tui.banner("escape keys", "map a key sequence to <Esc> in drills")
+    cur = config.escape_aliases(cfg)
+    print(tui.c("  Insert-mode aliases that leave Insert mode, e.g. ", tui.RESET)
+          + tui.c("jk", tui.BOLD) + tui.c(" or ", tui.RESET) + tui.c("jj", tui.BOLD)
+          + tui.c(".", tui.RESET))
+    print(tui.c("  They apply only inside live drills (not the menu).", tui.GREY))
+    print(tui.c("  Your alias counts as ONE keystroke (same as <Esc>) — no "
+                "efficiency penalty for using it.", tui.GREEN))
+    print()
+    print(tui.c("  current: ", tui.CYAN)
+          + (tui.c("  ".join(cur), tui.BOLD) if cur else tui.c("(none)", tui.GREY)))
+    print(tui.rule())
+    raw = tui.prompt_line("aliases (space/comma separated, blank to clear, "
+                          "Enter keeps current): ")
+    if raw.strip() == "":
+        return
+    aliases = [a for a in re.split(r"[\s,]+", raw.strip()) if a]
+    valid = [a for a in aliases if a.isalpha() and 1 <= len(a) <= 3]
+    config.set_escape_aliases(cfg, valid)
+    config.save(cfg)
+    rejected = [a for a in aliases if a not in valid]
+    tui.clear()
+    tui.banner("escape keys", "saved")
+    saved = config.escape_aliases(cfg)
+    print(tui.c("  now active: ", tui.GREEN)
+          + (tui.c("  ".join(saved), tui.BOLD) if saved else tui.c("(none)", tui.GREY)))
+    if rejected:
+        print(tui.c("  ignored (letters only, 1–3 chars): " + " ".join(rejected),
+                    tui.YELLOW))
+    print(tui.rule())
+    tui.pause()
+
+
+def run_settings(skills: list[Skill], cfg: dict) -> None:
+    while True:
+        off_n = len(config.disabled_set(cfg))
+        aliases = config.escape_aliases(cfg)
+        choice = tui.menu(
+            "settings",
+            [
+                ("lessons", "Lessons on/off",
+                 f"{len(skills) - off_n}/{len(skills)} on — pick what to drill"),
+                ("escape", "Escape keys",
+                 ("aliases: " + " ".join(aliases)) if aliases
+                 else "map jk/jj to <Esc> in drills"),
+                ("back", "Back", ""),
+            ],
+            subtitle="tune the trainer to your setup",
+        )
+        if choice in (None, "back"):
+            return
+        if choice == "lessons":
+            run_lessons(skills, cfg)
+        elif choice == "escape":
+            run_escape_aliases(cfg)
+
+
+# ---------------------------------------------------------------------------
 # menu / main
 # ---------------------------------------------------------------------------
 
-def interactive_menu(skills: list[Skill], progress: dict,
+def _blind_is_cold(enabled: list[Skill]) -> Optional[bool]:
+    """Ask which Blind flavour to run: recall-known vs cold blind-all.  Returns
+    True for cold, False for recall, or None if cancelled."""
+    pick = tui.menu(
+        "blind — choose your challenge",
+        [
+            ("recall", "Recall what you know",
+             "only skills you've already been taught — pure memory"),
+            ("cold", "Blind-all (cold)",
+             "throw ANY skill at you, even ones you've never seen"),
+        ],
+        subtitle="cold mode ignores the difficulty gate; a cold miss counts as seen",
+    )
+    if pick is None:
+        return None
+    return pick == "cold"
+
+
+def interactive_menu(skills: list[Skill], progress: dict, cfg: dict,
                      show_moves: bool = True) -> None:
     while True:
+        # SINGLE filter point: schedule (and rank) only enabled lessons, so a
+        # switched-off skill never appears AND never drags the belt down.  The
+        # full list still feeds the curriculum + settings views.
+        enabled = config.enabled_skills(skills, cfg)
+        aliases = config.escape_aliases(cfg)
         choice = tui.menu(
             "vimhjkl — pick up where vimtutor stopped",
             [
@@ -732,27 +1158,37 @@ def interactive_menu(skills: list[Skill], progress: dict,
                 ("grind",    "Grind",      f"drill ONE skill {DEFAULT_GRIND_REPS}× back-to-back to burn it in"),
                 ("review",   "Review",     "no-vim flashcards, away from a good terminal"),
                 ("list",     "Curriculum", "your belt, every skill, and its mastery"),
+                ("settings", "Settings",   "lessons on/off, escape-key aliases"),
                 ("quit",     "Quit",       ""),
             ],
             subtitle="a dojo for the tricks vimtutor never taught you",
-            header_lines=_belt_header(skills, progress),
+            header_lines=_belt_header(enabled, progress),
         )
         if choice in (None, "quit"):
             tui.clear()
             print(tui.c("\n  keep your fingers on the home row. ✌\n", tui.CYAN))
             return
         if choice == "learn":
-            run_drill(skills, progress, count=10, mode="learn", show_moves=show_moves)
+            run_drill(enabled, progress, count=10, mode="learn",
+                      show_moves=show_moves, escape_aliases=aliases)
         elif choice == "blind":
-            run_drill(skills, progress, count=10, mode="blind", show_moves=show_moves)
+            cold = _blind_is_cold(enabled)
+            if cold is None:
+                continue
+            run_drill(enabled, progress, count=10, mode="blind",
+                      show_moves=show_moves, escape_aliases=aliases, blind_all=cold)
         elif choice == "practice":
-            run_practice(skills, progress, count=10, show_moves=show_moves)
+            run_practice(enabled, progress, count=10, show_moves=show_moves,
+                         escape_aliases=aliases)
         elif choice == "grind":
-            run_grind(skills, progress, reps=DEFAULT_GRIND_REPS, show_moves=show_moves)
+            run_grind(enabled, progress, reps=DEFAULT_GRIND_REPS,
+                      show_moves=show_moves, escape_aliases=aliases)
         elif choice == "review":
-            run_review(skills, progress, count=10)
+            run_review(enabled, progress, count=10)
         elif choice == "list":
-            run_list(skills, progress)
+            run_list(skills, progress, cfg)
+        elif choice == "settings":
+            run_settings(skills, cfg)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -766,6 +1202,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--mode", choices=("learn", "blind"), default="learn",
                    help="drill mode for --drill: learn (read the move first) "
                         "or blind (no hints). Default: learn")
+    p.add_argument("--blind-all", action="store_true",
+                   help="with --mode blind: go cold — include skills you've never "
+                        "seen (ignores the difficulty gate)")
     p.add_argument("--practice", action="store_true",
                    help="remedial session: retry the skills you keep missing")
     p.add_argument("--reps", nargs="?", const=DEFAULT_GRIND_REPS, type=int,
@@ -791,6 +1230,10 @@ def main(argv: Optional[list[str]] = None) -> int:
     show_moves = not args.hide_moves
     skills = store.load_skills()
     progress = store.load_progress()
+    cfg = config.load()
+    # Single filter point for CLI-flag sessions too: drill only enabled lessons.
+    enabled = config.enabled_skills(skills, cfg)
+    aliases = config.escape_aliases(cfg)
 
     problems = [p for s in skills for p in s.validate()]
     if problems:
@@ -806,19 +1249,21 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     try:
         if args.review is not None:
-            run_review(skills, progress, count=args.review)
+            run_review(enabled, progress, count=args.review)
         elif args.list:
-            run_list(skills, progress)
+            run_list(skills, progress, cfg)
         elif args.reps is not None:
-            run_grind(skills, progress, reps=args.reps, new_gate=args.gate,
-                      show_moves=show_moves)
+            run_grind(enabled, progress, reps=args.reps, new_gate=args.gate,
+                      show_moves=show_moves, escape_aliases=aliases)
         elif args.practice:
-            run_practice(skills, progress, count=args.count, show_moves=show_moves)
+            run_practice(enabled, progress, count=args.count, show_moves=show_moves,
+                         escape_aliases=aliases)
         elif args.drill:
-            run_drill(skills, progress, count=args.count, new_gate=args.gate,
-                      mode=args.mode, show_moves=show_moves)
+            run_drill(enabled, progress, count=args.count, new_gate=args.gate,
+                      mode=args.mode, show_moves=show_moves, escape_aliases=aliases,
+                      blind_all=args.blind_all)
         else:
-            interactive_menu(skills, progress, show_moves=show_moves)
+            interactive_menu(skills, progress, cfg, show_moves=show_moves)
     except KeyboardInterrupt:
         # Ctrl-C anywhere closes the app cleanly.  Per-attempt saves already
         # flushed finished work; flush once more defensively, no traceback.

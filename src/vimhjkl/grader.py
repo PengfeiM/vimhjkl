@@ -88,15 +88,32 @@ _INTERACTIVE_SETTINGS = (
 )
 
 
+def _vim_str(s: str) -> str:
+    """A Vimscript single-quoted string literal of ``s`` (own quotes doubled)."""
+    return "'" + s.replace("'", "''") + "'"
+
+
 def _vim_list(lines: list[str]) -> str:
     """A Vimscript single-quoted list literal of ``lines`` (own quotes doubled)."""
-    return "[" + ",".join("'" + ln.replace("'", "''") + "'" for ln in lines) + "]"
+    return "[" + ",".join(_vim_str(ln) for ln in lines) + "]"
 
 
-def _goal_window_script(goal: list[str]) -> str:
+def _goal_window_script(goal: list[str],
+                        extra: Optional[list[str]] = None,
+                        motion_target: Optional[tuple[int, int]] = None) -> str:
     """A small vim script (to be ``:source``d) that pins the GOAL beside the
     edit buffer during an interactive drill, so the target is in view instead of
     held in memory.
+
+    For buffer-graded drills the pane shows the goal buffer ("make it look like
+    this").  For ``motion`` drills there is no goal buffer — pass
+    ``motion_target=(line, col)`` and the pane instead says to land the cursor on
+    the highlighted cell.  Either way the quit-remap/window machinery is identical
+    (a motion drill quits with a bare ``:q`` → ``qall``).
+
+    ``extra`` (Learn/Practice/Grind only — never Blind) adds a reference block
+    below the goal: the idiomatic move, why, hint and key family, so the side
+    pane is a full cheat-sheet while you practise rather than just the target.
 
     Layout: edit buffer on the LEFT, a read-only GOAL pane on the RIGHT.  The
     pane is a throwaway ``nofile`` scratch buffer (never written, wiped on
@@ -114,13 +131,26 @@ def _goal_window_script(goal: list[str]) -> str:
     at startup, so it is never logged to the scriptout — keystroke counts are
     unchanged.
     """
-    # The pane is decorative (never graded — grading reads the edit buffer on
-    # disk), so it carries a little wording above the target to say what it is.
-    pane = [
-        "  GOAL — make it look like this:",
-        "  (edit the buffer on the left to match)",
-        "",
-    ] + list(goal)
+    # The pane is decorative (never graded — grading reads the edit buffer / the
+    # final cursor), so it carries a little wording above the target to say what
+    # it is.
+    if motion_target is not None:
+        ln, col = motion_target
+        pane = [
+            "  GOAL — go to the highlighted place:",
+            f"  land the cursor on line {ln}, col {col},",
+            "  then quit with  :q",
+        ]
+        statusline = " ── GOAL ──   :q quit · read-only "
+    else:
+        pane = [
+            "  GOAL — make it look like this:",
+            "  (edit the buffer on the left to match)",
+            "",
+        ] + list(goal)
+        statusline = " ── GOAL ──   :wq save · :q! bail · read-only "
+    if extra:
+        pane += ["", "  ── how to do it ──", ""] + list(extra)
     return "\n".join([
         "cnoreabbrev <expr> wq (getcmdtype()==':'&&getcmdline()=~#'^wq$')?'xall':'wq'",
         "cnoreabbrev <expr> x  (getcmdtype()==':'&&getcmdline()=~#'^x$')?'xall':'x'",
@@ -131,7 +161,7 @@ def _goal_window_script(goal: list[str]) -> str:
         f"call setline(1, {_vim_list(pane)})",
         "setlocal buftype=nofile bufhidden=wipe nomodifiable "
         "nonumber norelativenumber nocursorline nolist nospell",
-        "let &l:statusline=' ── GOAL ──   :wq save · :q! bail · read-only '",
+        f"let &l:statusline={_vim_str(statusline)}",
         # Snug to the pane's own widest line (header or goal), but never wider
         # than half the terminal — the edit window keeps a fair share so its
         # lines don't wrap while you work.
@@ -142,11 +172,26 @@ def _goal_window_script(goal: list[str]) -> str:
     ])
 
 
+def _target_highlight_cmd(line: int, col: int) -> str:
+    """A single Ex command (for ``-c``) that paints the motion target cell — black
+    on yellow, mirroring the pre-launch screen's highlight — using ``matchaddpos``
+    so it works on both vim and nvim and needs no plugin.  A column past the end of
+    the line simply highlights nothing (no error).  The ``|`` joins the highlight
+    definition and the match call; neither is a mapping, so the bar is safe here."""
+    return (
+        "highlight VimhjklTarget cterm=bold ctermfg=0 ctermbg=11 "
+        "gui=bold guifg=#000000 guibg=#ffd54a "
+        f"| call matchaddpos('VimhjklTarget', [[{line}, {col}]])"
+    )
+
+
 def _build_argv(editor: str, tmpfile: str, scriptout: str, cursorfile: str,
                 playback: Optional[str],
                 start_cursor: Optional[list[int]] = None,
                 interactive: bool = False,
-                goal_script: Optional[str] = None) -> list[str]:
+                goal_script: Optional[str] = None,
+                escape_aliases: Optional[list[str]] = None,
+                highlight_cmd: Optional[str] = None) -> list[str]:
     # -u NONE / -i NONE : clean config so par counts are stable and no user
     #   autocmd (format-on-save, trim-whitespace, …) can mangle the buffer.
     # -N : nocompatible (matters for vim; harmless for nvim).
@@ -160,6 +205,21 @@ def _build_argv(editor: str, tmpfile: str, scriptout: str, cursorfile: str,
     # of these affect key counts.  Niceties only when a human is watching.
     if interactive:
         argv += ["-c", _INTERACTIVE_SETTINGS]
+        # User-chosen insert-mode escape aliases (jk, jj, …).  One `-c inoremap`
+        # each — they can't share a `-c` because a map's {rhs} swallows a trailing
+        # `|`.  Capped so the total `-c` count stays well under nvim's limit of 10.
+        # Injected via `-c` (not the scriptout), so the MAPPING costs nothing.  The
+        # alias bytes the user types ARE logged, but `_collapse_aliases` folds them
+        # back to one Esc in the count, so an alias costs one keystroke just like Esc
+        # — no efficiency penalty (the build replay passes no aliases, so par, built
+        # with a literal Esc=1, is unchanged).
+        for alias in (escape_aliases or [])[:5]:
+            argv += ["-c", f"inoremap {alias} <Esc>"]
+        # Mark the motion target IN the buffer (learn/practice only) so a player
+        # who dives straight in still sees where to land.  Display-only via `-c`,
+        # so it never touches the keystroke count.
+        if highlight_cmd:
+            argv += ["-c", highlight_cmd]
         # Pin the goal beside the buffer (buffer-graded categories only — cursor
         # drills already highlight their target and have no goal buffer).  The
         # script ends focused back on the edit window, so the start-cursor jump
@@ -181,7 +241,10 @@ def _build_argv(editor: str, tmpfile: str, scriptout: str, cursorfile: str,
 
 def run_attempt(challenge: Challenge, category: str,
                 playback: Optional[str] = None,
-                editor: Optional[str] = None) -> GradeResult:
+                editor: Optional[str] = None,
+                escape_aliases: Optional[list[str]] = None,
+                highlight_target: bool = False,
+                goal_extra: Optional[list[str]] = None) -> GradeResult:
     """Launch vim on ``challenge.start`` and grade the outcome.
 
     If ``playback`` is given (a string of keystrokes, ``\\x1b`` for Esc), vim
@@ -214,17 +277,33 @@ def run_attempt(challenge: Challenge, category: str,
         with open(playback_file, "wb") as fh:
             fh.write(playback.encode("utf-8"))
 
-    # Show the goal in a side pane during interactive drills, but not for cursor
-    # (motion) categories — those navigate a fixed buffer to a highlighted target
-    # and carry no goal buffer to display.
+    # Show the goal in a side pane during interactive drills.  Buffer-graded
+    # drills show the goal buffer; motion drills (no goal buffer) show a "go to
+    # the highlighted place" pane keyed off the target — but ONLY when the target
+    # is also highlighted (learn/practice/grind), so BLIND motion stays bare.
+    cursor_cat = is_cursor_category(category)
+    motion_pane = cursor_cat and highlight_target and challenge.target is not None
     goal_script: Optional[str] = None
-    if interactive and not is_cursor_category(category) and challenge.goal:
+    if interactive and ((not cursor_cat and challenge.goal) or motion_pane):
+        target = (int(challenge.target[0]), int(challenge.target[1])) \
+            if motion_pane else None
         goal_script = os.path.join(workdir, "goal.vim")
         with open(goal_script, "w", encoding="utf-8") as fh:
-            fh.write(_goal_window_script(challenge.goal))
+            fh.write(_goal_window_script(challenge.goal, goal_extra,
+                                         motion_target=target))
+
+    # Highlight the motion target cell in the buffer (cursor categories only, and
+    # only when the caller wants the training-wheel — learn/practice, never blind).
+    highlight_cmd: Optional[str] = None
+    if interactive and motion_pane:
+        ln, col = int(challenge.target[0]), int(challenge.target[1])
+        highlight_cmd = _target_highlight_cmd(ln, col)
+
     argv = _build_argv(editor, tmpfile, scriptout, cursorfile, playback_file,
                        start_cursor=challenge.start_cursor, interactive=interactive,
-                       goal_script=goal_script)
+                       goal_script=goal_script,
+                       escape_aliases=escape_aliases if interactive else None,
+                       highlight_cmd=highlight_cmd)
 
     try:
         if playback is not None:
@@ -245,8 +324,10 @@ def run_attempt(challenge: Challenge, category: str,
     raw_keys = clean_scriptout(_read_bytes(scriptout))
     final_cursor = _read_cursor(cursorfile)
     norm_keys = _normalized_bytes(raw_keys)   # typo/Esc-normalised, quit intact
-    keystrokes = count_keystrokes(raw_keys)
-    keys_typed = _render_tokens(_effective_tokens(raw_keys))
+    # Fold the player's escape aliases (jk → Esc) into the count so the comfort
+    # mapping costs one keystroke, not two — no efficiency penalty for using it.
+    keystrokes = count_keystrokes(raw_keys, escape_aliases)
+    keys_typed = _render_tokens(_effective_tokens(raw_keys, escape_aliases))
     # `saved` / command detection run on the normalised stream so a ':wq' typed
     # with a corrected typo is still recognised as a write / quit.
     command_line = _last_command_line(norm_keys)
@@ -382,14 +463,33 @@ def _normalized_bytes(raw: bytes) -> bytes:
     return b"".join(_normalize_tokens(_tokenize(clean_scriptout(raw))))
 
 
-def _effective_tokens(raw: bytes) -> list[bytes]:
-    """The logical keys we score: normalised, with a recognised trailing quit gone."""
-    return _tokenize(strip_quit(_normalized_bytes(raw)))
+def _collapse_aliases(raw: bytes, aliases: Optional[list[str]]) -> bytes:
+    """Fold each insert-mode escape alias (jk, jj, …) back into a single ``<Esc>``
+    byte, so using an alias costs ONE keystroke just like pressing Esc — no penalty
+    for the comfort mapping.  (par is built with a literal ``<Esc>`` = 1, and Esc
+    itself still works, so this just lets the alias match that.)  Longest aliases
+    first, so ``jjk`` is folded before ``jj``.  A bare-normal-mode occurrence of the
+    same letters would also fold, but in these drills that sequence is never a real
+    optimal move, and the only effect is a slightly lenient efficiency score."""
+    if not aliases:
+        return raw
+    for a in sorted((a for a in aliases if a), key=len, reverse=True):
+        raw = raw.replace(a.encode("utf-8"), b"\x1b")
+    return raw
 
 
-def count_keystrokes(raw: bytes) -> int:
-    """Effective keystrokes: logical keys after typo/Esc-normalisation, minus quit."""
-    return len(_effective_tokens(raw))
+def _effective_tokens(raw: bytes,
+                      aliases: Optional[list[str]] = None) -> list[bytes]:
+    """The logical keys we score: normalised, escape-aliases folded to one Esc,
+    with a recognised trailing quit gone."""
+    body = _collapse_aliases(strip_quit(_normalized_bytes(raw)), aliases)
+    return _tokenize(body)
+
+
+def count_keystrokes(raw: bytes, aliases: Optional[list[str]] = None) -> int:
+    """Effective keystrokes: logical keys after typo/Esc-normalisation and alias
+    folding, minus the trailing quit."""
+    return len(_effective_tokens(raw, aliases))
 
 
 # Readable names for multi-byte tokens; 0x1c–0x1f have no clean <C-letter> form.

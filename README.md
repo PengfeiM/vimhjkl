@@ -26,8 +26,10 @@ practise the move instead of remembering it.
 - [Install](#install)
 - [Usage](#usage)
 - [How it works](#how-it-works)
+  - [Progression](#progression)
 - [Contributing](#contributing)
 - [License](#license)
+- [Star History](#star-history)
 
 ## Install
 
@@ -98,6 +100,41 @@ The curriculum and your mastery:
 
 </details>
 
+### Progression
+
+There is **one** mastery model, shared by every mode. Learn, Blind, Practice,
+Grind, and even the no-editor Review flashcards all write to the same boxes — the
+mode only changes how much help you see *before* you edit, never whether the
+result counts. You don't "level up from Blind only"; a clean solve in Learn counts
+exactly the same.
+
+What moves the needle is committing a **passing** attempt: correct *and* efficient
+(no more than 2× the verified par in keystrokes). Quitting a buffer drill without
+saving is an *abstain* — it leaves your mastery untouched, so stopping early never
+costs you.
+
+Mastery has two axes:
+
+- **Leitner box (1 → 5)** — *do you know the move?* A pass bumps the box up one (a
+  fail knocks it down one), filling in after ~3–4 good reps. The box drives how
+  soon a skill comes back, your belt rank, and which new skills unlock.
+- **Reps toward grooved (25)** — *have you drilled it into muscle memory?* A
+  box-maxed skill keeps resurfacing on the normal schedule until it has 25 clean
+  reps; only then is it `✦ grooved` and moves to a rare maintenance schedule. One
+  later fail drops the box and pulls it straight back into active review.
+
+New material is gated by difficulty: harder skills unlock only once the tier below
+them is mastered, so the curriculum opens up as your boxes fill rather than
+dumping everything at once.
+
+| Mode     | Recording                                                       |
+|----------|----------------------------------------------------------------|
+| Learn    | One outcome per attempt                                        |
+| Blind    | One outcome per attempt                                        |
+| Practice | One outcome per skill (best of your retries — no thrash)       |
+| Grind    | Every rep counts (depth toward the 25)                         |
+| Review   | Self-rated: `j` promote · `f` demote · `k` skip                |
+
 ## Contributing
 
 Adding a technique is a data change, not an engine change. See
@@ -107,3 +144,13 @@ run the tests.
 ## License
 
 [MIT](LICENSE)
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=S-Sigdel%2Fvimhjkl&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=S-Sigdel/vimhjkl&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=S-Sigdel/vimhjkl&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=S-Sigdel/vimhjkl&type=date&legend=top-left" />
+ </picture>
+</a>
