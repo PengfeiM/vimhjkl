@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "vimhjkl"
-version = "0.4.0"
+version = "0.4.1"
 description = "A terminal trainer that drills advanced Vim techniques in real vim/nvim and grades your keystrokes."
 readme = "README.md"
 license = "MIT"
