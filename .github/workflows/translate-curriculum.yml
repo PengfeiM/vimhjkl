@@ -1,0 +1,107 @@
+name: Translate curriculum
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/vimhjkl/data/skills.json"
+  workflow_dispatch:
+    inputs:
+      locale:
+        description: "Locale to update (e.g. zh-CN)"
+        required: false
+        default: "zh-CN"
+      skill:
+        description: "Single skill ID to translate (optional)"
+        required: false
+        default: ""
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Detect curriculum changes
+        id: detect
+        env:
+          LOCALE: ${{ inputs.locale || 'zh-CN' }}
+        run: |
+          uv run python scripts/detect_curriculum_changes.py \
+            --locale "$LOCALE" \
+            --format json > /tmp/detect-result.json
+          echo "manifest=$(cat /tmp/detect-result.json | jq -c .)" >> "$GITHUB_OUTPUT"
+
+          CHANGED=$(jq -r '.changed' /tmp/detect-result.json)
+          STALE=$(jq -r '.locale_stale // false' /tmp/detect-result.json)
+          if [ "$CHANGED" = "true" ] || [ "$STALE" = "true" ]; then
+            echo "needs_update=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needs_update=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate translations
+        if: steps.detect.outputs.needs_update == 'true'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          LOCALE: ${{ inputs.locale || 'zh-CN' }}
+          SKILL: ${{ inputs.skill || '' }}
+        run: |
+          ARGS="--locale $LOCALE"
+          if [ -n "$SKILL" ]; then
+            ARGS="$ARGS --skill $SKILL"
+          fi
+          uv run python scripts/generate_translation.py $ARGS
+
+      - name: Validate translations
+        if: steps.detect.outputs.needs_update == 'true'
+        env:
+          LOCALE: ${{ inputs.locale || 'zh-CN' }}
+        run: |
+          uv run python scripts/validate_translation.py \
+            --locale "src/vimhjkl/data/i18n/$LOCALE.json" \
+            --skills src/vimhjkl/data/skills.json \
+            --schema src/vimhjkl/data/i18n/i18n-schema.json \
+            --strict
+
+      - name: Check for changes
+        id: changed
+        if: steps.detect.outputs.needs_update == 'true'
+        run: |
+          if [ -n "$(git status --porcelain src/vimhjkl/data/i18n/)" ]; then
+            echo "locale_updated=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "locale_updated=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create Pull Request
+        id: pr
+        if: steps.changed.outputs.locale_updated == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "i18n: auto-update ${{ inputs.locale || 'zh-CN' }} translation"
+          title: "i18n: auto-update ${{ inputs.locale || 'zh-CN' }} translation"
+          body: |
+            Auto-generated translation update for **${{ inputs.locale || 'zh-CN' }}**.
+
+            Triggered by changes to `src/vimhjkl/data/skills.json`.
+
+            - [ ] Review translations for accuracy
+            - [ ] Ensure Vim literals remain untranslated
+            - [ ] Verify glossary consistency
+          branch: i18n/auto-${{ inputs.locale || 'zh-CN' }}
+          base: main
+          labels: i18n, automated

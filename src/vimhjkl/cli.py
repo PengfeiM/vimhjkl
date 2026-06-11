@@ -302,7 +302,8 @@ def run_drill(skills: list[Skill], progress: dict, count: int,
               show_moves: bool = True,
               blind_all: bool = False,
               remaps: Optional[list[dict]] = None,
-              cfg: Optional[dict] = None) -> None:
+              cfg: Optional[dict] = None,
+              lang: str = "en") -> None:
     if find_editor() is None:
         print(tui.c("No vim or nvim found on PATH — install one, or try "
                     "`--review` for the no-vim flashcards.", tui.RED))
@@ -348,7 +349,8 @@ def run_drill(skills: list[Skill], progress: dict, count: int,
                            highlight_target=(mode != "blind"),
                            reveal_detail=(mode == "learn"),
                            free_form=cold, remaps=remaps,
-                           on_disable=_disabler(cfg))
+                           on_disable=_disabler(cfg),
+                           locale=lang)
     summary = session.run(selected)
     sweep = None
     if cold:
@@ -454,7 +456,8 @@ def _show_practice_result(record: AttemptRecord, show_moves: bool = True,
 def run_practice(skills: list[Skill], progress: dict, count: int,
                  show_moves: bool = True,
                  remaps: Optional[list[dict]] = None,
-                 cfg: Optional[dict] = None) -> None:
+                 cfg: Optional[dict] = None,
+                 lang: str = "en") -> None:
     if find_editor() is None:
         print(tui.c("No vim or nvim found on PATH — install one, or try "
                     "`--review` for the no-vim flashcards.", tui.RED))
@@ -491,7 +494,8 @@ def run_practice(skills: list[Skill], progress: dict, count: int,
                                  highlight_target=True,
                                  goal_extra=reveal_pane_lines(skill, challenge,
                                                               remaps=remaps),
-                                 remaps=remaps)
+                                 remaps=remaps,
+                                 locale=lang)
             abstained = attempt_abstained(result, skill.category)
             if not abstained:
                 genuine_attempt = True
@@ -581,7 +585,8 @@ def run_grind(skills: list[Skill], progress: dict, reps: int,
               new_gate: Optional[int] = None, show_moves: bool = True,
               skill: Optional[Skill] = None,
               remaps: Optional[list[dict]] = None,
-              cfg: Optional[dict] = None) -> None:
+              cfg: Optional[dict] = None,
+              lang: str = "en") -> None:
     """Drill a SINGLE skill ``reps`` times back-to-back, recording every rep, so
     you groove one move into muscle memory in one sitting (depth, vs the breadth
     of a normal session).  Each rep is a fresh random instance of the same skill
@@ -627,7 +632,8 @@ def run_grind(skills: list[Skill], progress: dict, reps: int,
                              highlight_target=True,
                              goal_extra=reveal_pane_lines(skill, challenge,
                                                           remaps=remaps),
-                             remaps=remaps)
+                             remaps=remaps,
+                             locale=lang)
         abstained = attempt_abstained(result, skill.category)
         passed = (not abstained) and outcome_passed(result)
         record = AttemptRecord(skill, challenge, result, passed, abstained=abstained)
@@ -1350,10 +1356,56 @@ def _remap_remove(cfg: dict, cur: list[dict]) -> None:
     config.save(cfg)
 
 
-def run_settings(skills: list[Skill], cfg: dict) -> None:
+def _available_locales() -> list[str]:
+    """Discover available locale codes from data/i18n/, English first."""
+    codes = ["en"]
+    i18n_dir = store.I18N_DIR
+    if not i18n_dir.exists():
+        return codes
+    for f in sorted(i18n_dir.glob("*.json")):
+        code = f.stem
+        if code == "i18n-schema":
+            continue
+        if re.match(r"^[a-z]{2}(-[A-Z]{2})?$", code):
+            codes.append(code)
+    return codes
+
+
+_LANG_LABELS: dict[str, str] = {
+    "en": "English (canonical)",
+    "zh-CN": "中文 (简体)",
+}
+
+
+def run_language(cfg: dict) -> bool:
+    """Language selection screen.  Returns True if changed (caller persists)."""
+    current = config.get_lang(cfg)
+    codes = _available_locales()
+    options = []
+    for code in codes:
+        label = _LANG_LABELS.get(code, code)
+        desc = "✓ currently active" if code == current else ""
+        options.append((code, label, desc))
+    options.append(("back", "Back", ""))
+    choice = tui.menu(
+        "language",
+        options,
+        subtitle="choose the display language for teaching text",
+    )
+    if choice in (None, "back") or choice == current:
+        return False
+    config.set_lang(cfg, choice)
+    config.save(cfg)
+    return True
+
+
+def run_settings(skills: list[Skill], cfg: dict) -> bool:
+    """Open the settings menu.  Returns True if the language changed."""
     while True:
         off_n = len(config.disabled_set(cfg))
         remaps = config.remaps(cfg)
+        current_lang = config.get_lang(cfg)
+        lang_label = _LANG_LABELS.get(current_lang, current_lang)
         choice = tui.menu(
             "settings",
             [
@@ -1362,16 +1414,21 @@ def run_settings(skills: list[Skill], cfg: dict) -> None:
                 ("remaps", "Key remaps",
                  (f"{len(remaps)} set — incl. your escape key") if remaps
                  else "remap any key (e.g. jk/<C-p>→<Esc>, ;→:)"),
+                ("language", "Language",
+                 f"teaching text: {lang_label}"),
                 ("back", "Back", ""),
             ],
             subtitle="tune the trainer to your setup",
         )
         if choice in (None, "back"):
-            return
+            return False
         if choice == "lessons":
             run_lessons(skills, cfg)
         elif choice == "remaps":
             run_remaps(cfg, skills)
+        elif choice == "language":
+            if run_language(cfg):
+                return True
 
 
 # ---------------------------------------------------------------------------
@@ -1397,7 +1454,8 @@ def _blind_is_cold(enabled: list[Skill]) -> Optional[bool]:
 
 
 def interactive_menu(skills: list[Skill], progress: dict, cfg: dict,
-                     show_moves: bool = True) -> None:
+                     show_moves: bool = True,
+                     lang: str = "en") -> None:
     while True:
         # SINGLE filter point: schedule (and rank) only enabled lessons, so a
         # switched-off skill never appears AND never drags the belt down.  The
@@ -1428,28 +1486,32 @@ def interactive_menu(skills: list[Skill], progress: dict, cfg: dict,
             return
         if choice == "learn":
             run_drill(enabled, progress, count=10, mode="learn",
-                      show_moves=show_moves, remaps=remaps, cfg=cfg)
+                      show_moves=show_moves, remaps=remaps, cfg=cfg, lang=lang)
         elif choice == "blind":
             cold = _blind_is_cold(enabled)
             if cold is None:
                 continue
             run_drill(enabled, progress, count=10, mode="blind",
-                      show_moves=show_moves, blind_all=cold, remaps=remaps, cfg=cfg)
+                      show_moves=show_moves, blind_all=cold, remaps=remaps, cfg=cfg, lang=lang)
         elif choice == "practice":
             run_practice(enabled, progress, count=10, show_moves=show_moves,
-                         remaps=remaps, cfg=cfg)
+                         remaps=remaps, cfg=cfg, lang=lang)
         elif choice == "grind":
             new_gate = mastery_summary(enabled, progress)["new_gate"]
             chosen = _pick_grind_skill(enabled, progress, new_gate)
             if chosen is not None:        # None = backed out, return to the menu
                 run_grind(enabled, progress, reps=DEFAULT_GRIND_REPS, skill=chosen,
-                          show_moves=show_moves, remaps=remaps, cfg=cfg)
+                          show_moves=show_moves, remaps=remaps, cfg=cfg, lang=lang)
         elif choice == "review":
             run_review(enabled, progress, count=10, remaps=remaps)
         elif choice == "list":
             run_list(skills, progress, cfg)
         elif choice == "settings":
-            run_settings(skills, cfg)
+            if run_settings(skills, cfg):
+                # Language changed — reload skills with new locale.
+                lang = config.get_lang(cfg)
+                skills[:] = store.load_skills(locale=lang)
+                continue
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -1485,6 +1547,9 @@ def build_parser() -> argparse.ArgumentParser:
                    help="only introduce new skills of difficulty <= D")
     p.add_argument("--hide-moves", action="store_true",
                    help="don't show your own keystrokes on the result screen")
+    p.add_argument("--lang", "-L", default=None, metavar="CODE",
+                   help="display language for teaching text "
+                        "(zh-CN, ...). Default: en (or config.json lang)")
     return p
 
 
@@ -1492,9 +1557,11 @@ def main(argv: Optional[list[str]] = None) -> int:
     args = build_parser().parse_args(argv)
     tui.install_signal_guard()
     show_moves = not args.hide_moves
-    skills = store.load_skills()
-    progress = store.load_progress()
     cfg = config.load()
+    # Language priority: CLI --lang > config.json lang > "en"
+    lang = args.lang or config.get_lang(cfg)
+    skills = store.load_skills(locale=lang)
+    progress = store.load_progress()
     # Single filter point for CLI-flag sessions too: drill only enabled lessons you
     # can actually do (exclude ones whose taught key you've remapped away).
     remaps = config.remaps(cfg)
@@ -1526,16 +1593,16 @@ def main(argv: Optional[list[str]] = None) -> int:
                                 "Run --list to see skill ids.", tui.YELLOW))
                     return 1
             run_grind(enabled, progress, reps=args.reps, new_gate=args.gate,
-                      show_moves=show_moves, skill=grind_skill, remaps=remaps, cfg=cfg)
+                      show_moves=show_moves, skill=grind_skill, remaps=remaps, cfg=cfg, lang=lang)
         elif args.practice:
             run_practice(enabled, progress, count=args.count, show_moves=show_moves,
-                         remaps=remaps, cfg=cfg)
+                         remaps=remaps, cfg=cfg, lang=lang)
         elif args.drill:
             run_drill(enabled, progress, count=args.count, new_gate=args.gate,
                       mode=args.mode, show_moves=show_moves,
-                      blind_all=args.blind_all, remaps=remaps, cfg=cfg)
+                      blind_all=args.blind_all, remaps=remaps, cfg=cfg, lang=lang)
         else:
-            interactive_menu(skills, progress, cfg, show_moves=show_moves)
+            interactive_menu(skills, progress, cfg, show_moves=show_moves, lang=lang)
     except KeyboardInterrupt:
         # Ctrl-C anywhere closes the app cleanly.  Per-attempt saves already
         # flushed finished work; flush once more defensively, no traceback.

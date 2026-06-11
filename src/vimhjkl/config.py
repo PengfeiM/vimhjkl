@@ -44,7 +44,20 @@ def _default() -> dict:
         # to canonical so it costs the same as the original.  An escape remap is just
         # `{from} → <Esc>` in insert mode.  See cli.run_remaps.
         "remaps": [],
+        # Display language for teaching text.  "en" = English (canonical curriculum);
+        # "zh-CN" = Chinese, etc.  Loaded from data/i18n/{lang}.json at startup.
+        "lang": "en",
     }
+
+
+def get_lang(cfg: dict) -> str:
+    """The display language: ``config.json``'s saved ``lang``, or ``"en"``."""
+    return cfg.get("lang", "en")
+
+
+def set_lang(cfg: dict, lang: str) -> None:
+    """Set the display language (mutates ``cfg``; caller persists)."""
+    cfg["lang"] = lang
 
 
 def load(path: Path | None = None) -> dict:

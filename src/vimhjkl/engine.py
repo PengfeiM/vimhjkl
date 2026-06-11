@@ -498,7 +498,8 @@ class DrillSession:
                  reveal_detail: bool = False,
                  free_form: bool = False,
                  remaps: Optional[list[dict]] = None,
-                 on_disable: Optional[Callable[[str], None]] = None):
+                 on_disable: Optional[Callable[[str], None]] = None,
+                 locale: str = "en"):
         self.skills = skills
         self.progress = progress
         self.present = present
@@ -523,6 +524,7 @@ class DrillSession:
         # on the result screen — the caller disables it (config) so it stops
         # being scheduled.  The current attempt is not recorded.
         self.on_disable = on_disable
+        self.locale = locale
 
     def run(self, selected: list[Skill]) -> SessionSummary:
         """Drill each selected skill.  ``review`` returns an action string:
@@ -546,7 +548,8 @@ class DrillSession:
                                      highlight_target=self.highlight_target,
                                      goal_extra=goal_extra,
                                      enforce_command=not self.free_form,
-                                     remaps=self.remaps)
+                                     remaps=self.remaps,
+                                     locale=self.locale)
                 abstained = attempt_abstained(result, skill.category)
                 passed = (not abstained) and outcome_passed(result)
                 record = AttemptRecord(skill, challenge, result, passed,

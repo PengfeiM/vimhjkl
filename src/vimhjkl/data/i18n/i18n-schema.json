@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vimhjkl.example.com/i18n-schema.json",
+  "title": "vimhjkl Locale File Schema",
+  "description": "JSON Schema for validating vimhjkl i18n locale overlay files. Each locale file provides translated strings for the skills curriculum, keyed by skill_id. All fields are optional overlays — missing entries fall back to the English source.",
+  "type": "object",
+  "properties": {
+    "locale": {
+      "description": "BCP-47 locale identifier (e.g. zh-CN, fr, de). Used for runtime lookup and CI validation.",
+      "type": "string",
+      "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+    },
+    "source_sha": {
+      "description": "Git commit SHA of the English skills.json that this translation was generated from. Used by CI to detect curriculum changes.",
+      "type": "string"
+    },
+    "generated_at": {
+      "description": "ISO 8601 datetime when this locale file was last generated or updated.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "glossary": {
+      "description": "Consistent term translation glossary. Maps English Vim terms to their locale-specific translations. Used by CI validation to ensure terminology consistency across all skill entries.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "minProperties": 0
+    },
+    "skills": {
+      "description": "Translated skill overlays, keyed by skill_id. Each key must match the skill_id format used in skills.json.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/skill_overlay"
+      },
+      "propertyNames": {
+        "pattern": "^[a-zA-Z][a-zA-Z0-9_-]+$"
+      },
+      "minProperties": 0
+    }
+  },
+  "required": ["locale", "skills"],
+  "additionalProperties": false,
+  "$defs": {
+    "challenge_overlay": {
+      "description": "Partial overlay for a single challenge entry. Only translatable fields (hint, why) are included; data fields (start, goal, solution, par_keys, target, etc.) are NOT present.",
+      "type": "object",
+      "properties": {
+        "hint": {
+          "description": "Translated hint text for this challenge.",
+          "type": "string"
+        },
+        "why": {
+          "description": "Translated explanation text explaining why this technique is effective.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 0
+    },
+    "skill_overlay": {
+      "description": "Partial overlay for a single skill. All fields are optional — only those present in the overlay will be applied at runtime.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "description": "Translated skill title (display name).",
+          "type": "string"
+        },
+        "teach": {
+          "description": "Translated teaching text / explanation for this skill.",
+          "type": "string"
+        },
+        "key_commands": {
+          "description": "Translated or reordered key command list for display. The individual keystrokes themselves must remain in raw Vim notation.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "challenges": {
+          "description": "Translated challenge overlays. The array index corresponds to the position in the English skills.json challenges array.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/challenge_overlay"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 0
+    }
+  }
+}

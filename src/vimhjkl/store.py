@@ -23,6 +23,7 @@ from .challenge import Skill
 # both in a source checkout and in site-packages (wheels install as plain files).
 _PKG_DIR = Path(__file__).resolve().parent
 SKILLS_PATH = _PKG_DIR / "data" / "skills.json"
+I18N_DIR = _PKG_DIR / "data" / "i18n"
 
 # PROJECT_ROOT and content/ exist only in a source checkout — the build writes its
 # cursor + LLM pools into content/.  Both are absent in an installed package.
@@ -55,12 +56,55 @@ PROGRESS_PATH = _progress_path()
 # Curriculum
 # ---------------------------------------------------------------------------
 
-def load_skills(path: Path | None = None) -> list[Skill]:
+def _load_locale(locale: str) -> dict | None:
+    """Load a locale overlay file from data/i18n/{locale}.json.
+    Returns None if the file doesn't exist (graceful fallback to English)."""
+    if locale == "en":
+        return None
+    path = I18N_DIR / f"{locale}.json"
+    if not path.exists():
+        return None
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _apply_overlay(skills: list[Skill], overlay: dict) -> None:
+    """Overlay translated fields from a locale file onto Skill/Challenge objects.
+
+    - Iterates skills by skill.id matching overlay["skills"] keys
+    - Only overlays fields that exist in the overlay entry
+    - Challenges are matched by array index (challenges[i] <-> overlay.challenges[i])
+    - Missing skill entries or challenge entries are silently skipped (fallback to English)
+    - The overlay modifies objects in-place; no return value needed
+    """
+    locale_skills = overlay.get("skills", {})
+    for skill in skills:
+        if skill.id not in locale_skills:
+            continue
+        entry = locale_skills[skill.id]
+        if "title" in entry:
+            skill.title = entry["title"]
+        if "teach" in entry:
+            skill.teach = entry["teach"]
+        if "key_commands" in entry:
+            skill.key_commands = entry["key_commands"]
+        if "challenges" in entry and skill.challenges:
+            for i, chal_overlay in enumerate(entry["challenges"]):
+                if i < len(skill.challenges):
+                    if "hint" in chal_overlay:
+                        skill.challenges[i].hint = chal_overlay["hint"]
+                    if "why" in chal_overlay:
+                        skill.challenges[i].why = chal_overlay["why"]
+
+
+def load_skills(path: Path | None = None, locale: str = "en") -> list[Skill]:
     path = path or SKILLS_PATH
     if not path.exists():
         return []
     data = json.loads(path.read_text(encoding="utf-8"))
     skills = [Skill.from_dict(s) for s in data.get("skills", [])]
+    overlay = _load_locale(locale)
+    if overlay:
+        _apply_overlay(skills, overlay)
     return skills
 
 

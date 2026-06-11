@@ -37,6 +37,23 @@ _QUIT_SEQUENCES = [
     b":q!\r", b":q\r", b"ZZ", b"ZQ",
 ]
 
+# Goal pane locale strings for non-English goal window display.
+_GOAL_LOCALES: dict[str, dict[str, str]] = {
+    "zh-CN": {
+        "motion_header": "  GOAL — 移动到高亮位置：",
+        "motion_instruction": "  将光标移动到第 {ln} 行第 {col} 列，",
+        "motion_quit": "  然后使用 :q 退出",
+        "motion_statusline": " ── GOAL ──   :q 退出 · 只读 ",
+        "yank_header": "  GOAL — 将这段文本复制到寄存器：",
+        "yank_instruction": "  （缓冲区保持不变）",
+        "yank_statusline": " ── GOAL ──   :q 退出 · 只读 ",
+        "buffer_header": "  GOAL — 将缓冲区编辑成这个样子：",
+        "buffer_instruction": "  （在左侧编辑缓冲区以达到目标）",
+        "buffer_statusline": " ── GOAL ──   :wq 保存 · :q! 放弃 · 只读 ",
+        "cheat_sheet_header": "  ── 如何操作 ──",
+    },
+}
+
 
 @dataclass
 class GradeResult:
@@ -103,7 +120,8 @@ def _vim_list(lines: list[str]) -> str:
 def _goal_window_script(goal: list[str],
                         extra: Optional[list[str]] = None,
                         motion_target: Optional[tuple[int, int]] = None,
-                        yank_text: Optional[str] = None) -> str:
+                        yank_text: Optional[str] = None,
+                        locale: str = "en") -> str:
     """A small vim script (to be ``:source``d) that pins the GOAL beside the
     edit buffer during an interactive drill, so the target is in view instead of
     held in memory.
@@ -137,33 +155,34 @@ def _goal_window_script(goal: list[str],
     # The pane is decorative (never graded — grading reads the edit buffer / the
     # final cursor), so it carries a little wording above the target to say what
     # it is.
+    loc = _GOAL_LOCALES.get(locale, {})
     if motion_target is not None:
         ln, col = motion_target
         pane = [
-            "  GOAL — go to the highlighted place:",
-            f"  land the cursor on line {ln}, col {col},",
-            "  then quit with  :q",
+            loc.get("motion_header", "  GOAL — go to the highlighted place:"),
+            loc.get("motion_instruction", f"  land the cursor on line {ln}, col {col},").format(ln=ln, col=col),
+            loc.get("motion_quit", "  then quit with  :q"),
         ]
-        statusline = " ── GOAL ──   :q quit · read-only "
+        statusline = loc.get("motion_statusline", " ── GOAL ──   :q quit · read-only ")
     elif yank_text is not None:
         ylines = yank_text.split("\n")
         if ylines and ylines[-1] == "":
             ylines = ylines[:-1]
         pane = [
-            "  GOAL — yank this text into a register:",
-            "  (the buffer stays unchanged)",
+            loc.get("yank_header", "  GOAL — yank this text into a register:"),
+            loc.get("yank_instruction", "  (the buffer stays unchanged)"),
             "",
         ] + ["  " + ln for ln in ylines]
-        statusline = " ── GOAL ──   :q quit · read-only "
+        statusline = loc.get("yank_statusline", " ── GOAL ──   :q quit · read-only ")
     else:
         pane = [
-            "  GOAL — make it look like this:",
-            "  (edit the buffer on the left to match)",
+            loc.get("buffer_header", "  GOAL — make it look like this:"),
+            loc.get("buffer_instruction", "  (edit the buffer on the left to match)"),
             "",
         ] + list(goal)
-        statusline = " ── GOAL ──   :wq save · :q! bail · read-only "
+        statusline = loc.get("buffer_statusline", " ── GOAL ──   :wq save · :q! bail · read-only ")
     if extra:
-        pane += ["", "  ── how to do it ──", ""] + list(extra)
+        pane += ["", loc.get("cheat_sheet_header", "  ── how to do it ──"), ""] + list(extra)
     return "\n".join([
         "cnoreabbrev <expr> wq (getcmdtype()==':'&&getcmdline()=~#'^wq$')?'xall':'wq'",
         "cnoreabbrev <expr> x  (getcmdtype()==':'&&getcmdline()=~#'^x$')?'xall':'x'",
@@ -275,7 +294,8 @@ def run_attempt(challenge: Challenge, category: str,
                 highlight_target: bool = False,
                 goal_extra: Optional[list[str]] = None,
                 enforce_command: bool = True,
-                remaps: Optional[list[dict]] = None) -> GradeResult:
+                remaps: Optional[list[dict]] = None,
+                locale: str = "en") -> GradeResult:
     """Launch vim on ``challenge.start`` and grade the outcome.
 
     If ``playback`` is given (a string of keystrokes, ``\\x1b`` for Esc), vim
@@ -323,7 +343,8 @@ def run_attempt(challenge: Challenge, category: str,
         with open(goal_script, "w", encoding="utf-8") as fh:
             fh.write(_goal_window_script(challenge.goal, goal_extra,
                                          motion_target=target,
-                                         yank_text=challenge.yank))
+                                         yank_text=challenge.yank,
+                                         locale=locale))
 
     # Highlight the motion target cell in the buffer (cursor categories only, and
     # only when the caller wants the training-wheel — learn/practice, never blind).
