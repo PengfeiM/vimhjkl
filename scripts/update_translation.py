@@ -228,6 +228,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: list[str] | None = None) -> int:
+    try:
+        from _env import load_dotenv  # repo-root .env fills missing env vars
+        load_dotenv()
+    except ImportError:
+        pass
     args = parse_args(argv)
     _check_scripts_exist()
 

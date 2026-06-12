@@ -646,6 +646,11 @@ def resolve_api(args: argparse.Namespace) -> tuple[str, str, str]:
 
 def main(argv: list[str] | None = None) -> int:
     """Entry point.  Returns 0 on success, 1 on total failure."""
+    try:
+        from _env import load_dotenv  # repo-root .env fills missing env vars
+        load_dotenv()
+    except ImportError:
+        pass
     args = parse_args(argv)
     locale_code = args.locale
     skills_path = Path(args.skills)
