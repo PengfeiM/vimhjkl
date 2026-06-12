@@ -24,7 +24,7 @@ uv run python -m tests.test_engine
 
 ## Workflow
 
-Work on a branch, never directly on `master` — a named branch keeps your pull
+Work on a branch, never directly on `main` — a named branch keeps your pull
 request reviewable and lets you pull upstream changes without conflicts.
 
 1. **Fork** the repo and clone your fork.
@@ -54,7 +54,7 @@ request reviewable and lets you pull upstream changes without conflicts.
 
    Keep each commit a single logical change; squash noise before pushing.
 
-6. **Push and open a pull request** against `master`. In the description, say what
+6. **Push and open a pull request** against `main`. In the description, say what
    changed and why. For a lesson, paste the **start buffer**, the **goal**, and the
    **keystrokes** so a reviewer can verify it in one paste.
 
