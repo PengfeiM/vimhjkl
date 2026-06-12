@@ -21,12 +21,21 @@ edit.
 
 ## Install
 
+### macOS / Linux (Homebrew)
+
 ```sh
-brew install S-Sigdel/tap/vimhjkl        # macOS / Linux (Homebrew)
-paru -S vimhjkl                          # Arch (AUR)
+brew install S-Sigdel/tap/vimhjkl
 ```
 
-From source (needs [uv](https://docs.astral.sh/uv/) and `vim` or `nvim`):
+### Arch Linux (AUR)
+
+```sh
+yay -S vimhjkl
+```
+
+### From source
+
+Needs [uv](https://docs.astral.sh/uv/) and `vim` or `nvim`:
 
 ```sh
 git clone https://github.com/S-Sigdel/vimhjkl && cd vimhjkl
