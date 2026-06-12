@@ -10,8 +10,11 @@ Usage:
     python scripts/generate_translation.py --locale zh-CN [options]
 
 Environment variables:
-    OPENAI_API_KEY  — API key (alternative to --api-key)
-    OPENAI_BASE_URL — API base URL (alternative to --api-base)
+    OPENAI_API_KEY   — API key (alternative to --api-key)
+    OPENAI_BASE_URL  — API base URL (alternative to --api-base)
+    OPENAI_MODEL     — model name (alternative to --model)
+    DEEPSEEK_API_KEY — DeepSeek key; if set (and no OpenAI key), the base URL
+                       and model default to DeepSeek's (deepseek-chat)
 """
 
 from __future__ import annotations
@@ -38,6 +41,8 @@ DEFAULT_SKILLS_PATH = Path("src/vimhjkl/data/skills.json")
 DEFAULT_I18N_DIR = Path("src/vimhjkl/data/i18n")
 DEFAULT_API_BASE = "https://api.openai.com/v1"
 DEFAULT_MODEL = "gpt-4o-mini"
+DEEPSEEK_API_BASE = "https://api.deepseek.com"
+DEEPSEEK_MODEL = "deepseek-chat"
 API_RATE_LIMIT_SECONDS = 1.0
 API_TIMEOUT_SECONDS = 180
 TRANSLATION_SPEC_RELPATH = Path("src/vimhjkl/data/i18n/TRANSLATION_SPEC.md")
@@ -601,19 +606,42 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--api-key",
         default=None,
-        help="OpenAI-compatible API key (env: OPENAI_API_KEY).",
+        help="OpenAI-compatible API key (env: OPENAI_API_KEY or DEEPSEEK_API_KEY).",
     )
     parser.add_argument(
         "--api-base",
         default=None,
-        help=f"API base URL (env: OPENAI_BASE_URL, default: {DEFAULT_API_BASE}).",
+        help=f"API base URL (env: OPENAI_BASE_URL; default: {DEFAULT_API_BASE}, "
+             f"or {DEEPSEEK_API_BASE} when using a DeepSeek key).",
     )
     parser.add_argument(
         "--model",
-        default=DEFAULT_MODEL,
-        help=f"Model name (default: {DEFAULT_MODEL}).",
+        default=None,
+        help=f"Model name (default: {DEFAULT_MODEL}, or {DEEPSEEK_MODEL} when "
+             "using a DeepSeek key).",
     )
     return parser.parse_args(argv)
+
+
+def resolve_api(args: argparse.Namespace) -> tuple[str, str, str]:
+    """Resolve (api_key, api_base, model) from flags and environment.
+
+    Any OpenAI-compatible endpoint works. Precedence: explicit flags, then
+    OPENAI_* env vars, then DEEPSEEK_API_KEY (which switches the default
+    base URL and model to DeepSeek's).
+    """
+    openai_key = os.environ.get("OPENAI_API_KEY", "")
+    deepseek_key = os.environ.get("DEEPSEEK_API_KEY", "")
+
+    api_key = args.api_key or openai_key or deepseek_key
+    using_deepseek = not args.api_key and not openai_key and bool(deepseek_key)
+
+    default_base = DEEPSEEK_API_BASE if using_deepseek else DEFAULT_API_BASE
+    default_model = DEEPSEEK_MODEL if using_deepseek else DEFAULT_MODEL
+
+    api_base = args.api_base or os.environ.get("OPENAI_BASE_URL", "") or default_base
+    model = args.model or os.environ.get("OPENAI_MODEL", "") or default_model
+    return api_key, api_base, model
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -627,14 +655,13 @@ def main(argv: list[str] | None = None) -> int:
     skill_filter = args.skill
     dry_run = args.dry_run
 
-    # API credentials
-    api_key = args.api_key or os.environ.get("OPENAI_API_KEY", "")
-    api_base = args.api_base or os.environ.get("OPENAI_BASE_URL", "") or DEFAULT_API_BASE
-    model = args.model
+    # API credentials — any OpenAI-compatible endpoint (OpenAI, DeepSeek, ...)
+    api_key, api_base, model = resolve_api(args)
 
     if not dry_run and not api_key:
         print(
-            "Error: API key is required. Provide --api-key or set OPENAI_API_KEY.",
+            "Error: API key is required. Provide --api-key, or set "
+            "OPENAI_API_KEY or DEEPSEEK_API_KEY.",
             file=sys.stderr,
         )
         return 1

@@ -570,9 +570,15 @@ def main(argv=None) -> int:
     p.add_argument("--workers", type=int, default=10)
     p.add_argument("--skill", action="append", default=[], dest="skills")
     p.add_argument("--category", default=None)
-    p.add_argument("--model", default=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"))
-    p.add_argument("--base-url",
-                   default=os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1"))
+    # No OPENAI_API_KEY but a DEEPSEEK_API_KEY ⇒ default to DeepSeek's
+    # OpenAI-compatible endpoint and model (overridable as usual).
+    _deepseek = (not os.environ.get("OPENAI_API_KEY")
+                 and bool(os.environ.get("DEEPSEEK_API_KEY")))
+    p.add_argument("--model", default=os.environ.get(
+        "OPENAI_MODEL", "deepseek-chat" if _deepseek else "gpt-4o-mini"))
+    p.add_argument("--base-url", default=os.environ.get(
+        "OPENAI_BASE_URL",
+        "https://api.deepseek.com" if _deepseek else "https://api.openai.com/v1"))
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--fill", action="store_true",
                    help="auto-target every skill below --target instances and "
@@ -582,10 +588,11 @@ def main(argv=None) -> int:
                    help="--fill goal: instances per skill (default 6)")
     args = p.parse_args(argv)
 
-    args.api_key = os.environ.get("OPENAI_API_KEY", "")
+    args.api_key = (os.environ.get("OPENAI_API_KEY", "")
+                    or os.environ.get("DEEPSEEK_API_KEY", ""))
     if not args.api_key:
-        print(f"{RED}set OPENAI_API_KEY (and optionally OPENAI_BASE_URL / "
-              f"OPENAI_MODEL){RESET}", file=sys.stderr)
+        print(f"{RED}set OPENAI_API_KEY or DEEPSEEK_API_KEY (and optionally "
+              f"OPENAI_BASE_URL / OPENAI_MODEL){RESET}", file=sys.stderr)
         return 2
     if find_editor() is None:
         print(f"{RED}no vim/nvim on PATH — verification impossible{RESET}",

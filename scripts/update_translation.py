@@ -243,11 +243,15 @@ def main(argv: list[str] | None = None) -> int:
     print(file=sys.stderr)
 
     # ── Resolve API key ──
-    api_key = args.api_key or os.environ.get("OPENAI_API_KEY")
+    # generate_translation.py also reads OPENAI_API_KEY / DEEPSEEK_API_KEY from
+    # the environment itself (DeepSeek implies its own base URL and model), so
+    # an unset --api-key is fine as long as one of those is exported.
+    api_key = args.api_key or os.environ.get("OPENAI_API_KEY") \
+        or os.environ.get("DEEPSEEK_API_KEY")
     if not api_key and not args.dry_run:
         print(
-            "warning: no API key set (--api-key or OPENAI_API_KEY env). "
-            "Generation will fail if needed.",
+            "warning: no API key set (--api-key, OPENAI_API_KEY, or "
+            "DEEPSEEK_API_KEY env). Generation will fail if needed.",
             file=sys.stderr,
         )
 
@@ -282,9 +286,12 @@ def main(argv: list[str] | None = None) -> int:
 
     # ── Step 2: Generate ──
     if needs_generation:
+        # Forward only an EXPLICIT --api-key; env keys (OPENAI_API_KEY /
+        # DEEPSEEK_API_KEY) reach the child via the environment, where
+        # generate_translation picks the matching base URL and model.
         ok = step_generate(
             locale=args.locale,
-            api_key=api_key,
+            api_key=args.api_key,
             skill=args.skill,
             target_lang=args.target_lang,
             dry_run=args.dry_run,

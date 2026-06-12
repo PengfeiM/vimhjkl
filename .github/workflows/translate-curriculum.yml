@@ -55,7 +55,10 @@ jobs:
       - name: Generate translations
         if: steps.detect.outputs.needs_update == 'true'
         env:
+          # Either secret works: DEEPSEEK_API_KEY auto-selects DeepSeek's
+          # endpoint and deepseek-chat; OPENAI_API_KEY takes precedence.
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           LOCALE: ${{ inputs.locale || 'zh-CN' }}
           SKILL: ${{ inputs.skill || '' }}
         run: |
