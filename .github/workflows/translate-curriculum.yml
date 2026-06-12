@@ -16,6 +16,10 @@ on:
         required: false
         default: ""
 
+permissions:
+  contents: write        # push the i18n/auto-* branch
+  pull-requests: write   # open the auto-update PR
+
 jobs:
   translate:
     runs-on: ubuntu-latest
