@@ -1,0 +1,1219 @@
+{
+  "version": 1,
+  "pool": {
+    "motion-word-forward": [
+      {
+        "start": [
+          "ring bracelet necklace"
+        ],
+        "solution": "w",
+        "hint": "w to the next word; a count skips several",
+        "why": "w moves to the start of the next word.",
+        "start_cursor": [
+          1,
+          6
+        ],
+        "target": [
+          1,
+          15
+        ]
+      },
+      {
+        "start": [
+          "quick brown fox jumps"
+        ],
+        "solution": "3w",
+        "hint": "w to the next word; a count skips several",
+        "why": "3w moves forward 3 words.",
+        "start_cursor": [
+          1,
+          1
+        ],
+        "target": [
+          1,
+          17
+        ]
+      }
+    ],
+    "operator-delete-line": [
+      {
+        "start": [
+          "TODO list:",
+          "Walk the DELETE",
+          "dog accordingly"
+        ],
+        "solution": "jdd",
+        "hint": "Move to the dog's unfortunate task and delete.",
+        "why": "j down to the line, dd deletes it.",
+        "goal": [
+          "TODO list:",
+          "dog accordingly"
+        ]
+      },
+      {
+        "start": [
+          "const panic = true;",
+          "if (panic) {",
+          "// DELETE do something",
+          "console.log('Stay calm');",
+          "}"
+        ],
+        "solution": "2jdd",
+        "hint": "Descend into chaos and eradicate the fear.",
+        "why": "2j down two lines, dd deletes it.",
+        "goal": [
+          "const panic = true;",
+          "if (panic) {",
+          "console.log('Stay calm');",
+          "}"
+        ]
+      }
+    ],
+    "textobj-change-in-quotes": [
+      {
+        "start": [
+          "nickname = 'Bobby the Destroyer'"
+        ],
+        "solution": "ci'Bobby the Builder<Esc>",
+        "hint": "Transform chaos into construction.",
+        "why": "ci' changes the text inside the single quotes.",
+        "goal": [
+          "nickname = 'Bobby the Builder'"
+        ]
+      },
+      {
+        "start": [
+          "config = \"darkMode\""
+        ],
+        "solution": "ci\"lightMode<Esc>",
+        "hint": "Flip the switch from dark to light.",
+        "why": "ci\" changes the text inside the double quotes.",
+        "goal": [
+          "config = \"lightMode\""
+        ]
+      },
+      {
+        "start": [
+          "response = \"404 Not Found\""
+        ],
+        "solution": "ci\"200 OK<Esc>",
+        "hint": "Turn failure into success with one stroke.",
+        "why": "ci\" changes the text inside the double quotes.",
+        "goal": [
+          "response = \"200 OK\""
+        ]
+      },
+      {
+        "start": [
+          "command = \"shutdown -h now\""
+        ],
+        "solution": "ci\"restart -r now<Esc>",
+        "hint": "Keep the system running with a quick change.",
+        "why": "ci\" changes the text inside the double quotes.",
+        "goal": [
+          "command = \"restart -r now\""
+        ]
+      }
+    ],
+    "insert-entry-points": [
+      {
+        "start": [
+          "print('hi')"
+        ],
+        "solution": "A  # debug<Esc>",
+        "hint": "jump straight to the line end",
+        "why": "",
+        "goal": [
+          "print('hi')  # debug"
+        ]
+      }
+    ],
+    "change-to-eol-C": [
+      {
+        "start": [
+          "path = /tmp/old"
+        ],
+        "solution": "f/C/home/me<Esc>",
+        "hint": "fix everything from the slash onward",
+        "why": "",
+        "goal": [
+          "path = /home/me"
+        ]
+      },
+      {
+        "start": [
+          "TODO: write tests"
+        ],
+        "solution": "fwCship it<Esc>",
+        "hint": "replace the rest of the line",
+        "why": "",
+        "goal": [
+          "TODO: ship it"
+        ]
+      }
+    ],
+    "substitute-char-dot": [
+      {
+        "start": [
+          "apple@orange@banana"
+        ],
+        "solution": "f@s#<Esc>;.;.",
+        "hint": "Find '@', turn it to '#', and repeat like a fruit ninja.",
+        "why": "s swaps the char; ; finds the next, . repeats it.",
+        "goal": [
+          "apple#orange#banana"
+        ]
+      },
+      {
+        "start": [
+          "beef~chicken~pork"
+        ],
+        "solution": "f~s*<Esc>;.;.",
+        "hint": "Locate '~', shift it to '*', let the recipe morph.",
+        "why": "s swaps the char; ; finds the next, . repeats it.",
+        "goal": [
+          "beef*chicken*pork"
+        ]
+      }
+    ],
+    "count-vs-repeat": [
+      {
+        "start": [
+          "Python devs love",
+          "clear, compact, and readable code"
+        ],
+        "solution": "d2w",
+        "hint": "Start clean by deleting the intro words.",
+        "why": "d2w deletes both words as one change — one u undoes it.",
+        "goal": [
+          "love",
+          "clear, compact, and readable code"
+        ]
+      },
+      {
+        "start": [
+          "The superheroes gathered quickly",
+          "ready to tackle the pending doom"
+        ],
+        "solution": "dw.",
+        "hint": "Time to sweep two into history.",
+        "why": "dw, then . repeats it — each delete its own undo.",
+        "goal": [
+          "gathered quickly",
+          "ready to tackle the pending doom"
+        ]
+      },
+      {
+        "start": [
+          "Bakers knead dough",
+          "with meticulous precision daily"
+        ],
+        "solution": "2dw",
+        "hint": "Two kneads and you've got dough.",
+        "why": "2dw deletes both words as one change — one u undoes it.",
+        "goal": [
+          "dough",
+          "with meticulous precision daily"
+        ]
+      }
+    ],
+    "increment-number": [
+      {
+        "start": [
+          "cookiesRemaining = 100"
+        ],
+        "solution": "10<C-x>",
+        "hint": "The cookie monster strikes again; subtract strategically!",
+        "why": "10<C-x> subtracts 10 from the number under the cursor.",
+        "goal": [
+          "cookiesRemaining = 90"
+        ]
+      },
+      {
+        "start": [
+          "code_review_pending = 15"
+        ],
+        "solution": "2<C-x>",
+        "hint": "Reduce those reviews like a pro developer.",
+        "why": "2<C-x> subtracts 2 from the number under the cursor.",
+        "goal": [
+          "code_review_pending = 13"
+        ]
+      }
+    ],
+    "insert-paste-register": [
+      {
+        "start": [
+          "ERROR_42",
+          "code: "
+        ],
+        "solution": "yiwjA<C-r>0<Esc>",
+        "hint": "echo the yanked word into the next line",
+        "why": "",
+        "goal": [
+          "ERROR_42",
+          "code: ERROR_42"
+        ]
+      },
+      {
+        "start": [
+          "v2.5.1",
+          "version = "
+        ],
+        "solution": "y$jA<C-r>0<Esc>",
+        "hint": "paste the version string while typing",
+        "why": "",
+        "goal": [
+          "v2.5.1",
+          "version = v2.5.1"
+        ]
+      }
+    ],
+    "insert-expression-calc": [
+      {
+        "start": [
+          "Eggs in dozens: "
+        ],
+        "solution": "A<C-r>=12*8<CR><Esc>",
+        "hint": "Laying eggs is serious math!",
+        "why": "<C-r>= inserts the result of a sum, mid-insert.",
+        "goal": [
+          "Eggs in dozens: 96"
+        ]
+      },
+      {
+        "start": [
+          "Days till next year: "
+        ],
+        "solution": "A<C-r>=365-257<CR><Esc>",
+        "hint": "New years come quicker with math.",
+        "why": "<C-r>= inserts the result of a sum, mid-insert.",
+        "goal": [
+          "Days till next year: 108"
+        ]
+      },
+      {
+        "start": [
+          "Pixels per inch: "
+        ],
+        "solution": "A<C-r>=2*72<CR><Esc>",
+        "hint": "Get the picture with mathematical clarity.",
+        "why": "<C-r>= inserts the result of a sum, mid-insert.",
+        "goal": [
+          "Pixels per inch: 144"
+        ]
+      }
+    ],
+    "visual-block-insert": [
+      {
+        "start": [
+          "climb_mountain()",
+          "brew_potion()",
+          "bake_pie()"
+        ],
+        "solution": "<C-v>jjIdef <Esc>",
+        "hint": "Functions need defining; block them into submission.",
+        "why": "<C-v>, then I types the prefix onto every line.",
+        "goal": [
+          "def climb_mountain()",
+          "def brew_potion()",
+          "def bake_pie()"
+        ]
+      },
+      {
+        "start": [
+          "import numpy as np",
+          "import pandas as pd",
+          "import matplotlib.pyplot as plt"
+        ],
+        "solution": "<C-v>jjjI// <Esc>",
+        "hint": "Comment out the imports swiftly using Visual-Block.",
+        "why": "<C-v>, then I types the prefix onto every line.",
+        "goal": [
+          "// import numpy as np",
+          "// import pandas as pd",
+          "// import matplotlib.pyplot as plt"
+        ]
+      },
+      {
+        "start": [
+          "java.lang.String name",
+          "java.lang.Integer age",
+          "java.lang.Double price"
+        ],
+        "solution": "<C-v>jjjIpublic <Esc>",
+        "hint": "Make these variables public using Visual-Block mode.",
+        "why": "<C-v>, then I types the prefix onto every line.",
+        "goal": [
+          "public java.lang.String name",
+          "public java.lang.Integer age",
+          "public java.lang.Double price"
+        ]
+      }
+    ],
+    "motion-find-char": [
+      {
+        "start": [
+          "jump to the @ symbol"
+        ],
+        "solution": "f@",
+        "hint": "fly to the @ on the line",
+        "why": "f{char} lands the cursor on the next match.",
+        "start_cursor": [
+          1,
+          1
+        ],
+        "target": [
+          1,
+          13
+        ]
+      },
+      {
+        "start": [
+          "stop before END"
+        ],
+        "solution": "tE",
+        "hint": "t stops just before the target",
+        "why": "",
+        "start_cursor": [
+          1,
+          1
+        ],
+        "target": [
+          1,
+          12
+        ]
+      }
+    ],
+    "motion-line-anchors": [
+      {
+        "start": [
+          "function brewingPotion() {",
+          "    addIngredient('eye of newt');",
+          "}"
+        ],
+        "solution": "j^",
+        "hint": "Potion requires precision; find the core ingredient.",
+        "why": "j down a line, ^ to its first non-blank.",
+        "start_cursor": [
+          1,
+          28
+        ],
+        "target": [
+          2,
+          5
+        ]
+      },
+      {
+        "start": [
+          "Spaghetti code",
+          "    is just pasta",
+          "reheated daily"
+        ],
+        "solution": "2G$",
+        "hint": "jump to the middle line, then shoot to its end",
+        "why": "2G to line 2, $ to its end.",
+        "start_cursor": [
+          1,
+          5
+        ],
+        "target": [
+          2,
+          17
+        ]
+      },
+      {
+        "start": [
+          "public class InfiniteLoop {",
+          "    while(true) {",
+          "        // add code here",
+          "    }",
+          "}"
+        ],
+        "solution": "3G0",
+        "hint": "Skip lines to start adding code.",
+        "why": "3G to line 3, 0 to column one.",
+        "start_cursor": [
+          2,
+          10
+        ],
+        "target": [
+          3,
+          1
+        ]
+      }
+    ],
+    "motion-WORD-wise": [
+      {
+        "start": [
+          "go.to/the-end now"
+        ],
+        "solution": "W",
+        "hint": "leap over the punctuation in one W",
+        "why": "W skips to the next WORD, ignoring dots and slashes.",
+        "start_cursor": [
+          1,
+          1
+        ],
+        "target": [
+          1,
+          15
+        ]
+      },
+      {
+        "start": [
+          "one.two three.four"
+        ],
+        "solution": "B",
+        "hint": "B jumps back to the WORD start",
+        "why": "",
+        "start_cursor": [
+          1,
+          15
+        ],
+        "target": [
+          1,
+          9
+        ]
+      }
+    ],
+    "operator-WORD-change": [
+      {
+        "start": [
+          "visit http://old.site now"
+        ],
+        "solution": "WcWhttp://new.org<Esc>",
+        "hint": "change the whole URL WORD, slashes and all",
+        "why": "cW grabs the entire non-blank WORD.",
+        "goal": [
+          "visit http://new.org now"
+        ]
+      },
+      {
+        "start": [
+          "edit config.yaml here"
+        ],
+        "solution": "wcWconfig.json<Esc>",
+        "hint": "swap the whole filename WORD",
+        "why": "",
+        "goal": [
+          "edit config.json here"
+        ]
+      }
+    ],
+    "motion-search-navigate": [
+      {
+        "start": [
+          "Morning routine:",
+          "1. Defeat human snooze button.",
+          "2. Feed the cat before it plots."
+        ],
+        "solution": "/Feed<CR>",
+        "hint": "The key to avoiding feline rebellion.",
+        "why": "Searching /Feed jumps directly to feeding task.",
+        "start_cursor": [
+          1,
+          1
+        ],
+        "target": [
+          3,
+          4
+        ]
+      },
+      {
+        "start": [
+          "Garden maintenance:",
+          "- Water the petunias.",
+          "- Banish all weeds."
+        ],
+        "solution": "/Banish<CR>",
+        "hint": "Find the urgent task worthy of a fantasy novel.",
+        "why": "A swift /Banish gets you to the weed-removal mission.",
+        "start_cursor": [
+          2,
+          7
+        ],
+        "target": [
+          3,
+          3
+        ]
+      }
+    ],
+    "textobj-change-inner-word": [
+      {
+        "start": [
+          "error code 500"
+        ],
+        "solution": "$ciw404<Esc>",
+        "hint": "ciw from the last char too",
+        "why": "",
+        "goal": [
+          "error code 404"
+        ]
+      }
+    ],
+    "textobj-paragraph": [
+      {
+        "start": [
+          "#define BANANA 42",
+          "#define APPLE 64",
+          "",
+          "int main() {"
+        ],
+        "solution": "dap",
+        "hint": "Snip out both #defines entirely.",
+        "why": "dap deletes the paragraph and its trailing blank line.",
+        "goal": [
+          "int main() {"
+        ]
+      },
+      {
+        "start": [
+          "alert('Catastrophe!');",
+          "fixThings();",
+          "",
+          "return 0;"
+        ],
+        "solution": "cipconsole.log('All fixed!');<Esc>",
+        "hint": "Avoid catastrophe with a quick code change.",
+        "why": "cip changes the whole block with new content in one go.",
+        "goal": [
+          "console.log('All fixed!');",
+          "",
+          "return 0;"
+        ]
+      },
+      {
+        "start": [
+          "Order: KD12345",
+          "Items: 20 Platypuses",
+          "",
+          "Delivery: Neverland"
+        ],
+        "solution": "yip",
+        "hint": "Ensure the order details remain copied.",
+        "why": "yip grabs the paragraph's contents, ready to paste or duplicate.",
+        "goal": [
+          "Order: KD12345",
+          "Items: 20 Platypuses",
+          "",
+          "Delivery: Neverland"
+        ]
+      },
+      {
+        "start": [
+          "function predictRain() {",
+          "  return Math.random() <= 0.5;",
+          "}",
+          "",
+          "// Weather forecasting"
+        ],
+        "solution": "dip",
+        "hint": "Predict sunny code by eliminating rain guess.",
+        "why": "dip eliminates the function without touching adjacent content.",
+        "goal": [
+          "",
+          "// Weather forecasting"
+        ]
+      }
+    ],
+    "motion-match-pair": [
+      {
+        "start": [
+          "magicalCreatures = {",
+          "  'unicorn': true,",
+          "  'dragon': true,",
+          "}"
+        ],
+        "solution": "%",
+        "hint": "Leap across the dictionary from open to close.",
+        "why": "% jumps to the matching bracket.",
+        "start_cursor": [
+          1,
+          20
+        ],
+        "target": [
+          4,
+          1
+        ]
+      }
+    ],
+    "operator-search-motion": [
+      {
+        "start": [
+          "The great debate: pizza with pineapple or without, cats with hats or without."
+        ],
+        "solution": "d/pineapple<CR>",
+        "hint": "Slice away toppings from the pizza argument.",
+        "why": "d/pat deletes up to the next match of the search.",
+        "goal": [
+          "pineapple or without, cats with hats or without."
+        ]
+      }
+    ],
+    "register-yank-reliable": [
+      {
+        "start": [
+          "yank ME",
+          "trash THIS",
+          "paste:"
+        ],
+        "solution": "wyiwjddA <C-r>0<Esc>",
+        "hint": "yank a word, delete a whole line, still paste the word",
+        "why": "dd clobbered the unnamed register but \"0 survived.",
+        "goal": [
+          "yank ME",
+          "paste: ME"
+        ]
+      }
+    ],
+    "register-named": [
+      {
+        "start": [
+          "import os",
+          "import sys",
+          "# end"
+        ],
+        "solution": "\"ayyG\"ap",
+        "hint": "stash with \"a, drop it with \"ap",
+        "why": "",
+        "goal": [
+          "import os",
+          "import sys",
+          "# end",
+          "import os"
+        ]
+      }
+    ],
+    "macro-multistep": [
+      {
+        "start": [
+          "Pickles",
+          "Olives",
+          "Ketchup"
+        ],
+        "solution": "qaI- <Esc>A: Yum!<Esc>jq2@a",
+        "hint": "Add - before and : Yum! after the first item, then replay.",
+        "why": "Macros efficiently apply a repeated pattern across multiple lines.",
+        "goal": [
+          "- Pickles: Yum!",
+          "- Olives: Yum!",
+          "- Ketchup: Yum!"
+        ]
+      },
+      {
+        "start": [
+          "Sprint 1 Completed",
+          "Sprint 2 In Progress",
+          "Sprint 3 Not Started"
+        ],
+        "solution": "qaI|- Status <Esc>A -|<Esc>jq2@a",
+        "hint": "Turn each item into a well-defined status badge.",
+        "why": "Using macros, you convert disarray into structured trackable items.",
+        "goal": [
+          "|- Status Sprint 1 Completed -|",
+          "|- Status Sprint 2 In Progress -|",
+          "|- Status Sprint 3 Not Started -|"
+        ]
+      }
+    ],
+    "regex-very-magic": [
+      {
+        "start": [
+          "Bug #9012 - replicate in dark mode",
+          "Bug #3344 - crash on rainbow interaction"
+        ],
+        "solution": ":%s/\\vBug #[0-9]+/Issue #/g<CR>",
+        "hint": "Turn all 'Bug #' into 'Issue #'.",
+        "why": "Flexibility with number patterns is enhanced by \\v mode.",
+        "goal": [
+          "Issue # - replicate in dark mode",
+          "Issue # - crash on rainbow interaction"
+        ]
+      },
+      {
+        "start": [
+          "In stock: 001 chairs, 002 tables",
+          "In stock: 003 lamps, 004 rugs"
+        ],
+        "solution": ":%s/\\v\\d+/item/g<CR>",
+        "hint": "Swap all numbers with 'item'.",
+        "why": "\\v allows succinct digit handling with \\d without extra backslashes.",
+        "goal": [
+          "In stock: item chairs, item tables",
+          "In stock: item lamps, item rugs"
+        ]
+      },
+      {
+        "start": [
+          "Call 911 in emergencies",
+          "Dial 999 if you're in the UK"
+        ],
+        "solution": ":%s/\\v\\d{3}/XXX/g<CR>",
+        "hint": "Obfuscate all emergency numbers.",
+        "why": "The \\d{3} pattern is cleanly interpreted with \\v.",
+        "goal": [
+          "Call XXX in emergencies",
+          "Dial XXX if you're in the UK"
+        ]
+      }
+    ],
+    "regex-case-toggle": [
+      {
+        "start": [
+          "Do you prefer coffee or TEA?",
+          "I like COFFEE and tea.",
+          "Both coffee AND Tea are fine."
+        ],
+        "solution": ":%s/coffee\\c/cocoa/g<CR>",
+        "hint": "add \\c so the pattern ignores case",
+        "why": "\\c makes the pattern case-insensitive.",
+        "goal": [
+          "Do you prefer cocoa or TEA?",
+          "I like cocoa and tea.",
+          "Both cocoa AND Tea are fine."
+        ]
+      },
+      {
+        "start": [
+          "The apple is red.",
+          "The APPLE is Green.",
+          "An AppLe a day keeps the doctor away."
+        ],
+        "solution": ":%s/apple\\c/banana/g<CR>",
+        "hint": "add \\c so the pattern ignores case",
+        "why": "\\c makes the pattern case-insensitive.",
+        "goal": [
+          "The banana is red.",
+          "The banana is Green.",
+          "An banana a day keeps the doctor away."
+        ]
+      }
+    ],
+    "regex-submatch-backref": [
+      {
+        "start": [
+          "code,42",
+          "debug,68",
+          "compile,45"
+        ],
+        "solution": ":%s/\\v(\\w+),(\\d+)/Task: \\1 | Priority: \\2/<CR>",
+        "hint": "capture with (), replay with \\1 \\2",
+        "why": "\\1 and \\2 replay the () groups in any order.",
+        "goal": [
+          "Task: code | Priority: 42",
+          "Task: debug | Priority: 68",
+          "Task: compile | Priority: 45"
+        ]
+      },
+      {
+        "start": [
+          "piano:88",
+          "guitar:6",
+          "flute:0"
+        ],
+        "solution": ":%s/\\v(\\w+):(\\d+)/\\1 has \\2 strings<CR>",
+        "hint": "capture with (), replay with \\1 \\2",
+        "why": "\\1 and \\2 replay the () groups in any order.",
+        "goal": [
+          "piano has 88 strings",
+          "guitar has 6 strings",
+          "flute has 0 strings"
+        ]
+      }
+    ],
+    "regex-word-boundary": [
+      {
+        "start": [
+          "port portrait import export portal"
+        ],
+        "solution": ":%s/\\v<port>/dock/g<CR>",
+        "hint": "anchor with \\v< > to whole words",
+        "why": "\\v< > match whole words, skipping longer ones.",
+        "goal": [
+          "dock portrait import export portal"
+        ]
+      },
+      {
+        "start": [
+          "log logger prologue dialogue logging"
+        ],
+        "solution": ":%s/\\v<log>/tree/g<CR>",
+        "hint": "anchor with \\v< > to whole words",
+        "why": "\\v< > match whole words, skipping longer ones.",
+        "goal": [
+          "tree logger prologue dialogue logging"
+        ]
+      }
+    ],
+    "regex-match-boundary-zs": [
+      {
+        "start": [
+          "We love icecreamcake so much"
+        ],
+        "solution": ":%s/icecream\\zscake/sandwich/<CR>",
+        "hint": "Focus on the dessert part you want to replace.",
+        "why": "\\zs starts the match later, so only the tail changes.",
+        "goal": [
+          "We love icecreamsandwich so much"
+        ]
+      },
+      {
+        "start": [
+          "The art of quantum sarcasm takes decades"
+        ],
+        "solution": ":%s/quantum \\zssarcasm/physics/<CR>",
+        "hint": "From sarcasm to physics, keep it quantum.",
+        "why": "\\zs starts the match later, so only the tail changes.",
+        "goal": [
+          "The art of quantum physics takes decades"
+        ]
+      }
+    ],
+    "search-operate-gn": [
+      {
+        "start": [
+          "function forecastWeather() {",
+          "    return 'cloudy';",
+          "}",
+          "function predictWeather() {",
+          "    return 'cloudy';",
+          "}"
+        ],
+        "solution": "/cloudy<CR>cgnsunny<Esc>.",
+        "hint": "Change the forecast in a snap with cgn and dot.",
+        "why": "cgn changes the next match; . repeats it down the file.",
+        "goal": [
+          "function forecastWeather() {",
+          "    return 'sunny';",
+          "}",
+          "function predictWeather() {",
+          "    return 'sunny';",
+          "}"
+        ]
+      }
+    ],
+    "substitute-whole-match-amp": [
+      {
+        "start": [
+          "10 cats, 20 dogs, 30 lizards"
+        ],
+        "solution": ":%s/\\v\\d+/{{&}}/g<CR>",
+        "hint": "Envelop each number in double curly braces with &.",
+        "why": "& helps you wrap numbers with ease in one stroke.",
+        "goal": [
+          "{{10}} cats, {{20}} dogs, {{30}} lizards"
+        ]
+      }
+    ],
+    "substitute-expression": [
+      {
+        "start": [
+          "level 10",
+          "level 12",
+          "level 15"
+        ],
+        "solution": ":%s/\\v\\d+/\\=submatch(0)-5/<CR>",
+        "hint": "Reduce the stress of leveling up by 5!",
+        "why": "\\= computes each replacement; submatch(0) is the match.",
+        "goal": [
+          "level 5",
+          "level 7",
+          "level 10"
+        ]
+      },
+      {
+        "start": [
+          "book 1 edition 3",
+          "book 2 edition 4",
+          "book 3 edition 5"
+        ],
+        "solution": ":%s/\\v\\d+$/\\=submatch(0)+1/g<CR>",
+        "hint": "Bump up the edition number to keep up with revisions.",
+        "why": "\\= computes each replacement; submatch(0) is the match.",
+        "goal": [
+          "book 1 edition 4",
+          "book 2 edition 5",
+          "book 3 edition 6"
+        ]
+      }
+    ],
+    "substitute-repeat-global": [
+      {
+        "start": [
+          "I wear a pink hat",
+          "She has a pink scarf",
+          "They love pink shoes"
+        ],
+        "solution": ":s/pink/blue/<CR>g&",
+        "hint": "do :s on one line, then g& everywhere",
+        "why": "g& repeats the last :s on every line.",
+        "goal": [
+          "I wear a blue hat",
+          "She has a blue scarf",
+          "They love blue shoes"
+        ]
+      },
+      {
+        "start": [
+          "The eagle flies high",
+          "The sparrow flies high",
+          "The hawk flies high"
+        ],
+        "solution": ":s/high/low/<CR>g&",
+        "hint": "do :s on one line, then g& everywhere",
+        "why": "g& repeats the last :s on every line.",
+        "goal": [
+          "The eagle flies low",
+          "The sparrow flies low",
+          "The hawk flies low"
+        ]
+      },
+      {
+        "start": [
+          "Popcorn is crunchy",
+          "Chips are crunchy",
+          "Cereal is crunchy"
+        ],
+        "solution": ":s/crunchy/soggy/<CR>g&",
+        "hint": "do :s on one line, then g& everywhere",
+        "why": "g& repeats the last :s on every line.",
+        "goal": [
+          "Popcorn is soggy",
+          "Chips are soggy",
+          "Cereal is soggy"
+        ]
+      }
+    ],
+    "global-delete": [
+      {
+        "start": [
+          "knight.jpg",
+          "mage.png",
+          "orc.gif",
+          "sword.txt",
+          "ogre.pdf"
+        ],
+        "solution": ":v/\\.jpg\\|\\.png/d<CR>",
+        "hint": "Keep only the image files.",
+        "why": ":v/pat/d deletes every line that does NOT match.",
+        "goal": [
+          "knight.jpg",
+          "mage.png"
+        ]
+      },
+      {
+        "start": [
+          "html_file.html",
+          "css_style.css",
+          "js_script.js",
+          "html_guide.html",
+          "css_tweaks.css"
+        ],
+        "solution": ":g/\\.html/d<CR>",
+        "hint": "Delete all HTML files.",
+        "why": ":g/pat/d deletes every line that matches.",
+        "goal": [
+          "css_style.css",
+          "js_script.js",
+          "css_tweaks.css"
+        ]
+      }
+    ],
+    "global-copy-collect": [
+      {
+        "start": [
+          "def bake_cake():",
+          "pass",
+          "def fry_egg():",
+          "pass",
+          "def make_pancakes():",
+          "pass"
+        ],
+        "solution": ":g/^def /t$<CR>",
+        "hint": "copy all matching lines to the end",
+        "why": ":g/pat/t$ copies every matching line to the end.",
+        "goal": [
+          "def bake_cake():",
+          "pass",
+          "def fry_egg():",
+          "pass",
+          "def make_pancakes():",
+          "pass",
+          "def bake_cake():",
+          "def fry_egg():",
+          "def make_pancakes():"
+        ]
+      },
+      {
+        "start": [
+          "## Chapter 1: The Rise",
+          "Content here",
+          "## Chapter 2: The Fall",
+          "More content",
+          "## Chapter 3: The Redemption",
+          "Yet more content"
+        ],
+        "solution": ":g/^## /t$<CR>",
+        "hint": "copy all matching lines to the end",
+        "why": ":g/pat/t$ copies every matching line to the end.",
+        "goal": [
+          "## Chapter 1: The Rise",
+          "Content here",
+          "## Chapter 2: The Fall",
+          "More content",
+          "## Chapter 3: The Redemption",
+          "Yet more content",
+          "## Chapter 1: The Rise",
+          "## Chapter 2: The Fall",
+          "## Chapter 3: The Redemption"
+        ]
+      }
+    ],
+    "global-block-range": [
+      {
+        "start": [
+          "shoppingList {",
+          "  bananas: 5;",
+          "  apples: 2;",
+          "  cherries: 10;",
+          "}",
+          "movieList {",
+          "  Inception;",
+          "  Batman;",
+          "  Avengers;",
+          "}"
+        ],
+        "solution": ":g/{/.+1,/}/-1 sort<CR>",
+        "hint": "sort each braced block's interior",
+        "why": "Sorts the lines inside each { } block, braces untouched.",
+        "goal": [
+          "shoppingList {",
+          "  apples: 2;",
+          "  bananas: 5;",
+          "  cherries: 10;",
+          "}",
+          "movieList {",
+          "  Avengers;",
+          "  Batman;",
+          "  Inception;",
+          "}"
+        ]
+      },
+      {
+        "start": [
+          "bandInstruments {",
+          "  guitar;",
+          "  drums;",
+          "  bass;",
+          "}",
+          "songs {",
+          "  Yesterday;",
+          "  Hey Jude;",
+          "  Let It Be;",
+          "}"
+        ],
+        "solution": ":g/{/.+1,/}/-1 sort<CR>",
+        "hint": "sort each braced block's interior",
+        "why": "Sorts the lines inside each { } block, braces untouched.",
+        "goal": [
+          "bandInstruments {",
+          "  bass;",
+          "  drums;",
+          "  guitar;",
+          "}",
+          "songs {",
+          "  Hey Jude;",
+          "  Let It Be;",
+          "  Yesterday;",
+          "}"
+        ]
+      },
+      {
+        "start": [
+          "ingredients {",
+          "  sugar;",
+          "  flour;",
+          "  eggs;",
+          "}",
+          "utensils {",
+          "  spatula;",
+          "  whisk;",
+          "  bowl;",
+          "}"
+        ],
+        "solution": ":g/{/.+1,/}/-1 sort<CR>",
+        "hint": "sort each braced block's interior",
+        "why": "Sorts the lines inside each { } block, braces untouched.",
+        "goal": [
+          "ingredients {",
+          "  eggs;",
+          "  flour;",
+          "  sugar;",
+          "}",
+          "utensils {",
+          "  bowl;",
+          "  spatula;",
+          "  whisk;",
+          "}"
+        ]
+      }
+    ],
+    "autocomplete-keyword": [
+      {
+        "start": [
+          "def transmogrifyWidget(widget):",
+          "    transm"
+        ],
+        "solution": "jA<C-n><Esc>",
+        "hint": "Type enough to be unique and let Vim finish it.",
+        "why": "<C-n> completes the word from ones already in the buffer.",
+        "goal": [
+          "def transmogrifyWidget(widget):",
+          "    transmogrifyWidget"
+        ]
+      }
+    ],
+    "autocomplete-whole-line": [
+      {
+        "start": [
+          "    raise ValueError",
+          "    rai"
+        ],
+        "solution": "jA<C-x><C-l><Esc>",
+        "hint": "finish the line from the one above",
+        "why": "",
+        "goal": [
+          "    raise ValueError",
+          "    raise ValueError"
+        ]
+      },
+      {
+        "start": [
+          "import numpy as np",
+          "imp"
+        ],
+        "solution": "jA<C-x><C-l><Esc>",
+        "hint": "complete the import without retyping",
+        "why": "",
+        "goal": [
+          "import numpy as np",
+          "import numpy as np"
+        ]
+      },
+      {
+        "start": [
+          "    log.debug('checkpoint')",
+          "    log.de"
+        ],
+        "solution": "jA<C-x><C-l><Esc>",
+        "hint": "whole-line complete the log call",
+        "why": "",
+        "goal": [
+          "    log.debug('checkpoint')",
+          "    log.debug('checkpoint')"
+        ]
+      }
+    ]
+  }
+}

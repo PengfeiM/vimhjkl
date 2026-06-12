@@ -1173,35 +1173,29 @@
         },
         {
           "start": [
-            "#ifdef DEBUG",
-            "log('trace')",
-            "#endif"
+            "mirrors = [",
+            "ams.cdn.example",
+            "fra.cdn.example",
+            "lhr.cdn.example",
+            "nyc.cdn.example",
+            "sfo.cdn.example",
+            "syd.cdn.example",
+            "]"
           ],
-          "par_keys": 13,
-          "hint": "Comment out the whole debug block.",
+          "par_keys": 31,
+          "hint": "two :normal passes over the host lines: prefix, then suffix",
           "goal": [
-            "//#ifdef DEBUG",
-            "//log('trace')",
-            "//#endif"
+            "mirrors = [",
+            "  'ams.cdn.example',",
+            "  'fra.cdn.example',",
+            "  'lhr.cdn.example',",
+            "  'nyc.cdn.example',",
+            "  'sfo.cdn.example',",
+            "  'syd.cdn.example',",
+            "]"
           ],
-          "solution": ":%normal I//<CR>",
-          "why": ":%normal runs the same keys on every line."
-        },
-        {
-          "start": [
-            "if (raining)",
-            "if (sunny)",
-            "if (snowing)"
-          ],
-          "par_keys": 29,
-          "hint": "Provide a guidance note by extending forecast lines.",
-          "goal": [
-            "if (raining) // check forecast",
-            "if (sunny) // check forecast",
-            "if (snowing) // check forecast"
-          ],
-          "solution": ":%normal A // check forecast<CR>",
-          "why": ":%normal runs the same keys on every line."
+          "solution": ":2,7normal I  '<CR>:2,7normal A',<CR>",
+          "why": "Quoting six list entries by hand is twelve inserts — two ranged :normal commands do it in two."
         }
       ]
     },
@@ -1209,7 +1203,7 @@
       "id": "ex-copy-line",
       "title": "Duplicate lines with :t (copy)",
       "category": "ex_command",
-      "teach": ":[range]t{address} copies the range to just below {address} (think 'copy to'). It's a cursor-free way to duplicate a line anywhere: :t. clones the current line in place, :t$ sends a copy to the end of the file, :t0 to the top.",
+      "teach": ":[range]t{address} copies the range to just below {address} (think 'copy to'). The win is distance: the source line, the destination, and your cursor can be three different places — :5t12 touches none of them. :t$ sends a copy to the end, :t0 to the top, :t. to right here.",
       "key_commands": [
         ":t",
         ":copy",
@@ -1220,35 +1214,65 @@
       "challenges": [
         {
           "start": [
-            "header",
-            "---",
-            "body"
+            "/* ================================ */",
+            "/* Buttons */",
+            ".btn { padding: 8px; }",
+            ".btn:hover { background: #eee; }",
+            ".btn:active { transform: scale(.98); }",
+            "",
+            "/* Cards (needs the banner line above) */",
+            ".card { border: 1px solid #ddd; }",
+            ".card h2 { margin-top: 0; }"
           ],
           "par_keys": 5,
-          "hint": "copy line 1 to below the last line",
+          "hint": "copy the banner (line 1) to below line 6 — without going to either",
           "goal": [
-            "header",
-            "---",
-            "body",
-            "header"
+            "/* ================================ */",
+            "/* Buttons */",
+            ".btn { padding: 8px; }",
+            ".btn:hover { background: #eee; }",
+            ".btn:active { transform: scale(.98); }",
+            "",
+            "/* ================================ */",
+            "/* Cards (needs the banner line above) */",
+            ".card { border: 1px solid #ddd; }",
+            ".card h2 { margin-top: 0; }"
           ],
-          "solution": ":1t$<CR>",
-          "why": ":t duplicates a distant line without moving the cursor there."
+          "start_cursor": [
+            4,
+            1
+          ],
+          "solution": ":1t6<CR>",
+          "why": "Source, destination and cursor are three different places — :1t6 visits none of them."
         },
         {
           "start": [
-            "row",
-            "spacer"
+            "# deploy targets",
+            "[target.staging]",
+            "host = 'stage.internal'",
+            "port = 22",
+            "",
+            "[target.prod]",
+            "host = 'prod.internal'"
           ],
           "par_keys": 5,
-          "hint": "copy line 1 to just below itself",
+          "hint": "the prod block needs its port line — copy line 4 to the end",
           "goal": [
-            "row",
-            "row",
-            "spacer"
+            "# deploy targets",
+            "[target.staging]",
+            "host = 'stage.internal'",
+            "port = 22",
+            "",
+            "[target.prod]",
+            "host = 'prod.internal'",
+            "port = 22"
           ],
-          "solution": ":1t1<CR>",
-          "why": ":1t1 clones a line in place — handy for repeating boilerplate."
+          "start_cursor": [
+            1,
+            1
+          ],
+          "solution": ":4t$<CR>",
+          "why": ":4t$ duplicates a distant line to the file's end while the cursor stays parked on line 1."
         }
       ]
     },
@@ -1256,7 +1280,7 @@
       "id": "ex-move-line",
       "title": "Relocate lines with :m (move)",
       "category": "ex_command",
-      "teach": ":[range]m{address} moves the range to just below {address}. Use :m0 to send a line to the very top, :m$ to the bottom, or :m{n} to slot it after line n. It rearranges lines from afar without cut-and-paste.",
+      "teach": ":[range]m{address} moves the range to just below {address}. Use :m0 to send a line to the very top, :m$ to the bottom, or :m{n} to slot it after line n. It rearranges lines from afar without cut-and-paste — no travel, no register, no lost cursor position.",
       "key_commands": [
         ":m",
         ":move",
@@ -1267,37 +1291,67 @@
       "challenges": [
         {
           "start": [
-            "<h1>Welcome</h1>",
-            "<!DOCTYPE html>",
-            "<body>"
+            "import os",
+            "import sys",
+            "",
+            "def main():",
+            "    args = parse()",
+            "    run(args)",
+            "import json",
+            "",
+            "if __name__ == '__main__':",
+            "    main()"
           ],
           "par_keys": 5,
-          "hint": "the doctype must come first — lift line 2 to the top",
+          "hint": "the stray import on line 7 belongs after line 1 — move it from here",
           "goal": [
-            "<!DOCTYPE html>",
-            "<h1>Welcome</h1>",
-            "<body>"
+            "import os",
+            "import json",
+            "import sys",
+            "",
+            "def main():",
+            "    args = parse()",
+            "    run(args)",
+            "",
+            "if __name__ == '__main__':",
+            "    main()"
           ],
-          "solution": ":2m0<CR>",
-          "why": ":m0 lifts a line to the top in one stroke."
+          "start_cursor": [
+            5,
+            5
+          ],
+          "solution": ":7m1<CR>",
+          "why": "dd would mean travelling there and back; :7m1 moves a far line while your cursor stays put."
         },
         {
           "start": [
-            "import sys",
-            "# fixme later",
-            "import os",
-            "run()"
+            "print('DEBUG: remove me')",
+            "def checkout(cart):",
+            "    total = sum(cart.values())",
+            "    apply_discount(total)",
+            "    charge(total)",
+            "    return receipt(total)",
+            "",
+            "log = setup_logger()"
           ],
           "par_keys": 5,
-          "hint": "banish the stray note to the bottom of the file",
+          "hint": "banish the debug print from line 1 to the bottom — no travel",
           "goal": [
-            "import sys",
-            "import os",
-            "run()",
-            "# fixme later"
+            "def checkout(cart):",
+            "    total = sum(cart.values())",
+            "    apply_discount(total)",
+            "    charge(total)",
+            "    return receipt(total)",
+            "",
+            "log = setup_logger()",
+            "print('DEBUG: remove me')"
           ],
-          "solution": ":2m$<CR>",
-          "why": ":m$ relocates a line to the end without any yanking."
+          "start_cursor": [
+            4,
+            5
+          ],
+          "solution": ":1m$<CR>",
+          "why": ":1m$ relocates the line across the whole file in one command."
         }
       ]
     },
@@ -1305,28 +1359,46 @@
       "id": "ex-repeat-last",
       "title": "Repeat the last Ex command (@:)",
       "category": "ex_command",
-      "teach": "The dot command repeats the last NORMAL-mode change, but to repeat the last Ex command you use @: instead. After running it once, @@ repeats that in turn. It's the Ex-mode counterpart of the Dot Formula.",
+      "teach": "The dot command repeats the last NORMAL-mode change, but to repeat the last Ex command you use @: instead. After running it once, @@ repeats that in turn. Bonus: :s sets the search pattern, so n hops to the next match and @: re-runs the substitute right there.",
       "key_commands": [
         "@:",
         "@@",
-        ":t.",
-        "."
+        "n",
+        ":s"
       ],
       "difficulty": 4,
       "challenges": [
         {
           "start": [
-            "- [ ] review the PR"
+            "# rolling upgrade from v1, one service at a time",
+            "api:",
+            "  image: registry/api:v1",
+            "  replicas: 3",
+            "worker:",
+            "  image: registry/worker:v1",
+            "  replicas: 2",
+            "cron:",
+            "  image: registry/cron:v1"
           ],
-          "par_keys": 6,
-          "hint": "duplicate the checklist line, then @: repeats it",
+          "par_keys": 16,
+          "hint": ":s on the first image, then n to the next match and @: again",
           "goal": [
-            "- [ ] review the PR",
-            "- [ ] review the PR",
-            "- [ ] review the PR"
+            "# rolling upgrade from v1, one service at a time",
+            "api:",
+            "  image: registry/api:v2",
+            "  replicas: 3",
+            "worker:",
+            "  image: registry/worker:v2",
+            "  replicas: 2",
+            "cron:",
+            "  image: registry/cron:v2"
           ],
-          "solution": ":t.<CR>@:",
-          "why": "@: replays :t. — the dot command can't repeat Ex commands."
+          "start_cursor": [
+            3,
+            1
+          ],
+          "solution": ":s/v1/v2/<CR>n@:n@:",
+          "why": "A bare :%s//g would also hit the comment — n + @: repeats the substitute only where you point it."
         },
         {
           "start": [
@@ -2098,6 +2170,27 @@
           ],
           "solution": "ci[NEW<Esc>",
           "why": "ci[ swaps the subscript in one move."
+        },
+        {
+          "start": [
+            "registry.routes({",
+            "    home: '/',",
+            "    about: '/about',",
+            "})"
+          ],
+          "par_keys": 23,
+          "hint": "ci{ works across lines — the whole block body is one object",
+          "goal": [
+            "registry.routes({",
+            "    health: '/healthz',",
+            "})"
+          ],
+          "start_cursor": [
+            2,
+            5
+          ],
+          "solution": "ci{health: '/healthz',<Esc>",
+          "why": "Text objects read structure, so a multiline { } body falls to the same two keys as a one-liner."
         }
       ]
     },
@@ -2516,6 +2609,70 @@
           ],
           "solution": "magg'a",
           "why": "'a returns to the marked line's first non-blank."
+        },
+        {
+          "start": [
+            "def charge(order):",
+            "    total = order.subtotal",
+            "    total += total * TAX_RATE",
+            "    if order.express:",
+            "        total += EXPRESS_FEE",
+            "    if total > FREE_SHIP_OVER:",
+            "        total -= order.shipping",
+            "    return round(total, 2)",
+            "",
+            "def refund(order):",
+            "    ledger.reverse(order.id)",
+            "    notify(order.user)",
+            "",
+            "# pricing constants",
+            "TAX_RATE = 0.0825",
+            "EXPRESS_FEE = 14.50",
+            "FREE_SHIP_OVER = 120.00"
+          ],
+          "par_keys": 5,
+          "hint": "ma where you're editing, G to check the constants, `a back",
+          "start_cursor": [
+            5,
+            9
+          ],
+          "target": [
+            5,
+            9
+          ],
+          "solution": "maG`a",
+          "why": "Twelve lines away and back to the exact column in two keystrokes — no scroll-and-hunt."
+        },
+        {
+          "start": [
+            "def render(rows):",
+            "    out = []",
+            "    for r in rows:",
+            "        cells = [fmt(c) for c in r]",
+            "        out.append(' | '.join(cells))",
+            "    return '\\n'.join(out)",
+            "",
+            "def fmt(value):",
+            "    if value is None:",
+            "        return '-'",
+            "    if isinstance(value, float):",
+            "        return f'{value:.2f}'",
+            "    return str(value)",
+            "",
+            "WIDTH_LIMIT = 96"
+          ],
+          "par_keys": 9,
+          "hint": "search to the constant far below, then `` snaps you home",
+          "start_cursor": [
+            4,
+            18
+          ],
+          "target": [
+            4,
+            18
+          ],
+          "solution": "/WIDTH<CR>``",
+          "why": "Every jump sets the previous-position mark for free — `` is the return ticket you didn't have to buy."
         }
       ]
     },
@@ -2733,24 +2890,6 @@
             "import os"
           ],
           "solution": "\"ayyG\"ap"
-        },
-        {
-          "start": [
-            "chorus:",
-            "verse:",
-            "bridge:"
-          ],
-          "par_keys": 16,
-          "hint": "stash with \"a, drop it with \"ap",
-          "goal": [
-            "chorus:",
-            "verse:",
-            "bridge:",
-            "chorus:",
-            "verse:"
-          ],
-          "solution": "\"cyyj\"dyyG\"cp\"dp",
-          "why": "registers c and d stay independent."
         }
       ]
     },
@@ -2789,34 +2928,47 @@
         },
         {
           "start": [
-            "alpha();",
-            "bravo();",
-            "charlie();"
+            "GET /api/users",
+            "POST /api/users",
+            "GET /api/orders",
+            "DELETE /api/orders/1",
+            "PUT /api/users/7",
+            "PATCH /api/users/7"
           ],
-          "par_keys": 17,
-          "hint": "record a comment-append once, replay down the list",
+          "par_keys": 11,
+          "hint": "lowercase the method on line 1 (end with j), then 5@a",
           "goal": [
-            "alpha(); // done",
-            "bravo(); // done",
-            "charlie(); // done"
+            "get /api/users",
+            "post /api/users",
+            "get /api/orders",
+            "delete /api/orders/1",
+            "put /api/users/7",
+            "patch /api/users/7"
           ],
-          "solution": "qaA // done<Esc>jq2@a",
-          "why": "the macro ends by moving to the next line, so it chains."
+          "solution": "qa0guwjq5@a",
+          "why": "guw + j recorded once turns six edits into one count."
         },
         {
           "start": [
-            "sword",
-            "shield",
-            "potion"
+            "grader.py        413 lines   REVIEWED",
+            "engine.py        388 lines   REVIEWED",
+            "cli.py           512 lines   REVIEWED",
+            "store.py         301 lines   REVIEWED",
+            "tui.py           446 lines   REVIEWED",
+            "config.py        129 lines   REVIEWED"
           ],
           "par_keys": 11,
-          "hint": "bulletise every line with one recorded keystroke set",
+          "hint": "$daW removes the last WORD and its padding; record, then 5@a",
           "goal": [
-            "- sword",
-            "- shield",
-            "- potion"
+            "grader.py        413 lines",
+            "engine.py        388 lines",
+            "cli.py           512 lines",
+            "store.py         301 lines",
+            "tui.py           446 lines",
+            "config.py        129 lines"
           ],
-          "solution": "qaI- <Esc>jq2@a"
+          "solution": "qa$daWjq5@a",
+          "why": "The edit is a motion ($, aW), so a macro replays it perfectly."
         }
       ]
     },
@@ -2886,22 +3038,6 @@
           ],
           "solution": "qaI- <Esc>A: Yum!<Esc>jq2@a",
           "why": "Macros efficiently apply a repeated pattern across multiple lines."
-        },
-        {
-          "start": [
-            "insert coin",
-            "press start",
-            "defeat the boss"
-          ],
-          "par_keys": 15,
-          "hint": "Make a checklist where each action is marked completed.",
-          "goal": [
-            "- [x] insert coin",
-            "- [x] press start",
-            "- [x] defeat the boss"
-          ],
-          "solution": "qaI- [x] <Esc>jq2@a",
-          "why": "Macros help turn tasks into tidy completed checklists."
         },
         {
           "start": [
@@ -3094,14 +3230,19 @@
         },
         {
           "start": [
-            "call run() now"
+            "total += data[0]",
+            "weights = data0 * scale",
+            "print(data[0], total)"
           ],
-          "par_keys": 18,
-          "hint": "swap a literal call",
+          "par_keys": 24,
+          "hint": "\\V keeps the [0] literal — otherwise it's a character class",
           "goal": [
-            "call DONE now"
+            "total += data[i]",
+            "weights = data0 * scale",
+            "print(data[i], total)"
           ],
-          "solution": ":%s/\\Vrun()/DONE/<CR>"
+          "solution": ":%s/\\Vdata[0]/data[i]/g<CR>",
+          "why": "Plain /data[0]/ matches 'data0' too; \\V pins the brackets down."
         }
       ]
     },
@@ -3484,17 +3625,6 @@
           ],
           "solution": ":2,3s/.*/\\U&/<CR>",
           "why": "A line range scopes the substitute to exactly those rows."
-        },
-        {
-          "start": [
-            "error error error"
-          ],
-          "par_keys": 15,
-          "hint": "calm the whole line down",
-          "goal": [
-            "ok ok ok"
-          ],
-          "solution": ":%s/error/ok/g<CR>"
         }
       ]
     },
@@ -3564,15 +3694,21 @@
       "challenges": [
         {
           "start": [
-            "loud and clear"
+            "timeout = 30",
+            "retries = 5",
+            "log_level = warn",
+            "cache_dir = /tmp/vh"
           ],
-          "par_keys": 12,
-          "hint": "\\U upper-cases the whole matched line",
+          "par_keys": 31,
+          "hint": "capture the key, \\U\\1 shouts it, the rewrite adds the rest",
           "goal": [
-            "LOUD AND CLEAR"
+            "export TIMEOUT=30",
+            "export RETRIES=5",
+            "export LOG_LEVEL=warn",
+            "export CACHE_DIR=/tmp/vh"
           ],
-          "solution": ":%s/.*/\\U&/<CR>",
-          "why": "\\U& shouts the entire match in one substitute."
+          "solution": ":%s/\\v^(\\w+) \\= /export \\U\\1=/<CR>",
+          "why": "\\U uppercases the captured name while the same :s reshapes the whole line — no Normal-mode case operator can do both."
         },
         {
           "start": [
@@ -3585,20 +3721,6 @@
           ],
           "solution": ":%s/\\v<./\\u&/g<CR>",
           "why": "\\u& Title-Cases by upper-casing just the leading letter."
-        },
-        {
-          "start": [
-            "lumberjack",
-            "MAPLE syrup"
-          ],
-          "par_keys": 16,
-          "hint": "\\u& / \\U& change case in the replacement",
-          "goal": [
-            "LUMBERJACK MAN!",
-            "MAPLE syrup"
-          ],
-          "solution": ":s/.*/\\U& MAN!/<CR>",
-          "why": "\\U& uppercases the whole match."
         }
       ]
     },
@@ -3967,42 +4089,6 @@
           ],
           "solution": ":g/=/normal A;<CR>",
           "why": ":g/=/ targets the code lines and leaves the comments alone."
-        },
-        {
-          "start": [
-            "def escape_tower():",
-            "    run_away()",
-            "def make_tea():",
-            "    boil_water()"
-          ],
-          "par_keys": 26,
-          "hint": "Add TODO to all function definitions.",
-          "goal": [
-            "// TODO: def escape_tower():",
-            "    run_away()",
-            "// TODO: def make_tea():",
-            "    boil_water()"
-          ],
-          "solution": ":g/^def/normal I// TODO: <CR>",
-          "why": ":g/pat/normal runs the keys on each matching line."
-        },
-        {
-          "start": [
-            "userAction = createAccount()",
-            "trackEvent('Account Created')",
-            "userAction = deleteAccount()",
-            "trackEvent('Account Deleted')"
-          ],
-          "par_keys": 26,
-          "hint": "Comment out the event tracking calls.",
-          "goal": [
-            "userAction = createAccount()",
-            "// trackEvent('Account Created')",
-            "userAction = deleteAccount()",
-            "// trackEvent('Account Deleted')"
-          ],
-          "solution": ":g/trackEvent/normal I// <CR>",
-          "why": ":g/pat/normal runs the keys on each matching line."
         }
       ]
     },
@@ -4182,22 +4268,6 @@
           ],
           "solution": ":g/log/s/:/ =>/<CR>",
           "why": ":g+:s reshapes a subset without touching the err/warn lines."
-        },
-        {
-          "start": [
-            "meeting: brainstorm ideas",
-            "coffee break: sip slowly",
-            "meeting: review notes"
-          ],
-          "par_keys": 19,
-          "hint": "run :s only on matching lines",
-          "goal": [
-            "meeting = brainstorm ideas",
-            "coffee break: sip slowly",
-            "meeting = review notes"
-          ],
-          "solution": ":g/meeting/s/:/ =/<CR>",
-          "why": ":g/pat/s/// substitutes only on matching lines."
         }
       ]
     },
@@ -4349,6 +4419,415 @@
           ],
           "solution": ":g/{/.+1,/}/-1 sort<CR>",
           "why": "Sorts the lines inside each { } block, braces untouched."
+        }
+      ]
+    },
+    {
+      "id": "operator-replace-char",
+      "title": "Replace one character (r, R)",
+      "category": "operator",
+      "teach": "r{char} overwrites the character under the cursor and immediately returns to Normal mode — no <Esc>, no Insert trip. A count replaces a run (2r| turns && into ||), and R enters Replace mode to overtype several characters in place. For one-character typos, r beats any change command.",
+      "key_commands": [
+        "r",
+        "2r",
+        "R",
+        "f{char}r"
+      ],
+      "difficulty": 1,
+      "challenges": [
+        {
+          "start": [
+            "matrix[i][j] = matrix[j][i};"
+          ],
+          "par_keys": 4,
+          "hint": "fly to the wrong bracket, then r overtypes just it",
+          "goal": [
+            "matrix[i][j] = matrix[j][i];"
+          ],
+          "solution": "f}r]",
+          "why": "f}r] is four keys and never leaves Normal mode — cl]<Esc> is five plus a mode trip."
+        },
+        {
+          "start": [
+            "for (i = 0. i < n; i++) {",
+            "    visit(nodes[i])",
+            "}"
+          ],
+          "par_keys": 4,
+          "hint": "the dot should be a semicolon — find it, replace it",
+          "goal": [
+            "for (i = 0; i < n; i++) {",
+            "    visit(nodes[i])",
+            "}"
+          ],
+          "solution": "f.r;",
+          "why": "One stray character needs exactly one r, not an Insert session."
+        },
+        {
+          "start": [
+            "if (debug && verbose && trace) {",
+            "    dump_state()",
+            "}"
+          ],
+          "par_keys": 7,
+          "hint": "2r| swaps the pair; ; refinds, . repeats",
+          "goal": [
+            "if (debug || verbose || trace) {",
+            "    dump_state()",
+            "}"
+          ],
+          "solution": "f&2r|;.",
+          "why": "A counted r replaces a run, and it's dot-repeatable — the second && costs two keys."
+        },
+        {
+          "start": [
+            "release = v1.0.3-beta"
+          ],
+          "par_keys": 7,
+          "hint": "R overtypes in place — retype just the version core",
+          "goal": [
+            "release = v2.4.3-beta"
+          ],
+          "solution": "f1R2.4<Esc>",
+          "why": "Replace mode rewrites three characters without disturbing the '-beta' tail; cW would mean retyping all of it."
+        }
+      ]
+    },
+    {
+      "id": "operator-join-lines",
+      "title": "Join lines upward (J, gJ)",
+      "category": "operator",
+      "teach": "J joins the next line onto the current one, collapsing its leading indent to a single space; a count joins that many lines (3J makes three into one). gJ joins with NO space — for when a line broke mid-token. It's the undo button for over-eager line wrapping.",
+      "key_commands": [
+        "J",
+        "3J",
+        "gJ"
+      ],
+      "difficulty": 2,
+      "challenges": [
+        {
+          "start": [
+            "def setup():",
+            "    cfg = load(path,",
+            "        strict=True,",
+            "        retries=3)",
+            "    return cfg"
+          ],
+          "par_keys": 2,
+          "hint": "each J pulls the next wrapped argument up onto this line",
+          "goal": [
+            "def setup():",
+            "    cfg = load(path, strict=True, retries=3)",
+            "    return cfg"
+          ],
+          "start_cursor": [
+            2,
+            5
+          ],
+          "solution": "JJ",
+          "why": "J swallows the continuation's indent and leaves one clean space — deleting whitespace by hand can't compete."
+        },
+        {
+          "start": [
+            "msg = (\"deploy failed:\"",
+            "       \" disk full on\"",
+            "       \" node-7\")",
+            "raise DeployError(msg)"
+          ],
+          "par_keys": 2,
+          "hint": "a count joins the whole wrapped expression at once",
+          "goal": [
+            "msg = (\"deploy failed:\" \" disk full on\" \" node-7\")",
+            "raise DeployError(msg)"
+          ],
+          "solution": "3J",
+          "why": "3J collapses three lines in one stroke instead of J J."
+        },
+        {
+          "start": [
+            "DATABASE_",
+            "URL = os.environ.get('DATABASE_URL')",
+            "connect(DATABASE_URL)"
+          ],
+          "par_keys": 2,
+          "hint": "the identifier broke across lines — join with NO space",
+          "goal": [
+            "DATABASE_URL = os.environ.get('DATABASE_URL')",
+            "connect(DATABASE_URL)"
+          ],
+          "solution": "gJ",
+          "why": "gJ glues the lines verbatim; J would wedge a space inside the variable name."
+        }
+      ]
+    },
+    {
+      "id": "operator-indent-shift",
+      "title": "Shift indentation (>>, <<)",
+      "category": "operator",
+      "teach": ">> shifts the current line one 'shiftwidth' right, << shifts it left, and a count takes that many lines (3>> indents three). Like d and c they are operators, so >ip indents a paragraph and >} to the block's end. In clean vim a shift is one literal tab — exactly what Makefiles and Go want.",
+      "key_commands": [
+        ">>",
+        "<<",
+        "3>>",
+        ">ip"
+      ],
+      "difficulty": 2,
+      "challenges": [
+        {
+          "start": [
+            "build:",
+            "go build ./cmd/app",
+            "test:",
+            "go test ./..."
+          ],
+          "par_keys": 7,
+          "hint": "make recipes must be tab-indented — shift each command line",
+          "goal": [
+            "build:",
+            "\tgo build ./cmd/app",
+            "test:",
+            "\tgo test ./..."
+          ],
+          "solution": "j>>2j>>",
+          "why": ">> indents by one tab in clean vim, which is precisely what a Makefile recipe requires."
+        },
+        {
+          "start": [
+            "func main() {",
+            "fmt.Println(\"boot\")",
+            "cfg := load()",
+            "serve(cfg)",
+            "}"
+          ],
+          "par_keys": 4,
+          "hint": "the pasted body lost its indent — a count fixes all three lines",
+          "goal": [
+            "func main() {",
+            "\tfmt.Println(\"boot\")",
+            "\tcfg := load()",
+            "\tserve(cfg)",
+            "}"
+          ],
+          "solution": "j3>>",
+          "why": "3>> shifts the whole body in one operation; line-by-line >> j >> j >> is triple the work."
+        },
+        {
+          "start": [
+            "if ok {",
+            "\tship()",
+            "\t\tlog(\"done\")",
+            "\t\treturn nil",
+            "}"
+          ],
+          "par_keys": 5,
+          "hint": "two lines are a level too deep — dedent both with a count",
+          "goal": [
+            "if ok {",
+            "\tship()",
+            "\tlog(\"done\")",
+            "\treturn nil",
+            "}"
+          ],
+          "solution": "2j2<<",
+          "why": "2<< pulls both over-indented lines back one stop without touching their inner spacing."
+        }
+      ]
+    },
+    {
+      "id": "motion-paragraph-leap",
+      "title": "Leap by paragraph ({, })",
+      "category": "motion",
+      "teach": "} jumps to the next blank line, { to the previous one. In code, blank lines separate functions and stanzas — so each press leaps a whole block, however long it is. Counts stack (2}), and as motions they feed operators too (d}, y}).",
+      "key_commands": [
+        "{",
+        "}",
+        "2}",
+        "d}"
+      ],
+      "difficulty": 2,
+      "challenges": [
+        {
+          "start": [
+            "import sqlite3",
+            "import json",
+            "",
+            "def connect(path):",
+            "    db = sqlite3.connect(path)",
+            "    db.row_factory = dict_row",
+            "    return db",
+            "",
+            "def dict_row(cur, row):",
+            "    cols = [d[0] for d in cur.description]",
+            "    return dict(zip(cols, row))"
+          ],
+          "par_keys": 2,
+          "hint": "each } clears one whole block, however tall",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            8,
+            1
+          ],
+          "solution": "}}",
+          "why": "Two presses cross two blocks — j would take seven."
+        },
+        {
+          "start": [
+            "app.get('/health', (req, res) => {",
+            "  res.send('ok')",
+            "})",
+            "",
+            "app.get('/users', (req, res) => {",
+            "  res.json(db.users())",
+            "})",
+            "",
+            "app.listen(PORT)"
+          ],
+          "par_keys": 2,
+          "hint": "} to the gap, j onto the next route's first line",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            5,
+            1
+          ],
+          "solution": "}j",
+          "why": "}j is the two-key idiom for 'start of the next block'."
+        },
+        {
+          "start": [
+            "[server]",
+            "host = 0.0.0.0",
+            "port = 8080",
+            "",
+            "[database]",
+            "url = postgres://localhost/app",
+            "pool_size = 5",
+            "",
+            "[logging]",
+            "level = info",
+            "file = /var/log/app.log"
+          ],
+          "par_keys": 2,
+          "hint": "{ leaps backward a stanza at a time",
+          "start_cursor": [
+            11,
+            8
+          ],
+          "target": [
+            4,
+            1
+          ],
+          "solution": "{{",
+          "why": "Two { presses climb from the bottom section past [database] in two keys."
+        }
+      ]
+    },
+    {
+      "id": "motion-goto-line",
+      "title": "Jump to a line by number (G, gg)",
+      "category": "motion",
+      "teach": "{count}G jumps straight to that line number — THE motion for 'error on line 13'. Bare G goes to the last line, gg to the first. (:13<CR> does the same from the command line.) With relative distances unknown, an absolute jump beats any amount of scrolling.",
+      "key_commands": [
+        "13G",
+        "gg",
+        "G",
+        ":13"
+      ],
+      "difficulty": 1,
+      "challenges": [
+        {
+          "start": [
+            "certifi==2026.4.26",
+            "charset-normalizer==3.4.0",
+            "click==8.1.8",
+            "fastapi==0.115.6",
+            "h11==0.14.0",
+            "httpcore==1.0.7",
+            "httpx==0.28.1",
+            "idna==3.10",
+            "pydantic==2.10.4",
+            "sniffio==1.3.1",
+            "starlette==0.41.3",
+            "typing-extensions==4.12.2",
+            "uvicorn==0.30.1",
+            "uvloop==0.21.0",
+            "watchfiles==1.0.3"
+          ],
+          "par_keys": 3,
+          "hint": "the merge conflict is on line 13 — jump by number",
+          "start_cursor": [
+            1,
+            1
+          ],
+          "target": [
+            13,
+            1
+          ],
+          "solution": "13G",
+          "why": "13G lands exactly where the diff points, no counting."
+        },
+        {
+          "start": [
+            "[package]",
+            "name = 'vimhjkl'",
+            "version = '0.4.1'",
+            "",
+            "[dependencies]",
+            "# stdlib only",
+            "",
+            "[build]",
+            "backend = 'uv_build'",
+            "module-root = 'src'",
+            "",
+            "[tool.notes]",
+            "remember = 'tabs in makefiles'"
+          ],
+          "par_keys": 2,
+          "hint": "back to the top in two keys",
+          "start_cursor": [
+            13,
+            1
+          ],
+          "target": [
+            1,
+            1
+          ],
+          "solution": "gg",
+          "why": "gg is the absolute jump home — no Ctrl-U mashing."
+        },
+        {
+          "start": [
+            "#!/bin/sh",
+            "set -eu",
+            "",
+            "say() { printf '%s\\n' \"$1\"; }",
+            "",
+            "say 'building'",
+            "make build",
+            "",
+            "say 'testing'",
+            "make test",
+            "",
+            "say 'shipping'",
+            "make release"
+          ],
+          "par_keys": 1,
+          "hint": "straight to the file's last line",
+          "start_cursor": [
+            2,
+            1
+          ],
+          "target": [
+            13,
+            1
+          ],
+          "solution": "G",
+          "why": "G needs no count to reach the end of any file."
         }
       ]
     },

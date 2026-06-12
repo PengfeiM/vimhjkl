@@ -13,11 +13,12 @@ __pycache__/
 progress.json
 config.json
 
-# Build cursor + LLM augmentation pools — local intermediates, not distributed
-# (the merged result lives in the tracked content/skills.json)
+# Build intermediates — local only. The build system (build/) and the verified
+# instance pool (content/llm_pool.json) ARE tracked so anyone can rebuild
+# skills.json; the reading cursor and reject log stay local.
 content/build_state.json
-content/llm_pool.json
 content/llm_rejects.json
+build/cursor.py
 
 # Local tooling / reference material — not distributed
 .claude/
