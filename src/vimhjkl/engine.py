@@ -499,7 +499,8 @@ class DrillSession:
                  free_form: bool = False,
                  remaps: Optional[list[dict]] = None,
                  on_disable: Optional[Callable[[str], None]] = None,
-                 locale: str = "en"):
+                 locale: str = "en",
+                 extras: Optional[list[str]] = None):
         self.skills = skills
         self.progress = progress
         self.present = present
@@ -525,6 +526,8 @@ class DrillSession:
         # being scheduled.  The current attempt is not recorded.
         self.on_disable = on_disable
         self.locale = locale
+        # Extra prelude ex commands (config `vim_extras`) — display/comfort only.
+        self.extras = extras
 
     def run(self, selected: list[Skill]) -> SessionSummary:
         """Drill each selected skill.  ``review`` returns an action string:
@@ -549,7 +552,8 @@ class DrillSession:
                                      goal_extra=goal_extra,
                                      enforce_command=not self.free_form,
                                      remaps=self.remaps,
-                                     locale=self.locale)
+                                     locale=self.locale,
+                                     extras=self.extras)
                 abstained = attempt_abstained(result, skill.category)
                 passed = (not abstained) and outcome_passed(result)
                 record = AttemptRecord(skill, challenge, result, passed,

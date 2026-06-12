@@ -58,7 +58,10 @@ Other flags: `-n/--count N`, `--gate D` (cap new-skill difficulty), `--hide-move
 | Review   | Flashcards, self-rated                                    |
 
 Settings (in the menu): toggle lessons, choose language, remap any key in any
-mode (`jk` → `<Esc>`, `;` → `:`). Remapped keys are graded as the original.
+mode (`jk` → `<Esc>`, `;` → `:`) — remapped keys are graded as the original —
+and add "Vim extras": your own display commands (`set norelativenumber`,
+`colorscheme habamax`) run at drill startup. Drills stay on a clean
+`vim -u NONE` so plugins and autocmds can't skew grading.
 
 ## How it works
 

@@ -47,6 +47,10 @@ def _default() -> dict:
         # Display language for teaching text.  "en" = English (canonical curriculum);
         # "zh-CN" = Chinese, etc.  Loaded from data/i18n/{lang}.json at startup.
         "lang": "en",
+        # Extra ex commands sourced into every interactive drill, AFTER the
+        # built-in settings — bring your own look (set norelativenumber,
+        # colorscheme habamax, …) without sourcing your whole vimrc.
+        "vim_extras": [],
     }
 
 
@@ -166,3 +170,31 @@ def remaps(cfg: dict) -> list[dict]:
 def set_remaps(cfg: dict, rms: list[dict]) -> None:
     cfg["remaps"] = [{"from": r["from"], "to": r["to"], "mode": r["mode"]}
                      for r in rms if _valid_remap(r)]
+
+
+# Vim extras: ex commands appended to the drill prelude so the editor FEELS
+# like home (display options, colorscheme) without sourcing the user's real
+# config — plugins/autocmds there would corrupt grading and the par contract.
+MAX_VIM_EXTRAS = 16
+
+
+def _valid_extra(line: str) -> bool:
+    return (isinstance(line, str)
+            and 0 < len(line.strip()) <= 120
+            and "\n" not in line)
+
+
+def vim_extras(cfg: dict) -> list[str]:
+    """Validated extra ex commands for the interactive drill prelude
+    (e.g. ``set norelativenumber``, ``colorscheme desert``)."""
+    out: list[str] = []
+    for line in cfg.get("vim_extras", []):
+        if _valid_extra(line):
+            out.append(line.strip().lstrip(":"))
+        if len(out) >= MAX_VIM_EXTRAS:
+            break
+    return out
+
+
+def set_vim_extras(cfg: dict, lines: list[str]) -> None:
+    cfg["vim_extras"] = [l.strip() for l in lines if _valid_extra(l)][:MAX_VIM_EXTRAS]

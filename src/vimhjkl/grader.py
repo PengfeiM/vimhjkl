@@ -220,7 +220,8 @@ _REMAP_CMD = {"i": "inoremap", "n": "nnoremap"}
 
 
 def _prelude_script(remaps: Optional[list[dict]],
-                    highlight_cmd: Optional[str]) -> str:
+                    highlight_cmd: Optional[str],
+                    extras: Optional[list[str]] = None) -> str:
     """The interactive-only startup script (settings + key maps + target
     highlight), sourced via a SINGLE ``-c`` so the per-flag count stays well under
     nvim's cap of ten — many maps would otherwise blow it.  Each command is its own
@@ -236,6 +237,13 @@ def _prelude_script(remaps: Optional[list[dict]],
         cmd = _REMAP_CMD.get(r.get("mode", ""))
         if cmd and r.get("from") and r.get("to"):
             lines.append(f"{cmd} {r['from']} {r['to']}")
+    # User extras (config `vim_extras`) come AFTER the built-in settings so
+    # they can override them (e.g. `set norelativenumber`).  Startup commands
+    # are never logged to the scriptout, so key counts stay untouched.
+    for line in (extras or [])[:24]:
+        line = line.strip().lstrip(":")
+        if line and "\n" not in line:
+            lines.append(line)
     if highlight_cmd:
         lines.append(highlight_cmd)
     return "\n".join(lines) + "\n"
@@ -294,7 +302,8 @@ def run_attempt(challenge: Challenge, category: str,
                 goal_extra: Optional[list[str]] = None,
                 enforce_command: bool = True,
                 remaps: Optional[list[dict]] = None,
-                locale: str = "en") -> GradeResult:
+                locale: str = "en",
+                extras: Optional[list[str]] = None) -> GradeResult:
     """Launch vim on ``challenge.start`` and grade the outcome.
 
     If ``playback`` is given (a string of keystrokes, ``\\x1b`` for Esc), vim
@@ -358,7 +367,7 @@ def run_attempt(challenge: Challenge, category: str,
     if interactive:
         prelude_path = os.path.join(workdir, "prelude.vim")
         with open(prelude_path, "w", encoding="utf-8") as fh:
-            fh.write(_prelude_script(remaps, highlight_cmd))
+            fh.write(_prelude_script(remaps, highlight_cmd, extras))
 
     argv = _build_argv(editor, tmpfile, scriptout, cursorfile, regfile, playback_file,
                        start_cursor=challenge.start_cursor, interactive=interactive,

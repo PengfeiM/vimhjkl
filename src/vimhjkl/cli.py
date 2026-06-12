@@ -350,7 +350,8 @@ def run_drill(skills: list[Skill], progress: dict, count: int,
                            reveal_detail=(mode == "learn"),
                            free_form=cold, remaps=remaps,
                            on_disable=_disabler(cfg),
-                           locale=lang)
+                           locale=lang,
+                           extras=config.vim_extras(cfg) if cfg else None)
     summary = session.run(selected)
     sweep = None
     if cold:
@@ -495,7 +496,8 @@ def run_practice(skills: list[Skill], progress: dict, count: int,
                                  goal_extra=reveal_pane_lines(skill, challenge,
                                                               remaps=remaps),
                                  remaps=remaps,
-                                 locale=lang)
+                                 locale=lang,
+                                 extras=config.vim_extras(cfg) if cfg else None)
             abstained = attempt_abstained(result, skill.category)
             if not abstained:
                 genuine_attempt = True
@@ -633,7 +635,8 @@ def run_grind(skills: list[Skill], progress: dict, reps: int,
                              goal_extra=reveal_pane_lines(skill, challenge,
                                                           remaps=remaps),
                              remaps=remaps,
-                             locale=lang)
+                             locale=lang,
+                             extras=config.vim_extras(cfg) if cfg else None)
         abstained = attempt_abstained(result, skill.category)
         passed = (not abstained) and outcome_passed(result)
         record = AttemptRecord(skill, challenge, result, passed, abstained=abstained)
@@ -1356,6 +1359,93 @@ def _remap_remove(cfg: dict, cur: list[dict]) -> None:
     config.save(cfg)
 
 
+# Options that change EDIT SEMANTICS (not just looks): with these on, your
+# keystrokes can produce a different buffer than the verified solution, and
+# the par stops being comparable — allowed, but eyes open.
+_EXTRA_SEMANTIC = ("ignorecase", "smartcase", "expandtab", "shiftwidth",
+                   "tabstop", "softtabstop", "autoindent", "smartindent",
+                   "cindent", "indentexpr", "clipboard", "langmap", "paste",
+                   "virtualedit", "whichwrap", "iskeyword")
+_EXTRA_PLUGINISH = ("source ", "runtime", "packadd", "packloadall",
+                    "call plug", "lua ", "require(")
+
+
+def _extra_warnings(line: str) -> list[str]:
+    low = line.strip().lower()
+    warns = []
+    for opt in _EXTRA_SEMANTIC:
+        if opt in low:
+            warns.append(f"'{opt}' changes how edits behave — your keystrokes "
+                         "may not match the suggested move or its par.")
+    if any(low.startswith(p) or f" {p}" in low for p in _EXTRA_PLUGINISH):
+        warns.append("drills run on a clean vim (-u NONE): plugins and external "
+                     "scripts won't load. Use display options instead.")
+    if low.split(" ", 1)[0].rstrip("!").endswith("map"):
+        warns.append("for key remaps use Settings → Key remaps — those are "
+                     "shown in suggestions and graded as the canonical key.")
+    return warns
+
+
+def run_extras(cfg: dict) -> None:
+    """Vim extras: ex commands appended to every interactive drill's prelude —
+    bring the LOOK of your setup (line numbers, colorscheme) to the clean
+    drill vim without sourcing your whole config."""
+    while True:
+        cur = config.vim_extras(cfg)
+        tui.clear()
+        tui.banner("vim extras", "your display settings, on the clean drill vim")
+        print(tui.c("  Drills run on vim -u NONE so plugins/autocmds can't skew "
+                    "grading.", tui.GREY))
+        print(tui.c("  These ex commands run at startup, after the built-in "
+                    "settings.", tui.GREY))
+        print(tui.c("  e.g. ", tui.RESET) + tui.c("set norelativenumber", tui.BOLD)
+              + tui.c("  ·  ", tui.GREY) + tui.c("colorscheme habamax", tui.BOLD)
+              + tui.c("  ·  ", tui.GREY) + tui.c("set scrolloff=8", tui.BOLD))
+        print()
+        if cur:
+            for i, line in enumerate(cur, 1):
+                print(f"   {tui.c(str(i), tui.YELLOW)}. " + tui.c(line, tui.BOLD))
+        else:
+            print(tui.c("   (none yet — the built-in defaults apply)", tui.GREY))
+        print(tui.rule())
+        opts = [("add", "Add a command", "one ex command, e.g. set nonumber")]
+        if cur:
+            opts.append(("remove", "Remove a command", ""))
+        opts.append(("back", "Back", ""))
+        choice = tui.menu("vim extras", opts)
+        if choice in (None, "back"):
+            return
+        if choice == "add":
+            line = tui.prompt_line("ex command to run at drill startup: ").strip()
+            if not line or not config._valid_extra(line):
+                continue
+            warns = _extra_warnings(line)
+            tui.clear()
+            tui.banner("vim extras", "review")
+            print(tui.c("  adding: ", tui.CYAN) + tui.c(line, tui.BOLD))
+            print()
+            for w in warns:
+                print(tui.c("  ⚠ " + w, tui.YELLOW))
+            if not warns:
+                print(tui.c("  ✓ looks display-only — grading is unaffected.",
+                            tui.GREEN))
+            print(tui.rule())
+            print("  " + tui.c("y", tui.GREEN) + " add it   "
+                  + tui.c("any other key", tui.GREY) + " cancel")
+            if tui.read_key() in ("y", "Y"):
+                config.set_vim_extras(cfg, cur + [line])
+                config.save(cfg)
+        elif choice == "remove":
+            opts = [(str(i), line, "") for i, line in enumerate(cur)]
+            opts.append(("back", "Back", ""))
+            pick = tui.menu("remove which command?", opts)
+            if pick in (None, "back"):
+                continue
+            config.set_vim_extras(cfg, [l for i, l in enumerate(cur)
+                                        if str(i) != pick])
+            config.save(cfg)
+
+
 def _available_locales() -> list[str]:
     """Discover available locale codes from data/i18n/, English first."""
     codes = ["en"]
@@ -1404,6 +1494,7 @@ def run_settings(skills: list[Skill], cfg: dict) -> bool:
     while True:
         off_n = len(config.disabled_set(cfg))
         remaps = config.remaps(cfg)
+        extras = config.vim_extras(cfg)
         current_lang = config.get_lang(cfg)
         lang_label = _LANG_LABELS.get(current_lang, current_lang)
         choice = tui.menu(
@@ -1414,6 +1505,9 @@ def run_settings(skills: list[Skill], cfg: dict) -> bool:
                 ("remaps", "Key remaps",
                  (f"{len(remaps)} set — incl. your escape key") if remaps
                  else "remap any key (e.g. jk/<C-p>→<Esc>, ;→:)"),
+                ("extras", "Vim extras",
+                 (f"{len(extras)} command(s) run at drill startup") if extras
+                 else "your display settings on the drill vim (numbers, colors)"),
                 ("language", "Language",
                  f"teaching text: {lang_label}"),
                 ("back", "Back", ""),
@@ -1426,6 +1520,8 @@ def run_settings(skills: list[Skill], cfg: dict) -> bool:
             run_lessons(skills, cfg)
         elif choice == "remaps":
             run_remaps(cfg, skills)
+        elif choice == "extras":
+            run_extras(cfg)
         elif choice == "language":
             if run_language(cfg):
                 return True
