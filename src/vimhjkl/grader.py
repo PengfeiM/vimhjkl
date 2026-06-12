@@ -194,11 +194,10 @@ def _goal_window_script(goal: list[str],
         "setlocal buftype=nofile bufhidden=wipe nomodifiable "
         "nonumber norelativenumber nocursorline nolist nospell",
         f"let &l:statusline={_vim_str(statusline)}",
-        # Snug to the pane's own widest line (header or goal), but never wider
-        # than half the terminal — the edit window keeps a fair share so its
-        # lines don't wrap while you work.
-        "let s:gw = max(map(getline(1,'$'), 'strdisplaywidth(v:val)')) + 2",
-        "execute 'vertical resize' min([s:gw, &columns/2])",
+        # Equal columns: the goal pane mirrors the edit window at half the
+        # terminal, so the target text reads at the same width you edit at
+        # instead of being squeezed to its own narrowest fit.
+        "execute 'vertical resize' (&columns / 2)",
         "wincmd p",
         "",
     ])
