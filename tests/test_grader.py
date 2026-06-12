@@ -112,6 +112,21 @@ def integration_checks():
     r = run_attempt(motion, "motion", playback="w:q\r")
     check("motion wrong landing fails", not r.correct, f"cursor={r.final_cursor}")
 
+    # round-trip motion (issue #9): start == target, the far waypoint must be
+    # PROVEN via the jumplist — an instant quit or a j/k shuffle scores nothing.
+    trip = Challenge(start=["def alpha():", "    return 1", "", "def omega():",
+                            "    return 9"],
+                     start_cursor=[1, 1], target=[1, 1], via=5, par_keys=4)
+    r = run_attempt(trip, "motion", playback="maG`a:q\r")
+    check("round trip via mark passes", r.correct,
+          f"cursor={r.final_cursor} msg={r.message}")
+    r = run_attempt(trip, "motion", playback=":q\r")
+    check("instant quit fails the via check", not r.correct, r.message)
+    check("instant quit is an abstain (0 keys)",
+          attempt_abstained(r, "motion"), str(r.keystrokes))
+    r = run_attempt(trip, "motion", playback="jk:q\r")
+    check("j/k shuffle without a jump fails", not r.correct, r.message)
+
     # operator: jdd deletes line 2
     op = Challenge(start=["valid line one", "DELETE THIS LINE", "valid line two"],
                    goal=["valid line one", "valid line two"], par_keys=3)

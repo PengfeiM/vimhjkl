@@ -417,6 +417,11 @@ def attempt_abstained(result: GradeResult, category: str) -> bool:
         return True
     if not is_cursor_category(category) and not result.saved and not result.correct:
         return True
+    # A motion drill quit with ZERO keystrokes is a bail-out, not an attempt —
+    # and never a pass (issue #9: round-trip drills end where they start, so an
+    # instant :q used to score full marks).
+    if is_cursor_category(category) and result.keystrokes == 0:
+        return True
     return False
 
 

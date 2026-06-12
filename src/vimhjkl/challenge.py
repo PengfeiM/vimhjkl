@@ -95,6 +95,11 @@ class Challenge:
     # motion-only:
     start_cursor: Optional[list[int]] = None     # [line, col], 1-based
     target: Optional[list[int]] = None           # [line, col], 1-based
+    # Round-trip drills (mark + snap back) end where they start, so the final
+    # cursor alone can't prove the journey: `via` is a line the cursor must
+    # VISIT with a jump (G, marks, /search — anything in the jumplist).
+    # Issue #9: without it, :q on arrival scored a pass at 0 keystrokes.
+    via: Optional[int] = None                    # line, 1-based
     # yank challenges: the buffer is unchanged (goal == start), so success is the
     # unnamed register holding `yank` (the exact bytes a linewise yank produces,
     # trailing newline and all).  Auto-captured by the build from the solution
@@ -113,6 +118,7 @@ class Challenge:
             hint=d.get("hint", ""),
             start_cursor=d.get("start_cursor"),
             target=d.get("target"),
+            via=d.get("via"),
             yank=d.get("yank"),
             solution=d.get("solution", ""),
             why=d.get("why", ""),
@@ -126,6 +132,8 @@ class Challenge:
             d["start_cursor"] = self.start_cursor
         if self.target is not None:
             d["target"] = self.target
+        if self.via is not None:
+            d["via"] = self.via
         if self.yank is not None:
             d["yank"] = self.yank
         if self.solution:

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 
 def C(start, goal=None, solution="", hint="", why="",
-      start_cursor=None, target=None, par_keys=None):
+      start_cursor=None, target=None, par_keys=None, via=None):
     d: dict = {"start": list(start), "solution": solution, "hint": hint, "why": why}
     if goal is not None:
         d["goal"] = list(goal)
@@ -18,6 +18,8 @@ def C(start, goal=None, solution="", hint="", why="",
         d["target"] = list(target)
     if par_keys is not None:
         d["par_keys"] = par_keys
+    if via is not None:
+        d["via"] = int(via)   # a line the cursor must JUMP via (jumplist-checked)
     return d
 
 

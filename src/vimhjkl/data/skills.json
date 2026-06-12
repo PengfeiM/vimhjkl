@@ -2564,6 +2564,7 @@
             1,
             5
           ],
+          "via": 5,
           "solution": "maG`a",
           "why": "`a jumps to the exact spot you marked."
         },
@@ -2586,6 +2587,7 @@
             1,
             1
           ],
+          "via": 6,
           "solution": "G``",
           "why": "`` returns to where you were before the last jump."
         },
@@ -2607,6 +2609,7 @@
             2,
             5
           ],
+          "via": 1,
           "solution": "magg'a",
           "why": "'a returns to the marked line's first non-blank."
         },
@@ -2640,6 +2643,7 @@
             5,
             9
           ],
+          "via": 17,
           "solution": "maG`a",
           "why": "Twelve lines away and back to the exact column in two keystrokes — no scroll-and-hunt."
         },
@@ -2671,6 +2675,7 @@
             4,
             18
           ],
+          "via": 15,
           "solution": "/WIDTH<CR>``",
           "why": "Every jump sets the previous-position mark for free — `` is the return ticket you didn't have to buy."
         }

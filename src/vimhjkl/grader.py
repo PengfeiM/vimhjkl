@@ -263,9 +263,16 @@ def _build_argv(editor: str, tmpfile: str, scriptout: str, cursorfile: str,
     # unnamed register (yank grading) on exit.  The register is written in BINARY
     # mode so writefile adds no trailing newline — the file is the exact register
     # bytes, round-tripping linewise yanks ("a\nb\n") unambiguously.
+    # First line: final cursor "ln col".  Following lines: the line numbers in
+    # the window's jumplist — the positions the player JUMPED from (G, marks,
+    # /search, %).  Round-trip drills check their far waypoint against these,
+    # since their final cursor equals the start (issue #9: an instant :q used
+    # to score a 0-key pass).  Guarded for editors without getjumplist().
     autocmd = (
         "autocmd VimLeave * call writefile("
-        f"[line('.').' '.col('.')], '{cursorfile}') | "
+        "[line('.').' '.col('.')] + (exists('*getjumplist') ? "
+        "map(getjumplist()[0], 'string(v:val.lnum)') : []), "
+        f"'{cursorfile}') | "
         f"call writefile([getreg('\"')], '{regfile}', 'b')"
     )
     argv = [editor, "-u", "NONE", "-i", "NONE", "-N", "-c", autocmd]
@@ -390,7 +397,7 @@ def run_attempt(challenge: Challenge, category: str,
     # --- read back results -------------------------------------------------
     final_buffer = _read_buffer(tmpfile)
     raw_keys = clean_scriptout(_read_bytes(scriptout))
-    final_cursor = _read_cursor(cursorfile)
+    final_cursor, visited = _read_cursor(cursorfile)
     register = _read_register(regfile)
     norm_keys = _normalized_bytes(raw_keys)   # typo/Esc-normalised, quit intact
     # Fold the player's remap keys back to canonical (jk/<C-p> → Esc) in the count
@@ -406,7 +413,7 @@ def run_attempt(challenge: Challenge, category: str,
 
     return _score(challenge, category, final_buffer, final_cursor,
                   keystrokes, command_line, saved, keys_typed, register,
-                  enforce_command=enforce_command)
+                  enforce_command=enforce_command, visited=visited)
 
 
 # ---------------------------------------------------------------------------
@@ -417,7 +424,8 @@ def _score(challenge: Challenge, category: str, final_buffer: list[str],
            final_cursor: Optional[list[int]], keystrokes: int,
            command_line: Optional[str], saved: bool,
            keys_typed: str = "", register: Optional[str] = None,
-           enforce_command: bool = True) -> GradeResult:
+           enforce_command: bool = True,
+           visited: Optional[list[int]] = None) -> GradeResult:
     spec = CATEGORIES.get(category)
     correct = False
     message = ""
@@ -426,10 +434,17 @@ def _score(challenge: Challenge, category: str, final_buffer: list[str],
         # Motion: cursor must land on target; buffer must be untouched.
         if challenge.target is not None and final_cursor is not None:
             correct = list(final_cursor) == list(challenge.target)
+        # Round-trip drills also demand the far waypoint shows up in the
+        # jumplist — landing where you started proves nothing on its own.
+        if correct and challenge.via is not None \
+                and challenge.via not in (visited or []):
+            correct = False
+            message = (f"the cursor never jumped via line {challenge.via} — "
+                       "make the round trip, don't just stay put.")
         if final_buffer != list(challenge.start):
             correct = False
             message = "buffer was modified — a motion should not change text."
-        elif not correct and final_cursor is not None:
+        elif not correct and final_cursor is not None and not message:
             message = (f"landed at {final_cursor}, target was {challenge.target}.")
     elif challenge.yank is not None:
         # Yank challenge: the buffer is unchanged (goal == start), so buffer-diff
@@ -732,18 +747,29 @@ def _read_register(path: str) -> Optional[str]:
         return None
 
 
-def _read_cursor(path: str) -> Optional[list[int]]:
+def _read_cursor(path: str) -> tuple[Optional[list[int]], list[int]]:
+    """Parse the exit side-file: line 1 is the final cursor ("ln col"),
+    each further line is a jumplist line number (the visited waypoints).
+    Returns ``(cursor, visited)`` — ``(None, [])`` when unreadable."""
     try:
         with open(path, "r", encoding="utf-8") as fh:
-            parts = fh.read().split()
+            lines = fh.read().splitlines()
     except OSError:
-        return None
-    if len(parts) != 2:
-        return None
+        return None, []
+    if not lines:
+        return None, []
+    parts = lines[0].split()
     try:
-        return [int(parts[0]), int(parts[1])]
+        cursor = [int(parts[0]), int(parts[1])] if len(parts) == 2 else None
     except ValueError:
-        return None
+        cursor = None
+    visited: list[int] = []
+    for ln in lines[1:]:
+        try:
+            visited.append(int(ln))
+        except ValueError:
+            continue
+    return cursor, visited
 
 
 def _cleanup(workdir: str) -> None:
