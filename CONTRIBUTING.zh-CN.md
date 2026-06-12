@@ -56,44 +56,46 @@ src/vimhjkl/
   grader.py         # 启动真实 vim，捕获结果 + 按键，评分
   store.py          # JSON 持久化
   tui.py            # ANSI 渲染和输入
-  data/skills.json  # 课程（数据，不是代码）
+  data/skills.json  # 课程（自动生成——请勿手改）
+build/
+  passes/*.py       # 课程源码——在这里编写
+  generate.py       # 在真实 vim 中验证每个挑战，写出 skills.json
+content/
+  llm_pool.json     # 额外的已验证挑战实例，按技能 id 合并
 tests/              # 无头评分和引擎检查
 ```
 
-引擎是通用的：一项技巧是一条**数据条目**，而非引擎编辑。新技巧应该是 `skills.json` 中的一课，而不是 `grader.py` 或 `engine.py` 中的特例——如果你发现自己为了教授某个具体操作而编辑这些文件，请停下来重新思考。
+引擎是通用的：一项技巧是一条**数据条目**，而非引擎编辑。新技巧应该是 `build/passes/` 模块中的一课，而不是 `grader.py` 或 `engine.py` 中的特例——如果你发现自己为了教授某个具体操作而编辑这些文件，请停下来重新思考。
 
 ## 添加或修复课程
 
-课程位于 `src/vimhjkl/data/skills.json`。每项技能都有一个 `category`（`challenge.py` 中 `CATEGORIES` 的键之一），它决定了评分方式，以及一个 `challenges` 列表：
+课程在 `build/passes/*.py` 中用 `build/common.py` 的 `S`（技能）和 `C`（挑战）助手编写，然后由以下命令渲染到 `src/vimhjkl/data/skills.json`：
 
-```json
-{
-  "id": "marks-as-ex-range",
-  "title": "将标记用作 Ex 范围（'a,'b）",
-  "category": "ex_command",
-  "teach": "用两三个句子解释该操作。",
-  "key_commands": [":'a,'b", "ma", "mb"],
-  "difficulty": 4,
-  "challenges": [
-    {
-      "start": ["用户起始的行"],
-      "goal":  ["完成时缓冲区必须等于的行"],
-      "solution": "字面按键序列，用 <Esc>/<CR> 写出",
-      "par_keys": 25,
-      "hint": "简短提示",
-      "why": "一行说明为什么这是惯用路径"
-    }
-  ]
-}
+```sh
+uv run python -m build.generate
 ```
 
-`motion` 类挑战使用 `start_cursor` + `target`（1-based 的 `[行, 列]`）代替 `goal`。详见 `challenge.py` 中的 `CATEGORIES`。
+生成器会在真实 vim 中回放每个 `solution`，据此计算 `par_keys`，任何验证失败都会拒绝写入——错误的解法或目标不可能被发布。
+
+```python
+S("marks-as-ex-range", "将标记用作 Ex 范围 ('a,'b)", "ex_command",
+  "用两三个句子解释该操作。",
+  [":'a,'b", "ma", "mb"], 4, [
+    C(["用户起始的行"],
+      ["完成时缓冲区必须等于的行"],
+      solution="字面按键序列，用 <Esc>/<CR> 写出",
+      hint="简短提示",
+      why="一行说明为什么这是惯用路径"),
+  ]),
+```
+
+每项技能有一个 `category`（`challenge.py` 中 `CATEGORIES` 的键之一），决定评分方式。`motion` 类挑战使用 `start_cursor` + `target`（1-based 的 `[行, 列]`）代替目标缓冲区。
 
 **好**挑战的标准：
 
 - **例子必须需要该技术。** 调整缓冲区大小，使得该课的操作是最短的正确答案。在 2 行缓冲区上进行 `:g`/宏/排序/范围练习毫无意义——更简单的操作就能击败它。对于范围/标记练习，在范围*之外*放一个匹配项，这样全文件 `:%…` 会改错行。
 - **原创、具体的文本。** 不要用 `foo`/`bar`，不要用 `one/two/three`。使用生动、具体的示例文本；切勿复制真实的书籍/歌曲/源代码文本。
-- **`solution` 是最优路径**（`par_keys` 是最优按键次数，不含最后的保存/退出）且必须在真实 vim 中回放时精确复现 `goal`。在干净的编辑器（`vim -u NONE`）中运行你的按键以确认。
+- **`solution` 是最优路径**，在干净的 vim（`vim -u NONE`）中回放必须精确复现目标——`build.generate` 会替你检查并计算 `par_keys`。
 
 ## 报告问题
 

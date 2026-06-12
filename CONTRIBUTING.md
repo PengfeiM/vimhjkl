@@ -68,44 +68,49 @@ src/vimhjkl/
   grader.py         # launches real vim, captures result + keystrokes, scores
   store.py          # JSON persistence
   tui.py            # ANSI rendering and input
-  data/skills.json  # the curriculum (data, not code)
+  data/skills.json  # the curriculum (GENERATED — do not hand-edit)
+build/
+  passes/*.py       # the lesson source — author here
+  generate.py       # verifies every challenge in real vim, writes skills.json
+content/
+  llm_pool.json     # extra verified challenge instances, merged by skill id
 tests/              # headless grader and engine checks
 ```
 
 The engine is generic: a technique is a **data entry**, never an engine edit. A new
-trick should be a lesson in `skills.json`, not a special case in `grader.py` or
-`engine.py` — if you find yourself editing those to teach one specific move, stop
-and reconsider.
+trick should be a lesson in a `build/passes/` module, not a special case in
+`grader.py` or `engine.py` — if you find yourself editing those to teach one
+specific move, stop and reconsider.
 
 ## Adding or fixing a lesson
 
-A lesson lives in `src/vimhjkl/data/skills.json`. Each skill has a `category` (one
-of the keys in `CATEGORIES` in `challenge.py`) that decides how it's graded, and a
-list of `challenges`:
+Lessons are authored in `build/passes/*.py` with the `S` (skill) and `C`
+(challenge) helpers from `build/common.py`, then rendered into
+`src/vimhjkl/data/skills.json` by:
 
-```json
-{
-  "id": "marks-as-ex-range",
-  "title": "Use marks as an Ex range ('a,'b)",
-  "category": "ex_command",
-  "teach": "Two or three sentences explaining the move.",
-  "key_commands": [":'a,'b", "ma", "mb"],
-  "difficulty": 4,
-  "challenges": [
-    {
-      "start": ["lines the user starts with"],
-      "goal":  ["lines the buffer must equal when done"],
-      "solution": "the literal keystrokes, <Esc>/<CR> spelled out",
-      "par_keys": 25,
-      "hint": "a short nudge",
-      "why": "one line on why this is the idiomatic path"
-    }
-  ]
-}
+```sh
+uv run python -m build.generate
 ```
 
-`motion` challenges use `start_cursor` + `target` (a 1-based `[line, col]`) instead
-of `goal`. See `CATEGORIES` in `challenge.py` for every category.
+The generator replays every `solution` through real vim, computes `par_keys`
+from it, and refuses to write if anything fails to verify — so a wrong solution
+or goal cannot ship.
+
+```python
+S("marks-as-ex-range", "Use marks as an Ex range ('a,'b)", "ex_command",
+  "Two or three sentences explaining the move.",
+  [":'a,'b", "ma", "mb"], 4, [
+    C(["lines the user starts with"],
+      ["lines the buffer must equal when done"],
+      solution="the literal keystrokes, <Esc>/<CR> spelled out",
+      hint="a short nudge",
+      why="one line on why this is the idiomatic path"),
+  ]),
+```
+
+Each skill has a `category` (a key of `CATEGORIES` in `challenge.py`) that
+decides how it's graded. `motion` challenges use `start_cursor` + `target`
+(1-based `[line, col]`) instead of a goal buffer.
 
 What makes a **good** challenge:
 
@@ -115,9 +120,9 @@ What makes a **good** challenge:
   *outside* the range so a whole-file `:%…` would change the wrong lines.
 - **Original, concrete text.** No `foo`/`bar`, no `one/two/three`. Vivid, specific
   example text; never copy real book/song/source text.
-- **`solution` is the optimal path** (`par_keys` is the optimal keystroke count,
-  excluding the final save/quit) and must reproduce `goal` exactly when replayed in
-  real vim. Run your keystrokes in a clean editor (`vim -u NONE`) to confirm.
+- **`solution` is the optimal path** and must reproduce the goal exactly when
+  replayed in clean vim (`vim -u NONE`) — `build.generate` checks this and
+  computes `par_keys` for you.
 
 ## Reporting issues
 
