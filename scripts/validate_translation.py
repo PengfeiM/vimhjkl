@@ -23,11 +23,11 @@ from typing import Any, Optional, Sequence
 
 ALLOWED_TOP_LEVEL_FIELDS = frozenset({"locale", "source_sha", "generated_at", "glossary", "skills"})
 ALLOWED_SKILL_FIELDS = frozenset({"title", "teach", "key_commands", "challenges"})
-ALLOWED_CHALLENGE_FIELDS = frozenset({"hint", "why"})
+ALLOWED_CHALLENGE_FIELDS = frozenset({"hint", "why", "why_not"})
 SKILL_ID_PATTERN = re.compile(r"^[a-zA-Z][a-zA-Z0-9_-]+$")
 LOCALE_PATTERN = re.compile(r"^[a-z]{2}(-[A-Z]{2})?$")
 TRANSLATABLE_SKILL_FIELDS = ("title", "teach")
-TRANSLATABLE_CHALLENGE_FIELDS = ("hint", "why")
+TRANSLATABLE_CHALLENGE_FIELDS = ("hint", "why", "why_not")
 
 EXIT_OK = 0
 EXIT_ERRORS = 1

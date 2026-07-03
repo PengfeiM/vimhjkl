@@ -383,6 +383,7 @@ def _to_challenge(inst: dict, cursor: bool) -> Challenge:
         solution=inst.get("solution", ""),
         hint=inst.get("hint", ""),
         why=inst.get("why", ""),
+        why_not=inst.get("why_not", ""),
     )
 
 

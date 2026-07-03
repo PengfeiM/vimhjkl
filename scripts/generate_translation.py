@@ -48,7 +48,7 @@ API_TIMEOUT_SECONDS = 180
 TRANSLATION_SPEC_RELPATH = Path("src/vimhjkl/data/i18n/TRANSLATION_SPEC.md")
 
 TRANSLATABLE_SKILL_FIELDS = ("title", "teach", "key_commands")
-TRANSLATABLE_CHALLENGE_FIELDS = ("hint", "why")
+TRANSLATABLE_CHALLENGE_FIELDS = ("hint", "why", "why_not")
 
 
 # ---------------------------------------------------------------------------
@@ -282,7 +282,7 @@ def build_system_prompt() -> str:
         "Never add extra fields. "
         "The JSON structure must match the input structure:\n"
         '{"title": "...", "teach": "...", "key_commands": [...], '
-        '"challenges": [{"hint": "...", "why": "..."}, ...]}\n'
+        '"challenges": [{"hint": "...", "why": "...", "why_not": "..."}, ...]}\n'
         "\n"
         "## RULE 6 — Half-Width Symbols and Spacing Conventions\n"
         "- Use ONLY half-width (ASCII) punctuation and parentheses: (\") . , : ; ! ?\n"
@@ -318,11 +318,14 @@ def _format_challenges(skill: dict[str, Any], indices: list[int]) -> str:
             ch = challenges[i]
             hint = ch.get("hint", "")
             why = ch.get("why", "")
+            why_not = ch.get("why_not", "")
             parts.append(f"CHALLENGE {i + 1}:")
             if hint:
                 parts.append(f'  HINT: {hint}')
             if why:
                 parts.append(f'  WHY: {why}')
+            if why_not:
+                parts.append(f'  WHY_NOT: {why_not}')
     return "\n".join(parts)
 
 

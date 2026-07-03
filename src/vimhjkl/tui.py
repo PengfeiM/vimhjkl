@@ -186,6 +186,31 @@ def read_key() -> str:
     return ch
 
 
+def read_token() -> str:
+    """Read a single keypress as a semantic token — ``ESC`` / ``ENTER`` / ``UP``
+    / ``DOWN`` / ``LEFT`` / ``RIGHT`` or the literal character.
+
+    Unlike ``read_key`` this decodes escape sequences, so an arrow key is one
+    token instead of ``\\x1b`` plus stray ``[A`` bytes leaking into the next
+    prompt — which is what makes it safe to treat ESC as an answer."""
+    if not sys.stdin.isatty():
+        line = sys.stdin.readline()
+        return line[:1] if line else "q"
+    try:
+        import termios
+        import tty
+    except ImportError:  # pragma: no cover (non-unix)
+        return sys.stdin.readline()[:1] or "q"
+    fd = sys.stdin.fileno()
+    old = termios.tcgetattr(fd)
+    try:
+        tty.setraw(fd)
+        with _suspend_guard(fd, old):
+            return _read_raw_key(fd)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
+
 def pause(msg: str = "press any key to continue…") -> None:
     print(c("  " + msg, GREY))
     read_key()

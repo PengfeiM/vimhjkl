@@ -448,6 +448,7 @@ def reveal_pane_lines(skill: Skill, challenge: Challenge,
 
     field("the move:  ", display_solution(challenge.solution, remaps))
     field("why:       ", challenge.why)
+    field("why not:   ", challenge.why_not)
     field("hint:      ", challenge.hint)
     field("keys:      ", "  ".join(skill.key_commands))
     out.append(f"  par:       {challenge.par_keys} keystrokes")
@@ -488,7 +489,8 @@ class DrillSession:
     """Runs a sequence of real-vim challenges and updates progress.
 
     UI is injected via callbacks so the engine stays headless/testable:
-      * ``present(skill, challenge)`` — show the task, return when ready to launch.
+      * ``present(skill, challenge)`` — show the task; return ``"quit"`` to end
+        the session without launching (any other value launches the drill).
       * ``review(record)``           — show the graded outcome + optimal solution.
       * ``run`` returns a SessionSummary.
     """
@@ -540,7 +542,10 @@ class DrillSession:
         touch mastery; ``"next"`` commits the attempt and advances; ``"quit"``
         commits and ends the session early.  An abstain (quit without saving)
         re-shows the full task itself, so on its retry we relaunch the SAME
-        challenge directly rather than presenting the task a second time."""
+        challenge directly rather than presenting the task a second time.
+
+        ``present`` returning ``"quit"`` (the player backed out at the launch
+        prompt) ends the session with nothing recorded for that skill."""
         summary = SessionSummary()
         for skill in selected:
             action = "next"
@@ -548,7 +553,8 @@ class DrillSession:
             present_next = True
             while True:
                 if present_next:
-                    self.present(skill, challenge)
+                    if self.present(skill, challenge) == "quit":
+                        return summary
                 present_next = True
                 goal_extra = (reveal_pane_lines(skill, challenge, remaps=self.remaps)
                               if self.reveal_detail else None)

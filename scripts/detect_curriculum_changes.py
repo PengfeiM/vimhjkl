@@ -31,7 +31,7 @@ SKILLS_PATH = PROJECT_ROOT / "src" / "vimhjkl" / "data" / "skills.json"
 I18N_DIR = PROJECT_ROOT / "src" / "vimhjkl" / "data" / "i18n"
 
 TRANSLATABLE_SKILL_FIELDS: tuple[str, ...] = ("title", "teach", "key_commands")
-TRANSLATABLE_CHALLENGE_FIELDS: tuple[str, ...] = ("hint", "why")
+TRANSLATABLE_CHALLENGE_FIELDS: tuple[str, ...] = ("hint", "why", "why_not")
 
 
 # ---------------------------------------------------------------------------

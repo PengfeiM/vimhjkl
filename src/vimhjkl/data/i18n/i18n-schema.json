@@ -39,11 +39,14 @@
       "minProperties": 0
     }
   },
-  "required": ["locale", "skills"],
+  "required": [
+    "locale",
+    "skills"
+  ],
   "additionalProperties": false,
   "$defs": {
     "challenge_overlay": {
-      "description": "Partial overlay for a single challenge entry. Only translatable fields (hint, why) are included; data fields (start, goal, solution, par_keys, target, etc.) are NOT present.",
+      "description": "Partial overlay for a single challenge entry. Only translatable fields (hint, why, why_not) are included; data fields (start, goal, solution, par_keys, target, etc.) are NOT present.",
       "type": "object",
       "properties": {
         "hint": {
@@ -52,6 +55,10 @@
         },
         "why": {
           "description": "Translated explanation text explaining why this technique is effective.",
+          "type": "string"
+        },
+        "why_not": {
+          "description": "Translated rejected-alternative note: names the obvious cheaper-looking path and why it loses on this buffer.",
           "type": "string"
         }
       },

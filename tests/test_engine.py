@@ -180,6 +180,21 @@ def main():
                                        {"from": "jj", "to": "<Esc>", "mode": "i"}],
           config.remaps(migrated))
 
+    # vim extras must not be able to reopen the clipboard/mouse leak the drill
+    # prelude closes (middle-click pasting PRIMARY into a graded buffer).
+    config.set_vim_extras(cfg, [
+        "set norelativenumber",            # kept — display only
+        "colorscheme habamax",             # kept
+        "set mouse=a",                     # blocked
+        "set clipboard=unnamedplus",       # blocked
+        "se cb^=unnamed",                  # blocked (abbreviated form)
+        "set mousemodel=extend",           # kept — inert without mouse=
+    ])
+    kept = config.vim_extras(cfg)
+    check("extras drop clipboard/cb/mouse, keep display settings",
+          kept == ["set norelativenumber", "colorscheme habamax",
+                   "set mousemodel=extend"], kept)
+
     # general key remaps: round-trip valid ones, drop the malformed.
     config.set_remaps(cfg, [
         {"from": "<C-p>", "to": "<Esc>", "mode": "i"},
@@ -257,6 +272,46 @@ def main():
     check("'off' disables the skill, records no mastery, no summary entry",
           disabled == ["off_me"] and "off_me" not in prog_off["skills"]
           and out.total == 0, (disabled, prog_off["skills"], out.total))
+
+    # --- backing out at the launch prompt (present -> "quit") --------------
+    # Esc/q on the "press any key to launch vim" screen must NOT launch vim and
+    # must record nothing (the old prompt launched on ANY key, Esc included).
+    quit_skill = mk("bail", 2)
+    prog_bail = {"skills": {}}
+    launched = []
+    with mock.patch("vimhjkl.engine.run_attempt",
+                    side_effect=lambda *a, **k: launched.append(1) or res_ok), \
+         mock.patch("vimhjkl.engine.pick_challenge",
+                    return_value=quit_skill.challenges[0]):
+        sess = DrillSession([quit_skill], prog_bail,
+                            present=lambda *a: "quit", review=lambda r: "next")
+        out = sess.run([quit_skill])
+    check("present 'quit' ends the session before vim, records nothing",
+          launched == [] and out.total == 0 and prog_bail["skills"] == {},
+          (launched, out.total, prog_bail["skills"]))
+    # a present callback that returns None (legacy stubs) still launches.
+    with mock.patch("vimhjkl.engine.run_attempt", return_value=res_ok), \
+         mock.patch("vimhjkl.engine.pick_challenge",
+                    return_value=quit_skill.challenges[0]):
+        sess = DrillSession([quit_skill], prog_bail,
+                            present=lambda *a: None, review=lambda r: "next")
+        out = sess.run([quit_skill])
+    check("present returning None still launches the drill",
+          out.total == 1, out.total)
+
+    # --- why_not (rejected alternative) round-trips through the model ------
+    ch = Challenge(start=["a"], goal=["b"], par_keys=1,
+                   why="short path", why_not=":%s would clobber the comment")
+    check("why_not survives to_dict/from_dict",
+          Challenge.from_dict(ch.to_dict()).why_not == ch.why_not)
+    check("empty why_not stays out of the serialised dict",
+          "why_not" not in Challenge(start=["a"], goal=["b"]).to_dict())
+    from vimhjkl.engine import reveal_pane_lines
+    pane_skill = Skill(id="p", title="p", category="operator", teach="t",
+                       key_commands=["x"], challenges=[ch])
+    pane = "\n".join(reveal_pane_lines(pane_skill, ch))
+    check("goal pane includes the why-not line",
+          "why not:" in pane and "clobber" in pane, pane)
 
     print(f"\n{PASS} passed, {FAIL} failed")
     return 1 if FAIL else 0

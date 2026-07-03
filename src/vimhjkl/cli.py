@@ -18,6 +18,7 @@ from functools import partial
 from typing import Callable, Optional
 
 from . import store, tui, config
+from . import __version__
 from .challenge import Skill, Challenge, CATEGORIES, is_cursor_category
 from .engine import (
     DrillSession, AttemptRecord, SessionSummary,
@@ -139,12 +140,15 @@ def _yank_lines(yank: str) -> list[str]:
 
 def _show_task(skill: Skill, challenge: Challenge, mode: str = "learn",
                rep: Optional[tuple] = None,
-               remaps: Optional[list[dict]] = None) -> None:
+               remaps: Optional[list[dict]] = None) -> str:
     """Present a challenge before launching vim.
 
     ``learn`` / ``practice`` reveal the technique + the move + why up front
     (read, then do).  ``blind`` shows only the before/after buffers — pure recall.
     ``rep`` is a ``(k, N)`` counter shown during grind sessions.
+
+    Returns ``"launch"`` to run the drill, or ``"quit"`` if the player backed
+    out at the prompt.
     """
     tui.clear()
     spec = CATEGORIES.get(skill.category)
@@ -152,7 +156,18 @@ def _show_task(skill: Skill, challenge: Challenge, mode: str = "learn",
                _rep_prefix(rep, spec.blurb if spec else skill.category))
     _render_task_body(skill, challenge, mode, remaps)
     print(tui.rule())
-    tui.pause("press any key to launch vim…")
+    return _launch_prompt()
+
+
+def _launch_prompt() -> str:
+    """The pre-launch gate.  Any key launches vim — except Esc and q, which back
+    out without launching (a reflexive Esc used to start the drill, and there
+    was no way to leave this screen except through vim)."""
+    print(tui.c("  press any key to launch vim", tui.RESET)
+          + tui.c("    ·    esc/q back out", tui.GREY))
+    if tui.read_token() in ("q", "Q", "ESC"):
+        return "quit"
+    return "launch"
 
 
 def _task_title(skill: Skill, mode: str) -> str:
@@ -181,6 +196,8 @@ def _render_task_body(skill: Skill, challenge: Challenge, mode: str,
               + tui.c(display_solution(challenge.solution, remaps), tui.BOLD))
         if challenge.why:
             print(tui.c("  why:       " + challenge.why, tui.GREY))
+        if challenge.why_not:
+            print(tui.c("  why not:   " + challenge.why_not, tui.GREY))
         if challenge.hint:
             print(tui.c("  hint:      " + challenge.hint, tui.YELLOW))
         print(tui.c(f"  par:       {challenge.par_keys} keystrokes", tui.GREY))
@@ -227,11 +244,11 @@ def _abstain_action() -> str:
     """After quitting without saving: any key relaunches the same task; n skips,
     q quits."""
     print(tui.c("  press any key to try again", tui.RESET)
-          + tui.c("    ·    n skip    ·    q quit", tui.GREY))
-    k = tui.read_key()
+          + tui.c("    ·    n skip    ·    esc/q quit", tui.GREY))
+    k = tui.read_token()
     if k in ("n", "N"):
         return "next"
-    if k in ("q", "Q"):
+    if k in ("q", "Q", "ESC"):
         return "quit"
     return "retry"
 
@@ -276,6 +293,8 @@ def _show_result(record: AttemptRecord, show_moves: bool = True,
               + tui.c(display_solution(record.challenge.solution, remaps), tui.BOLD))
     if record.challenge.why:
         print(tui.c("  why:        " + record.challenge.why, tui.GREY))
+    if record.challenge.why_not:
+        print(tui.c("  why not:    " + record.challenge.why_not, tui.GREY))
     if record.skill.key_commands:
         print(tui.c("  keys:       " + "  ".join(record.skill.key_commands), tui.GREY))
     print(tui.rule())
@@ -432,6 +451,8 @@ def _show_practice_result(record: AttemptRecord, show_moves: bool = True,
               + tui.c(display_solution(record.challenge.solution, remaps), tui.BOLD))
     if record.challenge.why:
         print(tui.c("  why:        " + record.challenge.why, tui.GREY))
+    if record.challenge.why_not:
+        print(tui.c("  why not:    " + record.challenge.why_not, tui.GREY))
     print(tui.rule())
     good = r.correct and r.efficiency >= EFFICIENCY_FLOOR
     prompt = ("  nailed it — " if good else "  ")
@@ -489,7 +510,10 @@ def run_practice(skills: list[Skill], progress: dict, count: int,
         # task itself, so its retry relaunches the SAME buffer (no double-present).
         while True:
             if present_next:
-                _show_task(skill, challenge, mode="practice", remaps=remaps)
+                if _show_task(skill, challenge, mode="practice",
+                              remaps=remaps) == "quit":
+                    action = "quit"
+                    break
             present_next = True
             result = run_attempt(challenge, skill.category,
                                  highlight_target=True,
@@ -627,8 +651,9 @@ def run_grind(skills: list[Skill], progress: dict, reps: int,
     present_next = True
     while done < reps:
         if present_next:
-            _show_task(skill, challenge, mode="grind", rep=(done + 1, reps),
-                       remaps=remaps)
+            if _show_task(skill, challenge, mode="grind", rep=(done + 1, reps),
+                          remaps=remaps) == "quit":
+                break
         present_next = True
         result = run_attempt(challenge, skill.category,
                              highlight_target=True,
@@ -816,6 +841,8 @@ def run_review(skills: list[Skill], progress: dict, count: int,
         why = challenge.why or challenge.hint
         if why:
             print(tui.c("  why:        " + why, tui.YELLOW))
+        if challenge.why_not:
+            print(tui.c("  why not:    " + challenge.why_not, tui.GREY))
         print(tui.rule())
         print(tui.c("  rate yourself:  "
                     + tui.c("j", tui.GREEN) + "=got it   "
@@ -1646,6 +1673,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--lang", "-L", default=None, metavar="CODE",
                    help="display language for teaching text "
                         "(zh-CN, ...). Default: en (or config.json lang)")
+    p.add_argument("--version", action="version",
+                   version=f"vimhjkl {__version__}")
     return p
 
 

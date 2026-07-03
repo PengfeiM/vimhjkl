@@ -94,6 +94,8 @@ def _apply_overlay(skills: list[Skill], overlay: dict) -> None:
                         skill.challenges[i].hint = chal_overlay["hint"]
                     if "why" in chal_overlay:
                         skill.challenges[i].why = chal_overlay["why"]
+                    if "why_not" in chal_overlay:
+                        skill.challenges[i].why_not = chal_overlay["why_not"]
 
 
 def load_skills(path: Path | None = None, locale: str = "en") -> list[Skill]:

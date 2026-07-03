@@ -108,6 +108,9 @@ class Challenge:
     # shown only AFTER the attempt (and on review-card BACK):
     solution: str = ""                           # optimal keystrokes, e.g. 'ciwfoo<Esc>'
     why: str = ""                                # one-line "why this is idiomatic"
+    # The rejected alternative: names the obvious cheaper-looking path and says
+    # why it loses here — so the technique reads as necessary, not decorative.
+    why_not: str = ""                            # e.g. ':%s//g would hit the comment too'
 
     @classmethod
     def from_dict(cls, d: dict) -> "Challenge":
@@ -122,6 +125,7 @@ class Challenge:
             yank=d.get("yank"),
             solution=d.get("solution", ""),
             why=d.get("why", ""),
+            why_not=d.get("why_not", ""),
         )
 
     def to_dict(self) -> dict:
@@ -140,6 +144,8 @@ class Challenge:
             d["solution"] = self.solution
         if self.why:
             d["why"] = self.why
+        if self.why_not:
+            d["why_not"] = self.why_not
         return d
 
 
