@@ -127,12 +127,77 @@ def _locale_challenges(
     return padded
 
 
+def stale_from_manifest(manifest: dict[str, Any] | None) -> dict[str, Any]:
+    """Extract force-retranslate targets from a detect_curriculum_changes manifest.
+
+    Returns ``{skill_id: {"fields": [...], "challenges": {index: [fields]}}}``
+    for every translatable field the manifest reports as CHANGED in the English
+    source — those must be re-translated even when the locale already holds
+    text, because that text describes the old content.
+    """
+    out: dict[str, Any] = {}
+    changes = (manifest or {}).get("changes", manifest or {})
+    for sid, mod in changes.get("modified_skills", {}).items():
+        fields = [f for f in mod.get("fields_changed", [])
+                  if f in TRANSLATABLE_SKILL_FIELDS]
+        challenges = {
+            c["index"]: [f for f in c.get("fields", [])
+                         if f in TRANSLATABLE_CHALLENGE_FIELDS]
+            for c in mod.get("challenges_changed", [])
+        }
+        if fields or challenges:
+            out[sid] = {"fields": fields, "challenges": challenges}
+    return out
+
+
+def prune_locale(locale: dict[str, Any],
+                 skills_index: dict[str, dict[str, Any]]) -> int:
+    """Drop overlay entries with no source counterpart, in place.
+
+    Challenge overlays are matched to source instances BY INDEX, so leftovers
+    past the source's instance count (or whole skills no longer in the
+    curriculum) would silently attach old translations to the wrong content the
+    next time instances shift.  Returns the number of entries pruned.
+    """
+    pruned = 0
+    lskills = locale.get("skills", {})
+    for sid in list(lskills):
+        if sid not in skills_index:
+            del lskills[sid]
+            pruned += 1
+            continue
+        n = _challenge_count(skills_index[sid])
+        chs = lskills[sid].get("challenges")
+        if not isinstance(chs, list):
+            continue
+        if len(chs) > n:
+            pruned += len(chs) - n
+            lskills[sid]["challenges"] = chs[:n]
+            chs = lskills[sid]["challenges"]
+        # A translation whose English source field is now empty is stale text
+        # with nothing behind it — drop it rather than show it.
+        english = skills_index[sid].get("challenges", [])
+        for i, ch in enumerate(chs):
+            if not isinstance(ch, dict) or i >= len(english):
+                continue
+            for cf in TRANSLATABLE_CHALLENGE_FIELDS:
+                if ch.get(cf) and not english[i].get(cf):
+                    del ch[cf]
+                    pruned += 1
+    return pruned
+
+
 def compute_updates(
     skills_index: dict[str, dict[str, Any]],
     locale: dict[str, Any],
     skill_filter: str | None,
+    stale: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     """Return a list of update descriptors for fields needing translation.
+
+    A field needs translation when the locale has no text for it, OR when
+    ``stale`` (from a change manifest) says its English source changed — the
+    existing translation then describes the old content and must be redone.
 
     Each descriptor contains:
       - skill_id
@@ -140,18 +205,29 @@ def compute_updates(
       - challenges: list of {index, fields} for challenge-level fields
     """
     updates: list[dict[str, Any]] = []
+    stale = stale or {}
 
     for skill_id, skill in skills_index.items():
         if skill_filter is not None and skill_id != skill_filter:
             continue
 
         lskill = _locale_skill(locale, skill_id)
+        forced = stale.get(skill_id, {})
+        forced_fields = set(forced.get("fields", []))
+        forced_chs: dict[int, list[str]] = forced.get("challenges", {})
 
-        # Skill-level fields
+        # Skill-level fields.  A field is only translatable when the ENGLISH
+        # source has text — an empty source has nothing to translate, and
+        # requesting it forever is what used to leave permanent "empty field"
+        # warnings in the validator.
         fields: list[str] = []
         for field in TRANSLATABLE_SKILL_FIELDS:
+            if not skill.get(field):
+                continue
             val = lskill.get(field)
-            if field == "key_commands":
+            if field in forced_fields:
+                fields.append(field)
+            elif field == "key_commands":
                 # Empty-list key_commands also needs translation
                 if not val or (isinstance(val, list) and len(val) == 0):
                     fields.append(field)
@@ -160,13 +236,17 @@ def compute_updates(
                     fields.append(field)
 
         # Challenge-level fields
+        english_chs = skill.get("challenges", [])
         english_count = _challenge_count(skill)
         locale_chs = _locale_challenges(lskill, english_count)
         challenges: list[dict[str, Any]] = []
         for i in range(english_count):
+            forced_here = set(forced_chs.get(i, []))
             ch_fields: list[str] = []
             for cf in TRANSLATABLE_CHALLENGE_FIELDS:
-                if not locale_chs[i].get(cf):
+                if not english_chs[i].get(cf):
+                    continue    # nothing to translate from
+                if cf in forced_here or not locale_chs[i].get(cf):
                     ch_fields.append(cf)
             if ch_fields:
                 challenges.append({"index": i, "fields": ch_fields})
@@ -607,6 +687,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Output planned translations as JSON to stdout without calling the API.",
     )
     parser.add_argument(
+        "--manifest",
+        default=None,
+        help=(
+            "Change manifest from detect_curriculum_changes.py (JSON). Fields it "
+            "lists as changed are RE-translated even if the locale already has "
+            "text — without this the script only fills empty fields, so English "
+            "edits leave stale translations attached to the wrong content."
+        ),
+    )
+    parser.add_argument(
         "--api-key",
         default=None,
         help="OpenAI-compatible API key (env: OPENAI_API_KEY or DEEPSEEK_API_KEY).",
@@ -705,13 +795,29 @@ def main(argv: list[str] | None = None) -> int:
     # -----------------------------------------------------------------------
     # Compute updates
     # -----------------------------------------------------------------------
-    updates = compute_updates(skills_index, locale, skill_filter)
+    # Drop overlay entries whose source counterpart is gone — index-matched
+    # leftovers would attach old translations to the wrong instance.
+    pruned = prune_locale(locale, skills_index)
+    if pruned:
+        print(f"Pruned {pruned} orphaned overlay entr{'y' if pruned == 1 else 'ies'}.")
+
+    stale: dict[str, Any] = {}
+    if args.manifest:
+        stale = stale_from_manifest(load_json(Path(args.manifest)))
+        if stale:
+            n_ch = sum(len(v["challenges"]) for v in stale.values())
+            print(f"Manifest marks {len(stale)} skill(s) / {n_ch} challenge "
+                  f"entr{'y' if n_ch == 1 else 'ies'} stale — retranslating those.")
+
+    updates = compute_updates(skills_index, locale, skill_filter, stale=stale)
 
     if not updates:
         print(
             "No translatable fields found. Everything is up to date.",
             file=sys.stderr if dry_run else sys.stdout,
         )
+        if pruned and not dry_run:
+            write_json_atomic(locale_path, locale)
         return 0
 
     # -----------------------------------------------------------------------

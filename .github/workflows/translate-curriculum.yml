@@ -43,7 +43,14 @@ jobs:
         env:
           LOCALE: ${{ inputs.locale || 'zh-CN' }}
         run: |
+          # Compare against the previous committed skills.json (not HEAD, which
+          # already contains the change), so the manifest lists exactly which
+          # translated fields the last curriculum change made stale — the
+          # generator retranslates those instead of only filling empty ones.
+          REF=$(git log -2 --format=%H -- src/vimhjkl/data/skills.json | tail -1)
+          [ -n "$REF" ] || REF=HEAD
           uv run python scripts/detect_curriculum_changes.py \
+            --reference "$REF" \
             --locale "$LOCALE" \
             --format json > /tmp/detect-result.json
           echo "manifest=$(cat /tmp/detect-result.json | jq -c .)" >> "$GITHUB_OUTPUT"
@@ -66,7 +73,7 @@ jobs:
           LOCALE: ${{ inputs.locale || 'zh-CN' }}
           SKILL: ${{ inputs.skill || '' }}
         run: |
-          ARGS="--locale $LOCALE"
+          ARGS="--locale $LOCALE --manifest /tmp/detect-result.json"
           if [ -n "$SKILL" ]; then
             ARGS="$ARGS --skill $SKILL"
           fi

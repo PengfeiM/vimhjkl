@@ -404,22 +404,24 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
 
     # -- Load reference ------------------------------------------------------
-    if args.reference == "HEAD":
-        if not is_git_repo():
-            print(
-                "error: --reference HEAD requires a git repository; "
-                "provide a file path instead",
-                file=sys.stderr,
-            )
-            return 1
+    # An existing file wins; anything else (HEAD, a sha, a tag, HEAD~2 …) is
+    # resolved through git.
+    if Path(args.reference).is_file():
         try:
-            ref_data = load_reference_from_git("HEAD")
+            ref_data = load_reference_from_file(args.reference)
         except RuntimeError as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 1
     else:
+        if not is_git_repo():
+            print(
+                f"error: --reference {args.reference!r} is neither a file nor "
+                "usable outside a git repository",
+                file=sys.stderr,
+            )
+            return 1
         try:
-            ref_data = load_reference_from_file(args.reference)
+            ref_data = load_reference_from_git(args.reference)
         except RuntimeError as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 1
