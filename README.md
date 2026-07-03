@@ -11,7 +11,7 @@
 
 </div>
 
-66 skills, 233 challenges: dot command, operator+motion grammar, text objects,
+66 skills, 230 challenges: dot command, operator+motion grammar, text objects,
 registers, marks, macros, `:g` / `:normal` / ranges, regex and substitution,
 indentation, joins, paragraph motions. Every challenge is machine-verified
 against real vim. The goal is shown in a split next to the buffer while you

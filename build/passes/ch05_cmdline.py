@@ -135,10 +135,29 @@ SKILLS = [
           hint=":s on the first image, then n to the next match and @: again",
           why="A bare :%s//g would also hit the comment — n + @: repeats the "
               "substitute only where you point it."),
-        C(["x = 1", "y = 1", "z = 1"],
-          ["x = 0", "y = 0", "z = 0"],
-          solution=":s/1/0/<CR>j@:j@:",
-          hint="substitute on line 1, then @: repeats it down each line",
-          why="@: replays the :s — one j@: per remaining line, no retyping."),
+        # A real file's worth of pins, with the same version string living in
+        # two comments that must survive — :%s//g is a trap, and retyping the
+        # :s four times is the busywork @: exists to delete.  n walks the
+        # matches, a second n skips the decoy, @: fires only on the targets.
+        C(["# every service pinned to sdk 0.4 until the audit clears",
+           "[service api]", "sdk = 0.4", "retries = 3",
+           "[service worker]", "sdk = 0.4", "threads = 8",
+           "# NOTE: the 0.4 wire format bug is why we log raw frames",
+           "[service cron]", "sdk = 0.4", "schedule = nightly",
+           "[service audit]", "sdk = 0.4", "mode = strict"],
+          ["# every service pinned to sdk 0.4 until the audit clears",
+           "[service api]", "sdk = 0.5", "retries = 3",
+           "[service worker]", "sdk = 0.5", "threads = 8",
+           "# NOTE: the 0.4 wire format bug is why we log raw frames",
+           "[service cron]", "sdk = 0.5", "schedule = nightly",
+           "[service audit]", "sdk = 0.5", "mode = strict"],
+          start_cursor=[3, 1],
+          solution=r":s/0\.4/0.5/<CR>n@:nn@:n@:",
+          hint=":s the first pin, then n to each match — an extra n hops the "
+               "comment, @: re-fires the substitute where you stand",
+          why="@: replays the :s at every stop you choose — four pins bumped, "
+              "two comments untouched, the command typed once.",
+          why_not=":%s/0\\.4/0.5/g rewrites both comments' history; typing the "
+                  ":s four times over is exactly the retyping @: kills."),
       ]),
 ]

@@ -651,40 +651,6 @@
         ]
       }
     ],
-    "register-yank-reliable": [
-      {
-        "start": [
-          "yank ME",
-          "trash THIS",
-          "paste:"
-        ],
-        "solution": "wyiwjddA <C-r>0<Esc>",
-        "hint": "yank a word, delete a whole line, still paste the word",
-        "why": "dd clobbered the unnamed register but \"0 survived.",
-        "goal": [
-          "yank ME",
-          "paste: ME"
-        ]
-      }
-    ],
-    "register-named": [
-      {
-        "start": [
-          "import os",
-          "import sys",
-          "# end"
-        ],
-        "solution": "\"ayyG\"ap",
-        "hint": "stash with \"a, drop it with \"ap",
-        "why": "",
-        "goal": [
-          "import os",
-          "import sys",
-          "# end",
-          "import os"
-        ]
-      }
-    ],
     "macro-multistep": [
       {
         "start": [
@@ -846,30 +812,6 @@
         ]
       }
     ],
-    "regex-match-boundary-zs": [
-      {
-        "start": [
-          "We love icecreamcake so much"
-        ],
-        "solution": ":%s/icecream\\zscake/sandwich/<CR>",
-        "hint": "Focus on the dessert part you want to replace.",
-        "why": "\\zs starts the match later, so only the tail changes.",
-        "goal": [
-          "We love icecreamsandwich so much"
-        ]
-      },
-      {
-        "start": [
-          "The art of quantum sarcasm takes decades"
-        ],
-        "solution": ":%s/quantum \\zssarcasm/physics/<CR>",
-        "hint": "From sarcasm to physics, keep it quantum.",
-        "why": "\\zs starts the match later, so only the tail changes.",
-        "goal": [
-          "The art of quantum physics takes decades"
-        ]
-      }
-    ],
     "search-operate-gn": [
       {
         "start": [
@@ -935,53 +877,6 @@
           "book 1 edition 4",
           "book 2 edition 5",
           "book 3 edition 6"
-        ]
-      }
-    ],
-    "substitute-repeat-global": [
-      {
-        "start": [
-          "I wear a pink hat",
-          "She has a pink scarf",
-          "They love pink shoes"
-        ],
-        "solution": ":s/pink/blue/<CR>g&",
-        "hint": "do :s on one line, then g& everywhere",
-        "why": "g& repeats the last :s on every line.",
-        "goal": [
-          "I wear a blue hat",
-          "She has a blue scarf",
-          "They love blue shoes"
-        ]
-      },
-      {
-        "start": [
-          "The eagle flies high",
-          "The sparrow flies high",
-          "The hawk flies high"
-        ],
-        "solution": ":s/high/low/<CR>g&",
-        "hint": "do :s on one line, then g& everywhere",
-        "why": "g& repeats the last :s on every line.",
-        "goal": [
-          "The eagle flies low",
-          "The sparrow flies low",
-          "The hawk flies low"
-        ]
-      },
-      {
-        "start": [
-          "Popcorn is crunchy",
-          "Chips are crunchy",
-          "Cereal is crunchy"
-        ],
-        "solution": ":s/crunchy/soggy/<CR>g&",
-        "hint": "do :s on one line, then g& everywhere",
-        "why": "g& repeats the last :s on every line.",
-        "goal": [
-          "Popcorn is soggy",
-          "Chips are soggy",
-          "Cereal is soggy"
         ]
       }
     ],

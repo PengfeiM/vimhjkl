@@ -1402,19 +1402,46 @@
         },
         {
           "start": [
-            "x = 1",
-            "y = 1",
-            "z = 1"
+            "# every service pinned to sdk 0.4 until the audit clears",
+            "[service api]",
+            "sdk = 0.4",
+            "retries = 3",
+            "[service worker]",
+            "sdk = 0.4",
+            "threads = 8",
+            "# NOTE: the 0.4 wire format bug is why we log raw frames",
+            "[service cron]",
+            "sdk = 0.4",
+            "schedule = nightly",
+            "[service audit]",
+            "sdk = 0.4",
+            "mode = strict"
           ],
-          "par_keys": 14,
-          "hint": "substitute on line 1, then @: repeats it down each line",
+          "par_keys": 23,
+          "hint": ":s the first pin, then n to each match — an extra n hops the comment, @: re-fires the substitute where you stand",
           "goal": [
-            "x = 0",
-            "y = 0",
-            "z = 0"
+            "# every service pinned to sdk 0.4 until the audit clears",
+            "[service api]",
+            "sdk = 0.5",
+            "retries = 3",
+            "[service worker]",
+            "sdk = 0.5",
+            "threads = 8",
+            "# NOTE: the 0.4 wire format bug is why we log raw frames",
+            "[service cron]",
+            "sdk = 0.5",
+            "schedule = nightly",
+            "[service audit]",
+            "sdk = 0.5",
+            "mode = strict"
           ],
-          "solution": ":s/1/0/<CR>j@:j@:",
-          "why": "@: replays the :s — one j@: per remaining line, no retyping."
+          "start_cursor": [
+            3,
+            1
+          ],
+          "solution": ":s/0\\.4/0.5/<CR>n@:nn@:n@:",
+          "why": "@: replays the :s at every stop you choose — four pins bumped, two comments untouched, the command typed once.",
+          "why_not": ":%s/0\\.4/0.5/g rewrites both comments' history; typing the :s four times over is exactly the retyping @: kills."
         }
       ]
     },
@@ -2698,11 +2725,18 @@
           "start": [
             "release checklist",
             "  bump the version tag",
+            "  regenerate the changelog",
             "TODO-START",
             "  ask the cat for approval",
             "  rename everything twice",
             "  break the build on purpose",
+            "  blame the intern",
+            "  add a blockchain somewhere",
+            "  rewrite it in rust over lunch",
+            "  delete the tests that disagree",
+            "  promise it works this time",
             "TODO-END",
+            "  tag the release",
             "  ship it and hope"
           ],
           "par_keys": 34,
@@ -2710,54 +2744,93 @@
           "goal": [
             "release checklist",
             "  bump the version tag",
+            "  regenerate the changelog",
+            "  tag the release",
             "  ship it and hope"
           ],
           "solution": "/TODO-START<CR>ma/TODO-END<CR>mb:'a,'bd<CR>",
-          "why": "Marks set at search landings beat counting lines to a far boundary."
+          "why": "Marks set at search landings beat counting lines to a far boundary.",
+          "why_not": "10dd means first counting ten lines by eye; a visual V needs you to ride j down the whole span. The marks never miscount."
         },
         {
           "start": [
-            "banner: do not touch",
+            "banner: generated header - do not touch",
             "def conjure():",
             "    return spell",
             "def banish():",
             "    return void",
-            "banner: don't touch this either"
+            "def transmute(base):",
+            "    return gold(base)",
+            "def scry(name):",
+            "    return mirror[name]",
+            "def dispel(ward):",
+            "    ward.clear()",
+            "banner: generated footer - also not yours"
           ],
-          "par_keys": 24,
-          "hint": "mark the first and last code line, :normal only that range",
+          "par_keys": 31,
+          "hint": "mark the first code line, search to the footer, mark the last, :normal only that range",
           "goal": [
-            "banner: do not touch",
+            "banner: generated header - do not touch",
             "# def conjure():",
             "    # return spell",
             "# def banish():",
             "    # return void",
-            "banner: don't touch this either"
+            "# def transmute(base):",
+            "    # return gold(base)",
+            "# def scry(name):",
+            "    # return mirror[name]",
+            "# def dispel(ward):",
+            "    # ward.clear()",
+            "banner: generated footer - also not yours"
           ],
-          "solution": "jma3jmb:'a,'bnormal I# <CR>",
-          "why": "A whole-file :normal would comment the banners — marks fence it in."
+          "solution": "jma/footer<CR>kmb:'a,'bnormal I# <CR>",
+          "why": "A whole-file :normal would comment the banners — marks fence it in.",
+          "why_not": ":2,11normal works if you trust yourself to read '11' off a screen with no line numbers; the marks land exactly where the search does."
         },
         {
           "start": [
             "[hosts]",
-            "primary = old",
-            "backup = old",
-            "cache = old",
+            "web01 = old",
+            "web02 = old",
+            "web03 = old",
+            "web04 = old",
+            "api01 = old",
+            "api02 = old",
+            "db01 = old",
+            "db02 = old",
+            "cache01 = old",
+            "cache02 = old",
+            "queue01 = old",
+            "queue02 = old",
             "[fallback]",
-            "spare = old"
+            "spare01 = old",
+            "spare02 = old",
+            "spare03 = old"
           ],
-          "par_keys": 25,
-          "hint": "mark the first and last block line, substitute only that range",
+          "par_keys": 34,
+          "hint": "mark the first host, search to [fallback], mark the line above, substitute only that range",
           "goal": [
             "[hosts]",
-            "primary = new",
-            "backup = new",
-            "cache = new",
+            "web01 = new",
+            "web02 = new",
+            "web03 = new",
+            "web04 = new",
+            "api01 = new",
+            "api02 = new",
+            "db01 = new",
+            "db02 = new",
+            "cache01 = new",
+            "cache02 = new",
+            "queue01 = new",
+            "queue02 = new",
             "[fallback]",
-            "spare = old"
+            "spare01 = old",
+            "spare02 = old",
+            "spare03 = old"
           ],
-          "solution": "jma2jmb:'a,'bs/old/new/g<CR>",
-          "why": "Marks scope the :s to the block so the fallback's 'old' survives."
+          "solution": "jma/fallback<CR>kmb:'a,'bs/old/new/g<CR>",
+          "why": "Marks scope the :s to the block so the fallback's 'old' survives.",
+          "why_not": ":%s/old/new/g flips the three spares you were keeping; :2,13s means counting twelve entries and hoping — the marks sit exactly where /fallback landed you."
         }
       ]
     },
@@ -2806,7 +2879,7 @@
       "id": "register-yank-reliable",
       "title": "Yank survives a delete (\"0)",
       "category": "register",
-      "teach": "Every delete (x, d, c) overwrites the unnamed register, so a yank you meant to paste can get clobbered. The yank register \"0 is set ONLY by y, so it survives intervening deletes. Grab text with y, then paste it reliably with \"0p even after deleting something in the way.",
+      "teach": "Every delete (x, d, c — and a visual paste, which deletes what it replaces) overwrites the unnamed register, so a yank you meant to paste twice gets clobbered after the first paste. The yank register \"0 is set ONLY by y, so it survives all of that: yank once, then paste reliably with \"0p as many times as you need.",
       "key_commands": [
         "\"0p",
         "yiw",
@@ -2818,35 +2891,48 @@
         {
           "start": [
             "primary = main",
-            "standby = SPARE"
+            "standby = SPARE",
+            "mirror = SPARE"
           ],
-          "par_keys": 10,
-          "hint": "yank the value, drop down, replace the placeholder from \"0",
+          "par_keys": 15,
+          "hint": "yank the value once; after the first paste unnamed holds SPARE — \"0 still has your yank for the second",
           "goal": [
             "primary = main",
-            "standby = main"
+            "standby = main",
+            "mirror = main"
           ],
           "start_cursor": [
             1,
             11
           ],
-          "solution": "yiwjviw\"0p",
-          "why": "\"0 still holds 'main' even though viw's delete hit unnamed."
+          "solution": "yiwjviwpjviw\"0p",
+          "why": "\"0 is written only by y, so it survives the visual paste's implicit delete and pastes 'main' again untouched.",
+          "why_not": "viwp twice pastes 'main' then 'SPARE' — the first paste traded your yank for the word it replaced; re-yanking each time costs more keys than \"0."
         },
         {
           "start": [
-            "yank ME",
-            "trash THIS",
-            "paste:"
+            "primary = wss://relay.internal:8443",
+            "# point every consumer at the tested relay",
+            "consumer_a = TBD",
+            "consumer_b = TBD",
+            "consumer_c = TBD"
           ],
-          "par_keys": 12,
-          "hint": "yank a word, delete a whole line, still paste the word",
+          "par_keys": 26,
+          "hint": "one yank of the URL feeds all three slots — \"0 outlives every visual paste along the way",
           "goal": [
-            "yank ME",
-            "paste: ME"
+            "primary = wss://relay.internal:8443",
+            "# point every consumer at the tested relay",
+            "consumer_a = wss://relay.internal:8443",
+            "consumer_b = wss://relay.internal:8443",
+            "consumer_c = wss://relay.internal:8443"
           ],
-          "solution": "wyiwjddA <C-r>0<Esc>",
-          "why": "dd clobbered the unnamed register but \"0 survived."
+          "start_cursor": [
+            1,
+            11
+          ],
+          "solution": "yiW/TBD<CR>viWpnviW\"0pnviW\"0p",
+          "why": "Each viWp shoves the replaced TBD into unnamed, but \"0 keeps the URL for slots two and three.",
+          "why_not": "Retyping that URL three times is the slow-motion version; plain viWp dies after slot one because unnamed now holds TBD."
         }
       ]
     },
@@ -2854,47 +2940,72 @@
       "id": "register-named",
       "title": "Stash text in a named register (\"a)",
       "category": "register",
-      "teach": "The 26 named registers \"a-\"z each hold their own text: \"ay{motion} yanks into a, \"ap puts from it. A lowercase letter overwrites; the uppercase \"A APPENDS to the same register. Use them to carry several snippets at once without them stepping on each other.",
+      "teach": "The 26 named registers \"a-\"z each hold their own text: \"ay{motion} yanks into a, \"ap puts from it. A lowercase letter overwrites; the uppercase \"A APPENDS to the same register. Use them to carry several snippets at once without them stepping on each other — the unnamed register is wiped by every delete and every visual paste, but \"a and \"b never go stale.",
       "key_commands": [
-        "\"ayy",
+        "\"ayiW",
+        "\"byiW",
         "\"ap",
-        "\"Ayy",
-        "\"ad"
+        "viW\"bp"
       ],
       "difficulty": 4,
       "challenges": [
         {
           "start": [
-            "boilerplate",
-            "x",
-            "y"
+            "crit = ALERT-PAGE-ONCALL",
+            "warn = TICKET-NEXT-SPRINT",
+            "",
+            "[db timeouts]",
+            "severity: TODO",
+            "[disk almost full]",
+            "severity: TODO",
+            "[api 5xx spike]",
+            "severity: TODO",
+            "[css off by one px]",
+            "severity: TODO"
           ],
-          "par_keys": 8,
-          "hint": "yank line 1 into register a, go to the end, put it",
+          "par_keys": 46,
+          "hint": "yank each label into its own register, then fill the slots in one pass — viW\"ap pastes over the placeholder",
           "goal": [
-            "boilerplate",
-            "x",
-            "y",
-            "boilerplate"
+            "crit = ALERT-PAGE-ONCALL",
+            "warn = TICKET-NEXT-SPRINT",
+            "",
+            "[db timeouts]",
+            "severity: ALERT-PAGE-ONCALL",
+            "[disk almost full]",
+            "severity: TICKET-NEXT-SPRINT",
+            "[api 5xx spike]",
+            "severity: ALERT-PAGE-ONCALL",
+            "[css off by one px]",
+            "severity: TICKET-NEXT-SPRINT"
           ],
-          "solution": "\"ayyG\"ap",
-          "why": "A named register parks text safely until you put it."
+          "solution": "$\"ayiWj$\"byiW/TODO<CR>viW\"apnviW\"bpnviW\"apnviW\"bp",
+          "why": "Both labels ride along at once: \"a and \"b survive every visual paste, so you fill all four slots in a single sweep.",
+          "why_not": "yiW + viWp works exactly once — that first paste shoves the replaced TODO into the unnamed register, and your label is gone; two labels means two full passes."
         },
         {
           "start": [
-            "import os",
-            "import sys",
-            "# end"
+            "on  = enabled=true,audit=true",
+            "off = enabled=false,audit=false",
+            "",
+            "flag_checkout: PENDING",
+            "flag_search: PENDING",
+            "flag_uploads: PENDING",
+            "flag_export: PENDING"
           ],
-          "par_keys": 8,
-          "hint": "stash with \"a, drop it with \"ap",
+          "par_keys": 49,
+          "hint": "stash the on-value in \"a and the off-value in \"b, then alternate them over the PENDING slots",
           "goal": [
-            "import os",
-            "import sys",
-            "# end",
-            "import os"
+            "on  = enabled=true,audit=true",
+            "off = enabled=false,audit=false",
+            "",
+            "flag_checkout: enabled=true,audit=true",
+            "flag_search: enabled=false,audit=false",
+            "flag_uploads: enabled=true,audit=true",
+            "flag_export: enabled=false,audit=false"
           ],
-          "solution": "\"ayyG\"ap"
+          "solution": "$\"ayiWj$\"byiW/PENDING<CR>viW\"apnviW\"bpnviW\"apnviW\"bp",
+          "why": "One trip down the file settles all four flags — each register keeps its value no matter how many times you paste.",
+          "why_not": "With only the unnamed register the first viWp poisons it with PENDING; you'd re-yank at every other slot or walk the file twice."
         }
       ]
     },
@@ -3463,39 +3574,53 @@
       "challenges": [
         {
           "start": [
-            "Silver Lake and Silver Birch"
+            "from lib import utils",
+            "",
+            "def parse(flags):",
+            "    return flags.split()",
+            "",
+            "value = utils.parse(raw)",
+            "extra = utils.parse(headers)",
+            "flags = parse(cli_args)",
+            "debug = utils.parse(payload)"
           ],
-          "par_keys": 25,
-          "hint": "\\zs starts the match after 'Silver ', so only Lake is changed",
+          "par_keys": 28,
+          "hint": "require the utils. prefix but start the match after it — only the qualified calls change",
           "goal": [
-            "Silver LAKE and Silver Birch"
+            "from lib import utils",
+            "",
+            "def parse(flags):",
+            "    return flags.split()",
+            "",
+            "value = utils.decode(raw)",
+            "extra = utils.decode(headers)",
+            "flags = parse(cli_args)",
+            "debug = utils.decode(payload)"
           ],
-          "solution": ":%s/Silver \\zsLake/LAKE/<CR>",
-          "why": "\\zs keeps the prefix as context but out of the replacement."
+          "solution": ":%s/utils\\.\\zsparse/decode/<CR>",
+          "why": "\\zs makes the prefix a requirement without making it part of the match, so the replacement stays just 'decode'.",
+          "why_not": ":%s/parse/decode/ also renames the local def and its call; :%s/utils\\.parse/utils.decode/ works but retypes the prefix — \\zs is the version that doesn't."
         },
         {
           "start": [
-            "We love icecreamcake so much"
+            "deploy (prod) at 09:00 after review",
+            "freeze all deploys on friday",
+            "deploy (staging) whenever you like",
+            "deploy (prod) only from the release branch",
+            "we deploy (prod) twice a week at most"
           ],
-          "par_keys": 30,
-          "hint": "Focus on the dessert part you want to replace.",
+          "par_keys": 27,
+          "hint": "\\ze ends the match before ' (prod)', so the context is required but untouched",
           "goal": [
-            "We love icecreamsandwich so much"
+            "ship (prod) at 09:00 after review",
+            "freeze all deploys on friday",
+            "deploy (staging) whenever you like",
+            "ship (prod) only from the release branch",
+            "we ship (prod) twice a week at most"
           ],
-          "solution": ":%s/icecream\\zscake/sandwich/<CR>",
-          "why": "\\zs starts the match later, so only the tail changes."
-        },
-        {
-          "start": [
-            "The art of quantum sarcasm takes decades"
-          ],
-          "par_keys": 32,
-          "hint": "From sarcasm to physics, keep it quantum.",
-          "goal": [
-            "The art of quantum physics takes decades"
-          ],
-          "solution": ":%s/quantum \\zssarcasm/physics/<CR>",
-          "why": "\\zs starts the match later, so only the tail changes."
+          "solution": ":%s/deploy\\ze (prod)/ship/<CR>",
+          "why": "\\ze demands the (prod) tail without consuming it — staging and 'deploys' never match.",
+          "why_not": ":%s/deploy/ship/ hits staging and friday's 'deploys'; :%s/deploy (prod)/ship (prod)/ works but retypes the whole tail into the replacement."
         }
       ]
     },
@@ -3880,67 +4005,57 @@
             "TODO walk dog",
             "TODO call mom",
             "TODO pay rent",
-            "TODO water plants"
+            "TODO water plants",
+            "TODO fix the gate latch",
+            "TODO renew passport",
+            "TODO email the plumber",
+            "TODO back up the laptop",
+            "TODO sharpen the knives"
           ],
           "par_keys": 16,
-          "hint": "test the :s on line 1, then g& to apply it to the whole list",
+          "hint": "test the :s on line 1, watch it land, then g& rolls it out",
           "goal": [
             "DONE buy milk",
             "DONE walk dog",
             "DONE call mom",
             "DONE pay rent",
-            "DONE water plants"
+            "DONE water plants",
+            "DONE fix the gate latch",
+            "DONE renew passport",
+            "DONE email the plumber",
+            "DONE back up the laptop",
+            "DONE sharpen the knives"
           ],
           "solution": ":s/TODO/DONE/<CR>g&",
-          "why": "g& replays the last :s over every line in two keystrokes — no retyping."
+          "why": "g& replays the last :s over every line in two keystrokes — no retyping, same flags.",
+          "why_not": ":%s/TODO/DONE/ is one key shorter — and commits all ten lines blind. :s then g& shows you the first line change before you bet the rest of the file on the pattern."
         },
         {
           "start": [
-            "I wear a pink hat",
-            "She has a pink scarf",
-            "They love pink shoes"
+            "standup    every weekday of 2025",
+            "retro      last friday of 2025",
+            "planning   first monday of 2025",
+            "demo       every 2nd week of 2025",
+            "oncall     rotates monthly in 2025",
+            "review     quarterly through 2025",
+            "offsite    twice during 2025",
+            "audit      closes out 2025"
           ],
           "par_keys": 16,
-          "hint": "do :s on one line, then g& everywhere",
+          "hint": "prove the year bump on the standup line, then g& the calendar",
           "goal": [
-            "I wear a blue hat",
-            "She has a blue scarf",
-            "They love blue shoes"
+            "standup    every weekday of 2026",
+            "retro      last friday of 2026",
+            "planning   first monday of 2026",
+            "demo       every 2nd week of 2026",
+            "oncall     rotates monthly in 2026",
+            "review     quarterly through 2026",
+            "offsite    twice during 2026",
+            "audit      closes out 2026"
           ],
-          "solution": ":s/pink/blue/<CR>g&",
-          "why": "g& repeats the last :s on every line."
-        },
-        {
-          "start": [
-            "The eagle flies high",
-            "The sparrow flies high",
-            "The hawk flies high"
-          ],
-          "par_keys": 15,
-          "hint": "do :s on one line, then g& everywhere",
-          "goal": [
-            "The eagle flies low",
-            "The sparrow flies low",
-            "The hawk flies low"
-          ],
-          "solution": ":s/high/low/<CR>g&",
-          "why": "g& repeats the last :s on every line."
-        },
-        {
-          "start": [
-            "Popcorn is crunchy",
-            "Chips are crunchy",
-            "Cereal is crunchy"
-          ],
-          "par_keys": 20,
-          "hint": "do :s on one line, then g& everywhere",
-          "goal": [
-            "Popcorn is soggy",
-            "Chips are soggy",
-            "Cereal is soggy"
-          ],
-          "solution": ":s/crunchy/soggy/<CR>g&",
-          "why": "g& repeats the last :s on every line."
+          "solution": ":s/2025/2026/<CR>g&",
+          "why": "One test line, then g& — the whole schedule rolls over with the flags you already trusted.",
+          "why_not": "A blind :%s/2025/2026/ saves one keystroke and skips the step where you notice the pattern was wrong."
         }
       ]
     },

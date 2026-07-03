@@ -110,11 +110,33 @@ SKILLS = [
       "same flags — equivalent to :%s//~/&. Handy after testing a :s on one line.",
       ["g&", "&", ":%s//~/&", "@:"], 4, [
         C(["TODO buy milk", "TODO walk dog", "TODO call mom", "TODO pay rent",
-           "TODO water plants"],
+           "TODO water plants", "TODO fix the gate latch", "TODO renew passport",
+           "TODO email the plumber", "TODO back up the laptop",
+           "TODO sharpen the knives"],
           ["DONE buy milk", "DONE walk dog", "DONE call mom", "DONE pay rent",
-           "DONE water plants"],
+           "DONE water plants", "DONE fix the gate latch", "DONE renew passport",
+           "DONE email the plumber", "DONE back up the laptop",
+           "DONE sharpen the knives"],
           solution=":s/TODO/DONE/<CR>g&",
-          hint="test the :s on line 1, then g& to apply it to the whole list",
-          why="g& replays the last :s over every line in two keystrokes — no retyping."),
+          hint="test the :s on line 1, watch it land, then g& rolls it out",
+          why="g& replays the last :s over every line in two keystrokes — "
+              "no retyping, same flags.",
+          why_not=":%s/TODO/DONE/ is one key shorter — and commits all ten "
+                  "lines blind. :s then g& shows you the first line change "
+                  "before you bet the rest of the file on the pattern."),
+        C(["standup    every weekday of 2025", "retro      last friday of 2025",
+           "planning   first monday of 2025", "demo       every 2nd week of 2025",
+           "oncall     rotates monthly in 2025", "review     quarterly through 2025",
+           "offsite    twice during 2025", "audit      closes out 2025"],
+          ["standup    every weekday of 2026", "retro      last friday of 2026",
+           "planning   first monday of 2026", "demo       every 2nd week of 2026",
+           "oncall     rotates monthly in 2026", "review     quarterly through 2026",
+           "offsite    twice during 2026", "audit      closes out 2026"],
+          solution=":s/2025/2026/<CR>g&",
+          hint="prove the year bump on the standup line, then g& the calendar",
+          why="One test line, then g& — the whole schedule rolls over with "
+              "the flags you already trusted.",
+          why_not="A blind :%s/2025/2026/ saves one keystroke and skips the "
+                  "step where you notice the pattern was wrong."),
       ]),
 ]

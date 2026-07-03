@@ -40,10 +40,44 @@ SKILLS = [
       "require context without consuming it (like a lookbehind/lookahead). Match "
       "'foo bar' but only replace the 'bar' part.",
       [r"\zs", r"\ze", "lookbehind", "lookahead"], 5, [
-        C(["Silver Lake and Silver Birch"],
-          ["Silver LAKE and Silver Birch"],
-          solution=r":%s/Silver \zsLake/LAKE/<CR>",
-          hint=r"\zs starts the match after 'Silver ', so only Lake is changed",
-          why=r"\zs keeps the prefix as context but out of the replacement."),
+        # 'parse' exists as a local def AND as utils.parse — only the qualified
+        # uses get renamed.  The prefix is required context, so a bare :%s is
+        # wrong and retyping 'utils.' in the replacement is the tax \zs waives.
+        C(["from lib import utils", "", "def parse(flags):",
+           "    return flags.split()", "", "value = utils.parse(raw)",
+           "extra = utils.parse(headers)", "flags = parse(cli_args)",
+           "debug = utils.parse(payload)"],
+          ["from lib import utils", "", "def parse(flags):",
+           "    return flags.split()", "", "value = utils.decode(raw)",
+           "extra = utils.decode(headers)", "flags = parse(cli_args)",
+           "debug = utils.decode(payload)"],
+          solution=r":%s/utils\.\zsparse/decode/<CR>",
+          hint=r"require the utils. prefix but start the match after it — "
+               r"only the qualified calls change",
+          why=r"\zs makes the prefix a requirement without making it part of "
+              r"the match, so the replacement stays just 'decode'.",
+          why_not=r":%s/parse/decode/ also renames the local def and its call; "
+                  r":%s/utils\.parse/utils.decode/ works but retypes the "
+                  r"prefix — \zs is the version that doesn't."),
+        # \ze is the mirror: 'deploy' changes only when '(prod)' FOLLOWS, and
+        # the context must survive unconsumed.
+        C(["deploy (prod) at 09:00 after review",
+           "freeze all deploys on friday",
+           "deploy (staging) whenever you like",
+           "deploy (prod) only from the release branch",
+           "we deploy (prod) twice a week at most"],
+          ["ship (prod) at 09:00 after review",
+           "freeze all deploys on friday",
+           "deploy (staging) whenever you like",
+           "ship (prod) only from the release branch",
+           "we ship (prod) twice a week at most"],
+          solution=r":%s/deploy\ze (prod)/ship/<CR>",
+          hint=r"\ze ends the match before ' (prod)', so the context is "
+               r"required but untouched",
+          why=r"\ze demands the (prod) tail without consuming it — staging "
+              r"and 'deploys' never match.",
+          why_not=r":%s/deploy/ship/ hits staging and friday's 'deploys'; "
+                  r":%s/deploy (prod)/ship (prod)/ works but retypes the "
+                  r"whole tail into the replacement."),
       ]),
 ]

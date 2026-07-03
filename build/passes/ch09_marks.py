@@ -72,35 +72,64 @@ SKILLS = [
       "normal, whatever. It beats counting lines for a far-apart range.",
       [":'a,'b", "ma", "mb", ":'a,'bd"], 4, [
         # You DON'T count lines to a far-off boundary — you search to each end and
-        # mark it there.  The block is fenced by distinctive markers, so the move
-        # is /search -> ma -> /search -> mb -> delete the span.
-        C(["release checklist", "  bump the version tag", "TODO-START",
+        # mark it there.  The span is long enough that counting it by eye is a
+        # genuine chore; the fence markers make /search the honest way in.
+        C(["release checklist", "  bump the version tag",
+           "  regenerate the changelog", "TODO-START",
            "  ask the cat for approval", "  rename everything twice",
-           "  break the build on purpose", "TODO-END", "  ship it and hope"],
-          ["release checklist", "  bump the version tag", "  ship it and hope"],
+           "  break the build on purpose", "  blame the intern",
+           "  add a blockchain somewhere", "  rewrite it in rust over lunch",
+           "  delete the tests that disagree", "  promise it works this time",
+           "TODO-END", "  tag the release", "  ship it and hope"],
+          ["release checklist", "  bump the version tag",
+           "  regenerate the changelog", "  tag the release",
+           "  ship it and hope"],
           solution="/TODO-START<CR>ma/TODO-END<CR>mb:'a,'bd<CR>",
           hint="search to each TODO marker, drop a mark there, delete the span",
-          why="Marks set at search landings beat counting lines to a far boundary."),
+          why="Marks set at search landings beat counting lines to a far boundary.",
+          why_not="10dd means first counting ten lines by eye; a visual V needs "
+                  "you to ride j down the whole span. The marks never miscount."),
         # Range must BITE: a whole-file :normal would comment the banners too, so
-        # you fence just the code lines with marks.
-        C(["banner: do not touch", "def conjure():", "    return spell",
-           "def banish():", "    return void", "banner: don't touch this either"],
-          ["banner: do not touch", "# def conjure():", "    # return spell",
-           "# def banish():", "    # return void", "banner: don't touch this either"],
-          solution="jma3jmb:'a,'bnormal I# <CR>",
-          hint="mark the first and last code line, :normal only that range",
-          why="A whole-file :normal would comment the banners — marks fence it in."),
+        # you fence just the code lines with marks — and there are enough of them
+        # that counting j's to the far end is no longer the easy way.
+        C(["banner: generated header - do not touch", "def conjure():",
+           "    return spell", "def banish():", "    return void",
+           "def transmute(base):", "    return gold(base)", "def scry(name):",
+           "    return mirror[name]", "def dispel(ward):", "    ward.clear()",
+           "banner: generated footer - also not yours"],
+          ["banner: generated header - do not touch", "# def conjure():",
+           "    # return spell", "# def banish():", "    # return void",
+           "# def transmute(base):", "    # return gold(base)", "# def scry(name):",
+           "    # return mirror[name]", "# def dispel(ward):", "    # ward.clear()",
+           "banner: generated footer - also not yours"],
+          solution="jma/footer<CR>kmb:'a,'bnormal I# <CR>",
+          hint="mark the first code line, search to the footer, mark the last, "
+               ":normal only that range",
+          why="A whole-file :normal would comment the banners — marks fence it in.",
+          why_not=":2,11normal works if you trust yourself to read '11' off a "
+                  "screen with no line numbers; the marks land exactly where "
+                  "the search does."),
         # The range has to be NECESSARY or the move is pointless: 'old' appears
-        # several times inside the [hosts] block AND once in [fallback] below it.
+        # a dozen times inside the [hosts] block AND in [fallback] below it.
         # A bare :%s/old/new/g would clobber the fallback too — so you bracket the
-        # block with marks and substitute only :'a,'b.  This is what makes the
-        # technique the shortest correct path, not just one option among many.
-        C(["[hosts]", "primary = old", "backup = old", "cache = old",
-           "[fallback]", "spare = old"],
-          ["[hosts]", "primary = new", "backup = new", "cache = new",
-           "[fallback]", "spare = old"],
-          solution="jma2jmb:'a,'bs/old/new/g<CR>",
-          hint="mark the first and last block line, substitute only that range",
-          why="Marks scope the :s to the block so the fallback's 'old' survives."),
+        # block with marks and substitute only :'a,'b.  The block is far too long
+        # to count, which is what makes marks the shortest correct path.
+        C(["[hosts]", "web01 = old", "web02 = old", "web03 = old",
+           "web04 = old", "api01 = old", "api02 = old", "db01 = old",
+           "db02 = old", "cache01 = old", "cache02 = old", "queue01 = old",
+           "queue02 = old", "[fallback]", "spare01 = old", "spare02 = old",
+           "spare03 = old"],
+          ["[hosts]", "web01 = new", "web02 = new", "web03 = new",
+           "web04 = new", "api01 = new", "api02 = new", "db01 = new",
+           "db02 = new", "cache01 = new", "cache02 = new", "queue01 = new",
+           "queue02 = new", "[fallback]", "spare01 = old", "spare02 = old",
+           "spare03 = old"],
+          solution="jma/fallback<CR>kmb:'a,'bs/old/new/g<CR>",
+          hint="mark the first host, search to [fallback], mark the line above, "
+               "substitute only that range",
+          why="Marks scope the :s to the block so the fallback's 'old' survives.",
+          why_not=":%s/old/new/g flips the three spares you were keeping; "
+                  ":2,13s means counting twelve entries and hoping — the marks "
+                  "sit exactly where /fallback landed you."),
       ]),
 ]

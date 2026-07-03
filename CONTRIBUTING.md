@@ -104,7 +104,8 @@ S("marks-as-ex-range", "Use marks as an Ex range ('a,'b)", "ex_command",
       ["lines the buffer must equal when done"],
       solution="the literal keystrokes, <Esc>/<CR> spelled out",
       hint="a short nudge",
-      why="one line on why this is the idiomatic path"),
+      why="one line on why this is the idiomatic path",
+      why_not="the obvious cheaper-looking path, and why it loses HERE"),
   ]),
 ```
 
@@ -118,6 +119,11 @@ What makes a **good** challenge:
   the shortest correct path. A `:g`/macro/sort/range drill on a 2-line buffer is
   pointless — a simpler move would beat it. For range/marks drills, put a match
   *outside* the range so a whole-file `:%…` would change the wrong lines.
+- **Name the rejected alternative.** If a learner would reach for a simpler
+  command first (`:%s//g`, `dd`+`p`, plain `yy`), fill `why_not` with that exact
+  command and the concrete way it fails on *this* buffer. If you can't write an
+  honest `why_not`, the buffer probably doesn't motivate the technique — fix the
+  buffer, not the prose.
 - **Original, concrete text.** No `foo`/`bar`, no `one/two/three`. Vivid, specific
   example text; never copy real book/song/source text.
 - **`solution` is the optimal path** and must reproduce the goal exactly when

@@ -21,6 +21,7 @@ from vimhjkl.keys import translate
 from vimhjkl import store
 
 from build import curriculum
+from build.llm_augment import scope_unmotivated
 
 
 GREEN, RED, YELLOW, GREY, RESET = "\033[32m", "\033[31m", "\033[33m", "\033[90m", "\033[0m"
@@ -76,6 +77,17 @@ def verify_and_fill(skills_data: list[dict], *, verify: bool,
                                   f"buffer unchanged and yanks nothing (no-op)")
                     continue
                 ch.yank = result.register
+            # Motivation gate — the SAME one LLM-pool candidates must pass, now
+            # applied to every instance (hand-authored included): if the
+            # solution's ranged ex command broadened to '%' also reaches the
+            # goal, the taught scope added nothing on this buffer and the drill
+            # is unmotivated (the "6-line marks range" class of failure).
+            elif scope_unmotivated(ch.to_dict(),
+                                   {"id": skill.id, "category": skill.category}):
+                errors.append(f"{tag}: scope unmotivated — the solution's ranged "
+                              f"command rewritten to % also reaches the goal; "
+                              f"the buffer doesn't need the range")
+                continue
             # Authoritative par = the verified optimal-as-authored count.
             ch.par_keys = result.keystrokes
             n_verified += 1
@@ -164,7 +176,7 @@ def main(argv=None) -> int:
 
     print(f"{GREEN}wrote {store.SKILLS_PATH}{RESET}  "
           f"({len(skills)} skills, "
-          f"{sum(len(s['challenges']) for s in skills)} challenges)")
+          f"{sum(len(s.challenges) for s in skills)} challenges)")
     return 0
 
 
