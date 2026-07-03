@@ -6,4 +6,5 @@ search & replace.  Practice happens inside *real* vim/nvim; vimhjkl only sets
 up the buffer, launches the editor, and grades the result.
 """
 
-__version__ = "0.1.0"
+# Keep in sync with pyproject.toml [project] version on release bumps.
+__version__ = "0.5.1"

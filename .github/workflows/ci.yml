@@ -1,0 +1,40 @@
+name: CI
+
+# Every push/PR: run the three test suites, then rebuild the whole curriculum
+# with real nvim — build.generate replays every challenge's solution and exits
+# non-zero if any fails to verify (or trips the motivation gate), so a broken
+# or unmotivated drill can't land on main unnoticed.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.2.0
+        with:
+          version: "latest"
+
+      - name: Install neovim
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends neovim
+
+      - name: Test suites
+        run: |
+          uv run python -m tests.test_grader
+          uv run python -m tests.test_engine
+          uv run python -m tests.test_i18n
+          uv run python -m tests.test_tui
+
+      - name: Verify the curriculum builds
+        run: uv run python -m build.generate
