@@ -288,6 +288,10 @@ def check_field_completeness(
                     continue
                 for field in TRANSLATABLE_CHALLENGE_FIELDS:
                     if field in chal:
+                        # An empty English source has nothing to translate — an
+                        # empty locale echo of it is not a gap worth warning on.
+                        if not source_chals[idx].get(field):
+                            continue
                         total_checked += 1
                         val = chal[field]
                         if not isinstance(val, str) or val.strip() == "":

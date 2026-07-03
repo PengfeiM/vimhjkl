@@ -175,13 +175,14 @@ def prune_locale(locale: dict[str, Any],
             lskills[sid]["challenges"] = chs[:n]
             chs = lskills[sid]["challenges"]
         # A translation whose English source field is now empty is stale text
-        # with nothing behind it — drop it rather than show it.
+        # with nothing behind it, and an empty locale string is clutter either
+        # way — drop both rather than carry them.
         english = skills_index[sid].get("challenges", [])
         for i, ch in enumerate(chs):
             if not isinstance(ch, dict) or i >= len(english):
                 continue
             for cf in TRANSLATABLE_CHALLENGE_FIELDS:
-                if ch.get(cf) and not english[i].get(cf):
+                if cf in ch and (not ch.get(cf) or not english[i].get(cf)):
                     del ch[cf]
                     pruned += 1
     return pruned
