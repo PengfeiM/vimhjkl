@@ -583,16 +583,27 @@ def merge_skill_translation(
         lskill["challenges"] = [{} for _ in range(max_idx + 1)]
 
     t_challenges = translated.get("challenges", [])
-    for ch_up in challenges:
+    for pos, ch_up in enumerate(challenges):
         idx = ch_up["index"]
         # Extend the locale challenges array if needed
         while len(lskill["challenges"]) <= idx:
             lskill["challenges"].append({})
+        # The model is sent ONLY the requested challenges, so its reply array
+        # aligns with the REQUEST order (positional), not with source indices —
+        # indexing by source idx silently dropped every subset request (e.g. a
+        # single stale challenge in a 2-instance skill was never merged).  When
+        # the model echoes a full-length array instead, fall back to source
+        # indexing so the right entry is still picked.
+        if pos < len(t_challenges) and len(t_challenges) == len(challenges):
+            t_ch = t_challenges[pos]
+        elif idx < len(t_challenges):
+            t_ch = t_challenges[idx]
+        else:
+            continue
         for cf in ch_up["fields"]:
-            if idx < len(t_challenges) and cf in t_challenges[idx]:
-                val = t_challenges[idx][cf]
-                if val is not None and val != "":
-                    lskill["challenges"][idx][cf] = val
+            val = t_ch.get(cf)
+            if val is not None and val != "":
+                lskill["challenges"][idx][cf] = val
 
 
 # ---------------------------------------------------------------------------
