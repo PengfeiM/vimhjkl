@@ -21,6 +21,11 @@ jobs:
           VERSION="${TAG#v}"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           sed -i "s/^pkgver=.*/pkgver=$VERSION/" packaging/aur/PKGBUILD
+          # A new release always starts at pkgrel 1; a manual dispatch keeps the
+          # repo's pkgrel so a fixed PKGBUILD can republish the SAME version as -2.
+          if [ "${{ github.event_name }}" = "release" ]; then
+            sed -i "s/^pkgrel=.*/pkgrel=1/" packaging/aur/PKGBUILD
+          fi
 
       - name: Publish to AUR
         uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
