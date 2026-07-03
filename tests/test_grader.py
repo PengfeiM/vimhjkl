@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from vimhjkl.challenge import Challenge
 from vimhjkl.grader import (
     run_attempt, find_editor, count_keystrokes, strip_quit, _last_command_line,
-    _normalized_bytes, _goal_window_script, display_solution,
+    _normalized_bytes, _goal_window_script, _prelude_script, display_solution,
 )
 from vimhjkl.engine import attempt_abstained
 
@@ -93,6 +93,12 @@ def unit_checks():
           mot_pane)
     check("motion pane uses :q quit statusline (not :wq save)",
           ":q quit" in mot_pane and ":wq save" not in mot_pane)
+    # the outside world stays out of a graded drill: nvim's default mouse=nvi
+    # survives -u NONE, so middle-click would paste the X PRIMARY selection —
+    # the prelude must pin mouse and clipboard OFF for every interactive run.
+    prelude = _prelude_script(None, None)
+    check("prelude pins mouse off", "mouse=" in prelude, prelude)
+    check("prelude pins clipboard off", "clipboard=" in prelude, prelude)
 
 
 # --- integration: one challenge per category, played back through vim -------

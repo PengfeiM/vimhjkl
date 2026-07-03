@@ -100,9 +100,15 @@ def find_editor() -> Optional[str]:
 # The q:/q//q? mappings disable the command-line WINDOW — a notorious beginner
 # trap (pressing q then : opens a tiny editor that looks frozen).  Macro
 # recording (q{a-z}) is untouched, and no challenge solution uses q:.
+#
+# mouse= / clipboard= pin the outside world OUT of the drill: nvim's default
+# mouse=nvi survives -u NONE, so a middle-click would paste the X PRIMARY
+# selection (whatever was last swiped in a browser/PDF) straight into the
+# graded buffer — text entering without keystrokes breaks the whole contract.
+# config.vim_extras refuses to re-enable either (see config._valid_extra).
 _INTERACTIVE_SETTINGS = (
     "set number relativenumber showcmd ruler cursorline scrolloff=3 "
-    "laststatus=2 incsearch hlsearch | syntax on "
+    "laststatus=2 incsearch hlsearch mouse= clipboard= | syntax on "
     "| nnoremap q: <Nop> | nnoremap q/ <Nop> | nnoremap q? <Nop>"
 )
 

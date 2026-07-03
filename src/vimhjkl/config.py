@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from pathlib import Path
 
 from . import store
@@ -177,11 +178,20 @@ def set_remaps(cfg: dict, rms: list[dict]) -> None:
 # config — plugins/autocmds there would corrupt grading and the par contract.
 MAX_VIM_EXTRAS = 16
 
+# Options that would leak the outside world into a graded drill: `mouse`
+# re-enables middle-click paste of the X PRIMARY selection, `clipboard`/`cb`
+# wire the unnamed register to the system clipboard — either way text can
+# enter the buffer without keystrokes, which breaks grading and the par
+# contract.  The drill prelude pins both off (grader._INTERACTIVE_SETTINGS);
+# extras run after it, so they must not be able to switch them back on.
+_BLOCKED_EXTRA = re.compile(r"\b(?:mouse|clipboard|cb)\b", re.IGNORECASE)
+
 
 def _valid_extra(line: str) -> bool:
     return (isinstance(line, str)
             and 0 < len(line.strip()) <= 120
-            and "\n" not in line)
+            and "\n" not in line
+            and not _BLOCKED_EXTRA.search(line))
 
 
 def vim_extras(cfg: dict) -> list[str]:
