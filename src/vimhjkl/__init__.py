@@ -7,4 +7,4 @@ up the buffer, launches the editor, and grades the result.
 """
 
 # Keep in sync with pyproject.toml [project] version on release bumps.
-__version__ = "0.5.1"
+__version__ = "0.6.0"
